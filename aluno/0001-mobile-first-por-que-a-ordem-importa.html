@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A1 — Mobile-first: por que a ordem importa</title>
+<link rel="stylesheet" href="assets/course.css">
+<link rel="stylesheet" href="assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 1 de 22 · 3h · Metodologias de desenvolvimento mobile</p>
+
+<h1>Mobile-first:<br>por que a ordem importa</h1>
+
+<p class="deck">Mobile-first não é “fazer o site funcionar no celular”. É uma ordem de
+escrita — e a ordem muda o código que sai. Hoje a turma vê a diferença nas duas
+folhas de estilo, lado a lado, e escolhe o tema do projeto que vai atravessar o semestre.</p>
+
+<h2>1. Comecemos pelo fato, não pela opinião</h2>
+
+<p>A indexação mobile-first do Google deixou de ser uma transição em <strong>5 de julho de
+2024</strong>, quando o rollout foi concluído. Desde então não existe mais exceção de
+rastreamento por desktop: o Google indexa e ranqueia <strong>a versão móvel</strong> do
+seu site, mesmo que seu usuário esteja num monitor de 27 polegadas.</p>
+
+<div class="callout">
+  <span class="callout-title">A consequência prática</span>
+  <p>Se um conteúdo existe só na versão desktop, para efeito de busca ele
+  <strong>não existe</strong>. Não é penalizado — simplesmente não é visto.</p>
+</div>
+
+<p class="fonte"><a href="https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing">Google Search Central — Mobile-first indexing best practices</a></p>
+
+<h2>2. As duas direções</h2>
+
+<p>Existem exatamente duas maneiras de escrever CSS responsivo. Elas produzem a mesma
+tela e código profundamente diferente.</p>
+
+<div class="versus">
+  <div class="bad">
+    <h4>Desktop-down &nbsp;·&nbsp; <code>max-width</code></h4>
+    <p>Escreve-se o layout largo primeiro. As media queries <strong>desfazem</strong> o
+    que a base fez.</p>
+<pre><code>.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 3rem;
+}
+
+@media (max-width: 48rem) {
+  .cards {
+    grid-template-columns: 1fr;  /* desfaz */
+    gap: 1rem;                   /* desfaz */
+    padding: 1rem;               /* desfaz */
+  }
+}</code></pre>
+  </div>
+  <div class="good">
+    <h4>Mobile-up &nbsp;·&nbsp; <code>min-width</code></h4>
+    <p>Escreve-se o layout estreito primeiro. As media queries só
+    <strong>acrescentam</strong>.</p>
+<pre><code>.cards {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 3rem;
+  }
+}</code></pre>
+  </div>
+</div>
+
+<p>Repare no que acontece com o celular em cada caso. Na folha da esquerda, o celular
+baixa a regra de três colunas, aplica, e <em>depois</em> baixa a regra que a cancela. Na
+da direita, o celular baixa a regra que serve a ele e para. A folha de base — a que
+<strong>todo</strong> dispositivo aplica, sem media query nenhuma — é a mais simples das duas.</p>
+
+<h2>3. Agora mexa você</h2>
+
+<p>Abaixo, a folha mobile-up rodando de verdade. O controle muda a largura do viewport,
+e as media queries disparam de fato — não é simulação.</p>
+
+<div class="atelier" data-modo="demo" data-titulo="A folha mobile-up, rodando" data-vp="390">
+<template data-papel="css">
+  .cards { display: grid; gap: 1rem; padding: 1rem; }
+  .card  { background: #f3f0e9; border-radius: 8px; padding: 1rem; }
+  .card h3 { margin: 0 0 .3rem; font-size: 1rem; }
+  .card p  { margin: 0; font-size: .85rem; color: #55524c; }
+  .sinal { font: 600 .7rem/1 sans-serif; letter-spacing: .1em; text-transform: uppercase;
+           color: #9c2f22; padding: 1rem 1rem 0; }
+
+  @media (min-width: 48rem) {
+    .cards { grid-template-columns: repeat(3, 1fr); gap: 2rem; padding: 2rem; }
+    .sinal::after { content: " — min-width: 48rem ativa"; }
+  }
+</template>
+<template data-papel="html">
+  <p class="sinal">folha base</p>
+  <div class="cards">
+    <div class="card"><h3>Um</h3><p>A folha base não tem colunas. Uma coluna é o padrão.</p></div>
+    <div class="card"><h3>Dois</h3><p>Nada aqui precisou ser desfeito para caber no celular.</p></div>
+    <div class="card"><h3>Três</h3><p>A partir de 48rem, a media query acrescenta as colunas.</p></div>
+  </div>
+</template>
+</div>
+
+<p><strong>Observe:</strong> arraste devagar até 768px. O rótulo muda no instante em que a
+media query passa a valer. Esse instante é o <em>breakpoint</em> — e repare que ele foi
+escolhido pelo conteúdo (é onde três cartões param de espremer), não porque algum
+celular tem essa largura.</p>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a1-ex1-inverter" data-titulo="Inverta a folha" data-vp="380">
+<p data-papel="enunciado">
+  O CSS abaixo está escrito <strong>desktop-down</strong>: a base tem três colunas e a
+  media query desfaz. Reescreva <strong>mobile-up</strong> — base de uma coluna,
+  <code>min-width</code> acrescentando. O resultado tem que ser idêntico nas duas pontas
+  do controle. Conte as declarações antes e depois.
+</p>
+<template data-papel="css">
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+
+  @media (max-width: 47.99rem) {
+    .cards {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+  }
+
+  .card { background: #f3f0e9; border-radius: 8px; padding: 1rem; }
+  .card h3 { margin: 0 0 .3rem; font-size: 1rem; }
+  .card p { margin: 0; font-size: .85rem; color: #55524c; }
+</template>
+<template data-papel="html">
+  <div class="cards">
+    <div class="card"><h3>Um</h3><p>Texto de exemplo para dar altura ao cartão.</p></div>
+    <div class="card"><h3>Dois</h3><p>Texto de exemplo para dar altura ao cartão.</p></div>
+    <div class="card"><h3>Três</h3><p>Texto de exemplo para dar altura ao cartão.</p></div>
+  </div>
+</template>
+</div>
+
+<div class="callout">
+  <span class="callout-title">Conferência</span>
+  <p>A versão mobile-up tem <strong>três declarações a menos</strong> — as três que só
+  existiam para cancelar a base. Não é economia de bytes: é uma regra a menos para
+  depurar quando o layout quebrar em novembro.</p>
+</div>
+
+<h2>4. Por que a ordem não é arbitrária</h2>
+
+<p>Três razões, em ordem crescente de importância:</p>
+
+<h3>Economia de cascata</h3>
+<p>Toda regra que desfaz outra é uma regra a mais para depurar. A folha mobile-up tende
+a ser menor porque não paga o imposto de cancelar a si mesma.</p>
+
+<h3>Orçamento por padrão</h3>
+<p>Escrever primeiro para a tela pequena obriga a decidir o que é essencial <em>antes</em>
+de decidir o que é enfeite. Restrição de espaço vira priorização de conteúdo — de graça.</p>
+
+<h3>A base é o piso, não a exceção</h3>
+<p>A folha sem media query é o que <strong>todo</strong> agente recebe: o celular antigo, o
+leitor de tela, o rastreador do Google, o navegador com CSS parcialmente carregado. Se
+essa base já é uma página utilizável, tudo que vem depois é melhoria. Se a base é um
+layout de três colunas quebrado, todo o resto é conserto.</p>
+
+<div class="callout ok">
+  <span class="callout-title">Isso tem nome</span>
+  <p>Essa terceira razão é <strong>progressive enhancement</strong> — construir a partir de
+  uma base que funciona e acrescentar capacidade conforme o ambiente permite. É o assunto
+  inteiro da A3. Mobile-first é progressive
+  enhancement aplicado a layout.</p>
+</div>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a1-ex2-breakpoint" data-titulo="Ache o breakpoint no conteúdo" data-vp="360">
+<p data-papel="enunciado">
+  O <code>min-width</code> está em <code>20rem</code> — cedo demais: os nomes quebram no
+  meio. Arraste o controle até achar a largura em que os três cartões param de espremer,
+  e ajuste o valor. <strong>O breakpoint sai do conteúdo, não de uma tabela de celulares.</strong>
+</p>
+<template data-papel="css">
+  .precos { display: grid; gap: .8rem; padding: 1rem; }
+
+  @media (min-width: 20rem) {
+    .precos { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .plano { border: 1px solid #ddd8cd; border-radius: 8px; padding: .9rem; }
+  .plano h3 { margin: 0; font-size: .95rem; }
+  .plano .valor { font-size: 1.4rem; font-weight: 700; margin: .3rem 0 0; }
+</template>
+<template data-papel="html">
+  <div class="precos">
+    <div class="plano"><h3>Essencial</h3><p class="valor">R$ 29</p></div>
+    <div class="plano"><h3>Profissional</h3><p class="valor">R$ 79</p></div>
+    <div class="plano"><h3>Empresarial</h3><p class="valor">R$ 149</p></div>
+  </div>
+</template>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">Numa folha mobile-first, o que <code>@media (min-width: 48rem)</code> faz?</p>
+  <ul class="quiz-opts">
+    <li><button>Acrescenta regras quando a tela fica larga</button></li>
+    <li><button>Desativa regras quando a tela fica larga</button></li>
+    <li><button>Recarrega a folha quando a tela fica larga</button></li>
+    <li><button>Substitui a base quando a tela fica larga</button></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">Hoje, qual versão do seu site o Google indexa?</p>
+  <ul class="quiz-opts">
+    <li><button>A versão móvel, para todos os sites</button></li>
+    <li><button>A versão desktop, para todos os sites</button></li>
+    <li><button>A versão móvel, para os sites novos</button></li>
+    <li><button>A versão maior, para os sites antigos</button></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>5. A IA nesta disciplina</h2>
+
+<p>Você vai usar IA. Eu uso. O mercado usa. A regra da disciplina cabe em uma frase:</p>
+
+<div class="callout ok">
+  <span class="callout-title">A regra</span>
+  <p><strong>Use a IA à vontade. Você responde pelo que entrega, e vai defender
+  oralmente.</strong></p>
+  <p>Sem declaração obrigatória, sem detector, sem caça a plágio. Nada disso funciona,
+  e eu não vou fingir que funciona.</p>
+</div>
+
+<p>O que muda é <em>onde fica a nota</em>. Os exercícios destas aulas não valem nota —
+são para você errar à vontade. A nota vive na <strong>defesa oral do seu projeto</strong>
+e numa <strong>modificação ao vivo</strong>, em aula, com a IA aberta se você quiser.</p>
+
+<p>A razão é simples: a IA escreve o código por você, mas não senta na banca, não sabe
+por que <em>o seu</em> conteúdo pede aquele breakpoint, e não consegue modificar o que
+você não entendeu. Se você usou IA e consegue defender, modificar e diagnosticar —
+você aprendeu, e usou bem. É esse o objetivo.</p>
+
+<h3>Usar bem tem uma parte difícil</h3>
+
+<p>A parte difícil não é escrever o prompt. É <strong>revisar a resposta</strong> —
+porque nesta área específica a IA erra com confiança, repetindo conselho que era
+verdade em 2015. Alguns casos reais, verificáveis agora:</p>
+
+<ul>
+  <li>Sugerir <strong>jQuery Mobile</strong>, deprecado em 07/10/2021 e hoje projeto
+  arquivado.</li>
+  <li>Dar <strong>WordPress 6.8</strong> como versão atual quando a fonte oficial diz
+  7.1 (19/08/2026).</li>
+  <li>Mandar carregar <code>codemirror</code> do cdnjs na versão “6.65.7”, que é
+  código da <strong>linha 5</strong> — arquivada.</li>
+</ul>
+
+<p>Nenhum desses é pegadinha. São o estado normal de uma ferramenta treinada em texto
+antigo. Sua defesa é a mesma que a de qualquer profissional: <strong>conferir na fonte
+primária</strong>. Por isso toda afirmação destas aulas vem com link para MDN, W3C ou
+a documentação oficial — não é enfeite acadêmico, é o hábito que estou tentando passar.</p>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a1-auditoria-resposta-ia" data-titulo="Uma IA respondeu isto" data-vp="390">
+<p data-papel="enunciado">
+  Pediram a uma IA: <em>“deixa meu site responsivo”</em>. Veio o CSS abaixo. Ele
+  <strong>funciona</strong> — arraste o controle e veja. A pergunta não é se roda; é o
+  que ele custa. Marque o que você acha que é problema. <strong>Nem tudo na lista é.</strong>
+</p>
+<template data-papel="css">
+  /* Layout responsivo */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 3rem;
+  }
+
+  /* iPad */
+  @media (max-width: 1024px) {
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+  }
+
+  /* iPhone */
+  @media (max-width: 768px) {
+    .cards {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+  }
+
+  .card { background: #f3f0e9; border-radius: 8px; padding: 1rem; }
+  .card h3 { margin: 0 0 .3rem; font-size: 1rem; }
+  .card p { margin: 0; font-size: .85rem; color: #55524c; }
+</template>
+<template data-papel="html">
+  <div class="cards">
+    <div class="card"><h3>Um</h3><p>Texto de exemplo para dar altura ao cartão.</p></div>
+    <div class="card"><h3>Dois</h3><p>Texto de exemplo para dar altura ao cartão.</p></div>
+    <div class="card"><h3>Três</h3><p>Texto de exemplo para dar altura ao cartão.</p></div>
+  </div>
+</template>
+<ol data-papel="achados">
+  <li>
+    A base, sem media query nenhuma, já é o layout de três colunas.
+  </li>
+  <li>
+    Os breakpoints foram escolhidos por modelo de aparelho, não pelo conteúdo.
+  </li>
+  <li>
+    Há declarações que existem só para cancelar outras declarações.
+  </li>
+  <li>
+    Usar <code>repeat(3, 1fr)</code> em vez de larguras fixas em <code>px</code>.
+  </li>
+  <li>
+    Usar <code>gap</code> em vez de <code>margin</code> entre os cartões.
+  </li>
+</ol>
+</div>
+
+<div class="callout">
+  <span class="callout-title">Como você vai ser avaliado</span>
+  <p>Ao fim de cada fase do projeto, uma conversa de <strong>10 minutos</strong> sobre o
+  seu código, e uma <strong>modificação ao vivo</strong> que eu sorteio na hora. Duas
+  perguntas que vão cair, para você já ir pensando:</p>
+  <ul>
+    <li>“Você escolheu o breakpoint em tal medida. <strong>Por que não 10rem a mais?</strong>
+    Me mostra na tela onde dói.”</li>
+    <li>“<strong>Apague a media query inteira agora.</strong> O que quebra?”</li>
+  </ul>
+  <p>Se você fez mobile-first de verdade, a resposta da segunda é <em>nada quebra no
+  celular — só deixa de melhorar no desktop</em>. É o teste mais rápido que existe, e
+  vale para o seu projeto inteiro.</p>
+</div>
+
+<h2>6. O ambiente de trabalho do semestre</h2>
+
+<p>Três ferramentas, instaladas hoje:</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Ferramenta</th><th>Para quê</th><th>Onde</th></tr></thead>
+  <tbody>
+    <tr><td>Navegador com DevTools</td><td>Inspecionar, simular dispositivo, medir. Chrome ou Firefox — os dois servem.</td><td>Já instalado</td></tr>
+    <tr><td>Editor de código</td><td>Escrever. VS Code é o padrão da turma, mas qualquer um serve.</td><td>code.visualstudio.com</td></tr>
+    <tr><td>Seu próprio celular</td><td>A única fonte de verdade. Emulador aproxima; celular decide.</td><td>No seu bolso</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>No DevTools, o <strong>device mode</strong> (<code>Ctrl/Cmd + Shift + M</code>) simula
+viewport, densidade de pixel e toque. Ele <em>não</em> simula o processador, a rede real,
+nem o navegador do dispositivo. Por isso a terceira linha da tabela existe.</p>
+
+<p class="fonte"><a href="https://developer.chrome.com/docs/devtools/device-mode/">Chrome DevTools — Simulate mobile devices with Device Mode</a></p>
+
+<h2>7. O projeto que atravessa o semestre</h2>
+
+<p>Um site só, reconstruído seis vezes sob lentes diferentes. É como as 11 áreas da
+ementa se ligam em vez de virarem módulos soltos.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Fase</th><th>Aulas</th><th>O que você entrega</th></tr></thead>
+  <tbody>
+    <tr><td>F1 — À mão</td><td>A1–A12</td><td>HTML semântico + CSS próprio, mobile-first, zero framework.</td></tr>
+    <tr><td>F2 — Com framework</td><td>A13–A14</td><td>A mesma home em Bootstrap 5.3. Comparar peso e controle.</td></tr>
+    <tr><td>F3 — Interativo</td><td>A15–A16</td><td>Menu, carrossel e formulário funcionando.</td></tr>
+    <tr><td>F4 — Auditado</td><td>A17–A19</td><td>Relatório de acessibilidade, SEO e performance — com correções aplicadas.</td></tr>
+    <tr><td>F5 — Publicado</td><td>A20–A21</td><td>Portado para CMS, no ar, com usuários administrativos.</td></tr>
+    <tr><td>F6 — Testado</td><td>A22</td><td>Suíte de testes verde + apresentação.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout">
+  <span class="callout-title">Tarefa de hoje — escolha do tema</span>
+  <p>Escolha um site real que você <em>quer</em> que exista: seu portfólio, o negócio de
+  alguém da sua família, um coletivo, uma banda. Precisa ter conteúdo de verdade — texto
+  e imagens que existem. Site de mentira não sobrevive a seis fases.</p>
+  <p>Traga na A2: <strong>o tema, quem é o público e as cinco seções da home.</strong>
+  Em uma folha, escrito à mão. Sem Figma.</p>
+</div>
+
+<hr>
+
+<h2>Leitura primária</h2>
+
+<p>Um recurso, não cinco. <a href="https://web.dev/learn/design/welcome"><strong>web.dev —
+Learn Responsive Design</strong></a>, de Jeremy Keith, publicado pela equipe do Chrome.
+Leia os módulos <em>Introduction</em> e <em>Macro layouts</em> antes da A2. É a fonte mais
+limpa que existe sobre por que o breakpoint vem do conteúdo, e é o alicerce das
+aulas A11 e A12.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Pergunte — em aula,
+no canal da disciplina, ou direto. Uma dúvida sobre a A1 que fica sem resposta vira
+três aulas travadas mais adiante, porque tudo depende desta ordem.</p>
+
+<nav class="aula-nav">
+  <span>&nbsp;</span>
+  <a href="0002-html-semantico-e-o-viewport.html">A2 — HTML semântico e o <code>viewport</code> →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+
+<script src="assets/aulas.js"></script>
+<script src="assets/shell.js"></script>
+<script src="assets/course.js"></script>
+<script src="assets/atelier.js"></script>
+</body>
+</html>
