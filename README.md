@@ -76,3 +76,4 @@ CONTEÚDO
   - A5 — Pseudo-classes e pseudo-elementos
   - A6 — Unidades absolutas e relativas
   - A7 — Flexbox
+  - A8 — Grid
