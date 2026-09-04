@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2 — HTML semântico e o viewport</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 2 de 22 · 3h · HTML — viewport</p>
+
+<h1>HTML semântico<br>e o <code>viewport</code></h1>
+
+<p class="deck">Antes de fazer caber, precisamos dizer o que cada parte é. Hoje a
+turma transforma uma pilha de <code>div</code>s em um documento navegável e vê uma única
+linha no <code>&lt;head&gt;</code> mudar a escala inteira da página no celular.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Na folha mobile-first da A1, qual CSS chega a todo dispositivo?</p>
+  <ul class="quiz-opts">
+    <li>A folha base, fora das media queries.</li>
+    <li>A regra dentro do maior <code>min-width</code>.</li>
+    <li>A regra com o nome do celular no comentário.</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. HTML não descreve aparência</h2>
+
+<p>HTML descreve a <strong>estrutura e o significado</strong> do conteúdo. CSS decide
+como esse conteúdo aparece. JavaScript decide o que ele faz quando algo acontece.</p>
+
+<div class="versus">
+  <div class="bad">
+    <h4>Parece um título</h4>
+<pre><code>&lt;div class="titulo-grande"&gt;
+  Serviços
+&lt;/div&gt;</code></pre>
+    <p>O navegador vê um contêiner genérico. A aparência depende do CSS.</p>
+  </div>
+  <div class="good">
+    <h4>É um título</h4>
+<pre><code>&lt;h2&gt;Serviços&lt;/h2&gt;</code></pre>
+    <p>O navegador, o leitor de tela e o mecanismo de busca recebem a mesma estrutura.</p>
+  </div>
+</div>
+
+<p>Semântica não significa “usar tags diferentes para evitar <code>div</code>”. Significa
+escolher o elemento cujo <strong>papel</strong> corresponde ao conteúdo. Quando nenhum
+elemento tem esse papel, <code>div</code> e <code>span</code> continuam corretos.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Glossary/Semantics">MDN — Semantics</a></p>
+
+<h2>2. A árvore antes das folhas</h2>
+
+<p>Uma página não é uma coleção de caixas. É um documento com regiões e uma hierarquia
+de títulos. Estes elementos resolvem grande parte de uma home:</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Elemento</th><th>Pergunta que responde</th><th>Armadilha comum</th></tr></thead>
+  <tbody>
+    <tr><td><code>header</code></td><td>Qual é a introdução desta página ou seção?</td><td>Não é sinônimo de faixa no topo.</td></tr>
+    <tr><td><code>nav</code></td><td>Este bloco contém navegação importante?</td><td>Nem todo grupo de links precisa de uma região <code>nav</code>.</td></tr>
+    <tr><td><code>main</code></td><td>Qual é o conteúdo principal único desta página?</td><td>Deve haver apenas um <code>main</code> visível.</td></tr>
+    <tr><td><code>section</code></td><td>Este agrupamento tem tema e título próprios?</td><td>Não é uma <code>div</code> com nome sofisticado.</td></tr>
+    <tr><td><code>article</code></td><td>Isto faz sentido distribuído sozinho?</td><td>Nem todo cartão é um artigo.</td></tr>
+    <tr><td><code>footer</code></td><td>Quais informações fecham esta página ou seção?</td><td>Pode existir dentro de um <code>article</code>.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout">
+  <span class="callout-title">Teste da section</span>
+  <p>Se você não consegue dar um título útil ao bloco, provavelmente ele não é uma
+  <code>section</code>. Use <code>div</code> para agrupamento puramente visual.</p>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements">MDN — HTML elements reference</a></p>
+
+<div class="atelier" data-modo="demo" data-titulo="O mesmo conteúdo, sem a maquiagem" data-vp="390">
+<template data-papel="css">
+  body { font: 16px/1.5 system-ui; margin: 0; color: #272520; }
+  header, main, footer { padding: 1rem; }
+  nav ul { display: flex; gap: 1rem; padding: 0; list-style: none; }
+  .servicos { display: grid; gap: 1rem; }
+  article { border: 1px solid #cbc5b9; border-radius: .5rem; padding: 1rem; }
+  @media (min-width: 44rem) { .servicos { grid-template-columns: repeat(2, 1fr); } }
+</template>
+<template data-papel="html">
+  <header>
+    <a href="#conteudo">Pular para o conteúdo</a>
+    <nav aria-label="Principal"><ul><li><a href="#servicos">Serviços</a></li><li><a href="#contato">Contato</a></li></ul></nav>
+  </header>
+  <main id="conteudo">
+    <h1>Oficina Horizonte</h1>
+    <section id="servicos" aria-labelledby="titulo-servicos">
+      <h2 id="titulo-servicos">Serviços</h2>
+      <div class="servicos">
+        <article><h3>Revisão</h3><p>Inspeção preventiva com orçamento explicado.</p></article>
+        <article><h3>Freios</h3><p>Diagnóstico e troca de componentes.</p></article>
+      </div>
+    </section>
+  </main>
+  <footer id="contato"><p>Contato: (00) 0000-0000</p></footer>
+</template>
+</div>
+
+<p><strong>Experimente:</strong> expanda a prévia e navegue apenas com <kbd>Tab</kbd>.
+Os links continuam sendo links, o salto chega ao conteúdo e os títulos continuam
+organizando o documento. Nenhuma dessas propriedades veio do CSS.</p>
+
+<h2>3. Marque o significado, não o desenho</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="html"
+     data-id="a2-ex1-semantica" data-titulo="Troque caixas por estrutura" data-vp="390">
+<p data-papel="enunciado">
+  Reescreva somente o HTML. Preserve todo o texto e os links, mas substitua as caixas
+  genéricas pelos elementos que representam cabeçalho, navegação, conteúdo principal,
+  seção, artigo e rodapé. Crie uma hierarquia de títulos que não pule nível.
+</p>
+<template data-papel="css">
+  body { font: 16px/1.5 system-ui; margin: 0; color: #272520; }
+  body &gt; * { padding: 1rem; }
+  .menu { display: flex; gap: 1rem; }
+  .card { border: 1px solid #bbb4a8; padding: 1rem; margin-block: 1rem; }
+</template>
+<template data-papel="html">
+  <div class="topo">
+    <div class="marca">Cozinha da Ana</div>
+    <div class="menu"><a href="#menu">Cardápio</a> <a href="#contato">Contato</a></div>
+  </div>
+  <div class="conteudo">
+    <div class="titulo">Comida feita perto de você</div>
+    <div id="menu">
+      <div class="subtitulo">Pratos de hoje</div>
+      <div class="card"><div class="nome">Moqueca</div><p>Peixe, leite de coco e arroz.</p></div>
+      <div class="card"><div class="nome">Baião</div><p>Arroz, feijão-verde e queijo coalho.</p></div>
+    </div>
+  </div>
+  <div id="contato">Pedidos: (00) 0000-0000</div>
+</template>
+</div>
+
+<h2>4. O celular não começa com 390 pixels</h2>
+
+<p>O navegador móvel precisa encaixar páginas antigas que foram desenhadas para telas
+largas. Sem instrução, ele pode usar um <strong>viewport de layout virtual</strong> mais
+largo e reduzir a página inteira para caber. O site parece uma miniatura.</p>
+
+<pre><code>&lt;meta name="viewport"
+      content="width=device-width, initial-scale=1"&gt;</code></pre>
+
+<p><code>width=device-width</code> faz a largura do viewport de CSS acompanhar a largura
+do dispositivo. <code>initial-scale=1</code> define a escala inicial em 1:1. Essa linha
+não torna o site responsivo; ela permite que o CSS responsivo trabalhe na largura que
+você acredita estar testando.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/viewport">MDN — Viewport meta tag</a></p>
+
+<div class="callout">
+  <span class="callout-title">Não bloqueie o zoom</span>
+  <p>Não use <code>user-scalable=no</code> nem <code>maximum-scale=1</code>. Pessoas com
+  baixa visão precisam ampliar o conteúdo; navegadores podem ignorar o bloqueio, mas
+  isso não transforma uma instrução hostil em boa prática.</p>
+</div>
+
+<div class="versus">
+  <div class="bad">
+    <h4>Controle tirado do usuário</h4>
+<pre><code>&lt;meta name="viewport"
+ content="width=device-width,
+ initial-scale=1,
+ maximum-scale=1,
+ user-scalable=no"&gt;</code></pre>
+  </div>
+  <div class="good">
+    <h4>Escala inicial, zoom preservado</h4>
+<pre><code>&lt;meta name="viewport"
+ content="width=device-width,
+ initial-scale=1"&gt;</code></pre>
+  </div>
+</div>
+
+<div class="quiz">
+  <p class="quiz-q">O que a meta <code>viewport</code> faz sozinha?</p>
+  <ul class="quiz-opts">
+    <li>Transforma qualquer layout fixo em responsivo.</li>
+    <li>Define a largura do viewport de CSS e a escala inicial.</li>
+    <li>Reduz o tamanho de todas as imagens para a tela.</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>5. Audite uma resposta plausível</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="html" data-documento
+     data-id="a2-auditoria-head" data-titulo="Uma IA montou este head" data-vp="390">
+<p data-papel="enunciado">
+  Pediram a uma IA: <em>“configure meu HTML para celular e SEO”</em>. O resultado abre
+  e parece normal. Marque apenas o que é problema. Há decisões corretas na lista.
+</p>
+<template data-papel="css">
+  body { max-width: 42rem; margin: auto; padding: 1rem; font: 16px/1.5 system-ui; }
+</template>
+<template data-papel="html">
+  <!doctype html>
+  <html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Clínica Horizonte — atendimento próximo</title>
+  </head>
+  <body>
+    <div class="titulo">Clínica Horizonte</div>
+    <div>Cuidado perto de você.</div>
+  </body>
+  </html>
+</template>
+<ol data-papel="achados">
+  <li>
+    A configuração tenta impedir o zoom do usuário.
+  </li>
+  <li>
+    O nome da clínica parece título, mas continua sendo uma <code>div</code> genérica.
+  </li>
+  <li>
+    A página declara <code>charset="utf-8"</code>.
+  </li>
+  <li>
+    O documento usa <code>lang="pt-BR"</code>.
+  </li>
+  <li>
+    Existe um <code>title</code> descritivo no <code>head</code>.
+  </li>
+</ol>
+</div>
+
+<h2>6. Aplique ao projeto integrador</h2>
+
+<p>As cinco seções trazidas da A1 agora viram uma árvore HTML. Ainda sem layout e sem
+cores. O arquivo desta fase precisa conter:</p>
+
+<ol>
+  <li><code>&lt;!doctype html&gt;</code>, <code>lang="pt-BR"</code>, UTF-8, título útil e a meta viewport correta;</li>
+  <li>um único <code>main</code> visível e um <code>h1</code> que nomeie a página;</li>
+  <li>regiões escolhidas pelo papel do conteúdo, não pelo desenho desejado;</li>
+  <li>hierarquia de títulos sem saltos usados apenas para mudar o tamanho;</li>
+  <li>links reais quando a ação é navegar; botões ficam para ações, na A15.</li>
+</ol>
+
+<div class="callout">
+  <span class="callout-title">Entrega de hoje — esqueleto da home</span>
+  <p>Crie <code>index.html</code> com conteúdo real nas cinco seções. Abra sem CSS e leia
+  de cima a baixo. Se a ordem fizer sentido e os títulos contarem a história da página,
+  o esqueleto está de pé. Traga o arquivo para a A3.</p>
+</div>
+
+<h2>7. O que precisa ficar de pé</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Decisão</th><th>Teste rápido</th></tr></thead>
+  <tbody>
+    <tr><td>Semântica</td><td>Desligue o CSS: a estrutura continua explícita?</td></tr>
+    <tr><td>Hierarquia</td><td>Leia apenas os títulos: eles formam um sumário coerente?</td></tr>
+    <tr><td>Regiões</td><td>Cada elemento existe por um papel, não só por uma borda?</td></tr>
+    <tr><td>Viewport</td><td>Há <code>width=device-width, initial-scale=1</code> sem bloquear zoom?</td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr>
+
+<h2>Leitura primária</h2>
+
+<p>Leia <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Structuring_documents"><strong>MDN — Document and website structure</strong></a>
+e consulte <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/viewport"><strong>MDN — Viewport meta tag</strong></a>.
+Na primeira, observe como regiões e títulos formam o documento; na segunda, procure
+o alerta sobre zoom. As duas decisões reaparecem em acessibilidade, SEO e testes.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Pergunte agora.
+Uma árvore errada recebe CSS na A4 e fica mais cara de corrigir; uma árvore clara
+aguenta todas as próximas camadas.</p>
+
+<nav class="aula-nav">
+  <a href="0001-mobile-first-por-que-a-ordem-importa.html">← A1 — Mobile-first</a>
+  <a href="0003-progressive-enhancement-e-retrocompatibilidade.html">A3 — Progressive enhancement →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A10 — transition, animation e movimento acessível</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 10 de 22 · 3h · CSS3 — transições, animações e acessibilidade</p>
+<h1><code>transition</code>, <code>animation</code><br>e movimento acessível</h1>
+
+<p class="deck">Movimento deve explicar mudança, não disputar atenção. Hoje a turma
+distingue transição de animação por keyframes, escolhe propriedades e tempos explícitos,
+mantém estados finais fora do efeito e oferece uma experiência coerente para quem pediu
+menos movimento.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Qual recurso é suficiente para suavizar a mudança de cor entre o
+  estado normal e <code>:hover</code>?</p>
+  <ul class="quiz-opts">
+    <li><code>transition</code></li>
+    <li><code>@keyframes</code> infinito</li>
+    <li><code>setInterval()</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. Transição precisa de mudança de estado</h2>
+
+<p>Uma transição interpola valores quando o valor calculado de uma propriedade muda.
+Defina no estado-base quais propriedades participam, duração, curva e atraso. Algumas
+propriedades são discretas ou não animáveis; consulte o tipo de animação da propriedade.</p>
+
+<pre><code>.botao {
+  background-color: #1d6373;
+  transform: translateY(0);
+  transition:
+    background-color 160ms ease-out,
+    transform 160ms ease-out;
+}
+.botao:hover { background-color: #154b57; }
+.botao:active { transform: translateY(.125rem); }</code></pre>
+
+<div class="callout"><span class="callout-title">Evite o contrato invisível</span><p>
+<code>transition: all</code> inclui futuras mudanças que o autor talvez nunca tenha
+decidido animar. Liste as propriedades para que manutenção não transforme tamanho,
+posição ou foco em movimento inesperado.</p></div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Transitions/Using">MDN — usando transições CSS</a></p>
+
+<h2>2. Curva e duração têm significado</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Pergunta</th></tr></thead><tbody>
+  <tr><td>Duração</td><td>A mudança é percebida sem atrasar a tarefa?</td></tr>
+  <tr><td><code>ease-out</code></td><td>Precisa chegar rapidamente e desacelerar no fim?</td></tr>
+  <tr><td><code>ease-in</code></td><td>O elemento está saindo e pode acelerar?</td></tr>
+  <tr><td><code>linear</code></td><td>Velocidade constante comunica progresso ou rotação?</td></tr>
+  <tr><td>Atraso</td><td>Existe razão funcional ou só espera adicionada?</td></tr>
+</tbody></table></div>
+
+<p>Não existe duração universalmente acessível. Distância, escala, área ocupada,
+repetição e previsibilidade importam. Teste a tarefa, não apenas a suavidade.</p>
+
+<div class="atelier" data-modo="demo" data-titulo="Estado muda; transition interpola" data-vp="390">
+<template data-papel="css">
+  button { padding: .75rem 1rem; border: 2px solid #1d6373; background: white; color: #1d6373; transition: background-color 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
+  button:hover, button:focus-visible { background-color: #1d6373; color: white; }
+  button:active { transform: translateY(.125rem); }
+</template>
+<template data-papel="html">
+  <button>Guardar alterações</button>
+</template>
+</div>
+
+<h2>3. Corrija a interação lenta e invasiva</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a10-ex1-transition" data-titulo="Feedback rápido, foco preservado" data-vp="390">
+<p data-papel="enunciado">O botão anima qualquer propriedade por dois segundos, cresce
+demais no hover e remove o foco. Restrinja a transição a cor de fundo e transform por
+160ms, use deslocamento de <code>-.125rem</code> em hover e preserve um foco visível.
+Na preferência de movimento reduzido, remova transição e deslocamento.</p>
+<template data-papel="css">
+  .acao { padding: .75rem 1rem; background: #1d6373; color: white; transition: all 2s; }
+  .acao:hover { transform: scale(1.4); }
+  .acao:focus { outline: none; }
+</template>
+<template data-papel="html">
+  <button class="acao">Publicar</button>
+</template>
+</div>
+
+<h2>4. Animação descreve uma linha do tempo</h2>
+
+<p><code>@keyframes</code> define estados intermediários. A propriedade
+<code>animation</code> associa nome, duração, curva, atraso, quantidade de iterações,
+direção, fill mode e estado de execução. A duração inicial é <code>0s</code>; declarar
+somente o nome não produz movimento visível.</p>
+
+<pre><code>@keyframes aparecer {
+  from { opacity: 0; transform: translateY(.5rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mensagem { animation: aparecer 240ms ease-out both; }</code></pre>
+
+<p><code>animation-fill-mode</code> controla valores antes ou depois do intervalo ativo;
+não use <code>forwards</code> para esconder o estado real do componente. O estilo-base
+deve continuar correto se a animação não executar.</p>
+
+<div class="table-wrap"><table><thead><tr><th>Parte</th><th>Responsabilidade</th></tr></thead><tbody>
+  <tr><td><code>animation-name</code></td><td>Escolhe o conjunto de keyframes.</td></tr>
+  <tr><td><code>animation-duration</code></td><td>Define o tempo de um ciclo.</td></tr>
+  <tr><td><code>animation-iteration-count</code></td><td>Define quantas vezes; <code>infinite</code> nunca termina.</td></tr>
+  <tr><td><code>animation-direction</code></td><td>Controla execução normal, reversa ou alternada.</td></tr>
+  <tr><td><code>animation-play-state</code></td><td>Permite pausar ou retomar.</td></tr>
+</tbody></table></div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/animation">MDN — animation</a></p>
+
+<h2>5. Preferência reduzida é uma entrada do usuário</h2>
+
+<p><code>@media (prefers-reduced-motion: reduce)</code> corresponde quando o usuário
+expressou preferência por menos movimento no sistema. Remova movimento não essencial
+ou substitua-o por uma mudança menos intensa. Não remova junto informação de estado,
+progresso ou confirmação.</p>
+
+<pre><code>.estado { opacity: 1; }
+.estado.entrando { animation: aparecer 240ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .estado.entrando { animation: none; }
+}</code></pre>
+
+<p>Uma regra global que reduz tudo para <code>0.01ms</code> pode disparar eventos em ordem
+inesperada e destruir animações funcionalmente necessárias. Prefira decisões por
+componente e mantenha o estado final explícito.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Qual resposta é mais segura para uma decoração que pulsa sem parar?</p>
+  <ul class="quiz-opts">
+    <li>Aumentar a velocidade para terminar antes</li>
+    <li>Parar o pulso em <code>prefers-reduced-motion: reduce</code></li>
+    <li>Ocultar também o texto que ela acompanha</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>6. Movimento contínuo precisa de controle</h2>
+
+<p>Conteúdo que começa automaticamente, dura mais de cinco segundos e aparece junto de
+outro conteúdo precisa de mecanismo para pausar, parar ou ocultar, salvo quando o
+movimento é essencial. Uma preferência do sistema complementa; não substitui sempre o
+controle direto pedido pelo critério.</p>
+
+<p class="fonte"><a href="https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html">W3C WAI — Pausar, parar, ocultar</a></p>
+
+<h2>7. Audite intenção, duração e alternativa</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a10-auditoria-movimento" data-titulo="Uma IA deixou tudo mais vivo" data-vp="390">
+<p data-papel="enunciado">A interface deve responder rápido, manter foco e respeitar
+preferências. Marque somente problemas reais; três escolhas são corretas.</p>
+<template data-papel="css">
+  .cartao { transition: all 2s; }
+  .cartao:hover { transform: scale(1.45) rotate(4deg); }
+  .salvar { transition: background-color 160ms ease-out; }
+  .salvar:focus-visible { outline: 3px solid #e1a43a; outline-offset: 3px; }
+  .pulso { animation: pulsar 350ms ease-in-out infinite alternate; }
+  .ornamento { animation: flutuar 2s ease-in-out infinite alternate; }
+  @media (prefers-reduced-motion: reduce) { .ornamento { animation: none; } }
+  @keyframes pulsar { to { transform: scale(1.8); } }
+  @keyframes flutuar { to { transform: translateY(-.25rem); } }
+</template>
+<template data-papel="html">
+  <article class="cartao"><h3>Plano</h3><button class="salvar">Salvar</button></article><p><span class="pulso" aria-hidden="true">●</span> Sincronizando dados</p><span class="ornamento" aria-hidden="true">◆</span>
+</template>
+<ol data-papel="achados">
+  <li>O cartão transiciona qualquer mudança por dois segundos.</li>
+  <li>O hover amplia e gira excessivamente o cartão.</li>
+  <li>O indicador pulsa indefinidamente sem alternativa reduzida.</li>
+  <li>Salvar transiciona explicitamente a cor de fundo.</li>
+  <li>Salvar mantém um outline visível.</li>
+  <li>O ornamento flutua, mas respeita a preferência reduzida.</li>
+</ol>
+</div>
+
+<h2>8. Reduza o pulso sem perder o status</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a10-ex2-animation" data-titulo="Status legível com ou sem movimento" data-vp="390">
+<p data-papel="enunciado">O ponto de status cresce para o dobro quatro vezes por
+segundo. Reduza o máximo para <code>1.2</code>, use ciclo de <code>900ms</code> e pare a
+animação quando houver preferência por movimento reduzido. O texto deve permanecer.</p>
+<template data-papel="css">
+  .indicador { display: inline-block; color: #1d6373; animation: pulsar 250ms linear infinite alternate; }
+  @keyframes pulsar { from { transform: scale(1); } to { transform: scale(2); } }
+</template>
+<template data-papel="html">
+  <p role="status"><span class="indicador" aria-hidden="true">●</span> Salvando alterações…</p>
+</template>
+</div>
+
+<h2>9. Aplique ao projeto integrador</h2>
+
+<ol>
+  <li>liste cada movimento, seu objetivo, gatilho, duração e propriedade;</li>
+  <li>substitua <code>transition: all</code> por contratos explícitos;</li>
+  <li>teste hover, foco, ativação e estado final sem a animação;</li>
+  <li>adicione tratamento por componente para movimento reduzido;</li>
+  <li>forneça controle direto a movimento automático contínuo quando o critério exigir.</li>
+</ol>
+
+<div class="callout"><span class="callout-title">Entrega da A10</span><p>Atualize
+<code>styles.css</code> com uma transição de estado e uma animação justificada. Em
+<code>COMPATIBILIDADE.md</code>, registre objetivo, duração, propriedades, estado sem
+efeito e comportamento sob <code>prefers-reduced-motion: reduce</code>.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Conceito</th><th>Teste rápido</th></tr></thead><tbody>
+  <tr><td>Transição</td><td>Qual mudança de estado dispara quais propriedades?</td></tr>
+  <tr><td>Animação</td><td>Quais keyframes, duração e iterações formam a linha do tempo?</td></tr>
+  <tr><td>Estado</td><td>Sem efeito, conteúdo e resultado final continuam corretos?</td></tr>
+  <tr><td>Preferência</td><td>O que muda quando o usuário pede menos movimento?</td></tr>
+  <tr><td>Controle</td><td>Movimento automático prolongado pode ser pausado ou parado?</td></tr>
+</tbody></table></div>
+
+<hr>
+<h2>Leitura primária</h2>
+<p>Leia os guias MDN de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Transitions/Using"><strong>transições</strong></a>,
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/animation"><strong>animações</strong></a>
+e <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion"><strong>preferência de movimento reduzido</strong></a>.
+Escolha um efeito do projeto e descreva a experiência equivalente sem movimento.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o estado
+inicial, o final, o gatilho e a preferência testada. “Não anima” sem esses quatro dados
+não separa propriedade discreta, duração zero, seletor e media query.</p>
+
+<nav class="aula-nav">
+  <a href="0009-cor-gradientes-e-transform.html">← A9 — Cor e transform</a>
+  <a href="0011-media-queries-e-estrategia-de-breakpoints.html">A11 — Media queries →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

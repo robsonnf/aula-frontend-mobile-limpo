@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A6 — Unidades absolutas e relativas</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 6 de 22 · 3h · CSS3 — unidades de medida</p>
+<h1>Unidades absolutas<br>e relativas</h1>
+
+<p class="deck">Escolher uma unidade é escolher uma referência. Hoje a turma separa
+comprimento fixo de comprimento contextual, controla a composição de <code>em</code>,
+usa <code>rem</code> para uma escala comum e combina limites com medidas fluidas sem
+confundir píxel CSS, píxel físico, fonte, contêiner e viewport.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Em <code>.filho { font-size: 1.25em; }</code>, qual é a referência?</p>
+  <ul class="quiz-opts">
+    <li>O tamanho do viewport</li>
+    <li>O tamanho calculado da fonte do pai</li>
+    <li>Sempre 16px</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. Um comprimento sempre responde “em relação a quê?”</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Família</th><th>Exemplos</th><th>Referência</th></tr></thead>
+  <tbody>
+    <tr><td>Absoluta</td><td><code>px</code>, <code>pt</code>, <code>cm</code></td><td>Relações fixas definidas pelo CSS</td></tr>
+    <tr><td>Fonte</td><td><code>em</code>, <code>rem</code>, <code>ch</code></td><td>Métricas da fonte do elemento ou da raiz</td></tr>
+    <tr><td>Percentual</td><td><code>%</code></td><td>Depende da propriedade e do contexto de formatação</td></tr>
+    <tr><td>Viewport</td><td><code>vw</code>, <code>vh</code>, <code>dvh</code></td><td>Dimensões do viewport</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Unidades relativas não são automaticamente responsivas, e unidades absolutas não
+são automaticamente erradas. Uma borda de <code>1px</code> pode ser um bom contrato;
+uma coluna de texto com <code>900px</code> pode transbordar. A decisão vem daquilo que
+deve — ou não deve — acompanhar.</p>
+
+<h2>2. O píxel CSS não promete um ponto físico</h2>
+
+<p>As unidades absolutas têm proporções fixas: <code>1in = 96px</code> e
+<code>1pt = 1/72in</code>. Em tela, porém, o navegador ancora essas medidas numa unidade
+de referência perceptual; um <code>px</code> CSS não precisa coincidir com um píxel físico
+do painel. Por isso <code>cm</code> na tela não é régua confiável.</p>
+
+<div class="versus">
+  <div class="good"><h4>Bom uso de fixidez</h4><pre><code>.cartao { border: 1px solid; }
+@media print { body { margin: 12mm; } }</code></pre><p>Detalhe fino em tela; medida física no contexto de impressão.</p></div>
+  <div class="bad"><h4>Fixidez contra o conteúdo</h4><pre><code>.cartao {
+  inline-size: 720px;
+  block-size: 220px;
+}</code></pre><p>Texto ampliado ou viewport estreito pode não caber.</p></div>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/length">MDN — &lt;length&gt;</a></p>
+
+<h2>3. <code>em</code> compõe; <code>rem</code> compartilha uma raiz</h2>
+
+<p>Para <code>font-size</code>, <code>em</code> usa a fonte calculada do pai. Nas demais
+propriedades, usa a fonte do próprio elemento. <code>rem</code> usa a fonte do elemento
+raiz. Assim, <code>em</code> é útil para espaçamento interno que acompanha o componente,
+enquanto <code>rem</code> oferece uma escala tipográfica comum.</p>
+
+<div class="atelier" data-modo="demo" data-titulo="A mesma unidade, duas referências" data-vp="390">
+<template data-papel="css">
+  html { font-size: 16px; }
+  .caixa { font-size: 1.25em; padding: 1em; border: 1px solid #777; }
+  .raiz { font-size: 1.25rem; }
+</template>
+<template data-papel="html">
+  <div class="caixa">20px de fonte; 20px de padding<div class="caixa">25px de fonte; 25px de padding</div></div>
+  <p class="raiz">20px em relação à raiz.</p>
+</template>
+</div>
+
+<p><code>ch</code> mede em relação ao avanço do caractere “0” da fonte e pode limitar
+aproximadamente o comprimento de linha. Não significa “quantidade exata de caracteres”:
+letras têm larguras diferentes.</p>
+
+<h2>4. Corrija a composição involuntária</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a6-ex1-em-rem" data-titulo="Uma escala previsível, espaço local" data-vp="390">
+<p data-papel="enunciado">Os cartões podem ser aninhados e ficam progressivamente
+maiores. Mantenha todos com fonte de <code>1.125rem</code> e faça o padding acompanhar
+a fonte do próprio cartão com <code>1em</code>. Não altere o HTML.</p>
+<template data-papel="css">
+  html { font-size: 16px; }
+  .cartao { font-size: 1.25em; padding: 20px; border: 1px solid #777; }
+  .cartao + .cartao { margin-top: 1rem; }
+</template>
+<template data-papel="html">
+  <article class="cartao">Cartão externo<article class="cartao">Cartão interno</article></article>
+</template>
+</div>
+
+<h2>5. Percentual depende da propriedade</h2>
+
+<p><code>%</code> não possui uma referência universal. A largura percentual costuma
+usar o bloco que contém; <code>font-size: 120%</code> usa a fonte do pai. Até paddings
+percentuais têm regras próprias. Antes de usar porcentagem, consulte a definição da
+propriedade e confirme o valor calculado no inspetor.</p>
+
+<pre><code>.conteudo { inline-size: 90%; max-inline-size: 65ch; }
+.conteudo h2 { font-size: 120%; }</code></pre>
+
+<h2>6. O viewport do celular muda enquanto a página vive</h2>
+
+<p><code>vw</code> e <code>vh</code> usam dimensões do viewport. Em navegadores móveis, as
+barras do navegador aparecem e somem; <code>svh</code>, <code>lvh</code> e <code>dvh</code>
+representam, respectivamente, os tamanhos pequeno, grande e dinâmico. Um fallback pode
+vir primeiro e a melhoria depois.</p>
+
+<pre><code>.hero {
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+}</code></pre>
+
+<p>Evite combinar <code>height: 100vh</code> com <code>overflow: hidden</code> para uma
+área que contém texto: barras móveis, zoom e aumento de fonte podem recortar conteúdo.
+Prefira altura mínima quando o conteúdo precisa crescer.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Qual expressão cria tipografia fluida com piso e teto?</p>
+  <ul class="quiz-opts">
+    <li><code>font-size: 7vw</code></li>
+    <li><code>font-size: clamp(2rem, 7vw, 4.5rem)</code></li>
+    <li><code>font-size: 48px !important</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>7. Audite as referências, não os sufixos</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a6-auditoria-unidades" data-titulo="Uma IA tornou tudo responsivo" data-vp="390">
+<p data-papel="enunciado">Pediram “troque os pixels por unidades responsivas”. Marque
+somente os problemas reais. Há unidades absolutas e relativas usadas corretamente.</p>
+<template data-papel="css">
+  .painel { inline-size: 720px; margin-inline: auto; border: 1px solid #777; }
+  .hero { height: 100vh; overflow: hidden; padding: 1em; }
+  .hero h2 { font-size: 8vw; }
+  .texto { max-inline-size: 65ch; }
+  .acoes { display: flex; gap: 1rem; }
+</template>
+<template data-papel="html">
+  <main class="painel"><section class="hero"><h2>Unidades com contexto</h2><p class="texto">Este conteúdo precisa sobreviver a viewport estreito, barras móveis, zoom e fonte ampliada.</p><div class="acoes"><button>Salvar</button><button>Voltar</button></div></section></main>
+</template>
+<ol data-papel="achados">
+  <li>O painel tem largura rígida maior que muitos viewports.</li>
+  <li>A hero combina altura fixa de viewport com corte de conteúdo.</li>
+  <li>O título usa apenas vw, sem limites.</li>
+  <li>A borda usa <code>1px</code>.</li>
+  <li>O texto é limitado a <code>65ch</code>.</li>
+  <li>O espaço entre ações usa <code>1rem</code>.</li>
+</ol>
+</div>
+
+<h2>8. Construa fluidez com limites</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a6-ex2-viewport" data-titulo="Hero que cresce sem recortar" data-vp="390">
+<p data-papel="enunciado">A hero transborda na largura e recorta texto na altura.
+Faça o conteúdo caber em qualquer viewport, use altura mínima dinâmica com fallback,
+padding fluido limitado e título fluido entre <code>2rem</code> e <code>4.5rem</code>.</p>
+<template data-papel="css">
+  .hero { width: 900px; height: 100vh; overflow: hidden; padding: 64px; }
+  .hero h2 { font-size: 8vw; }
+  .hero p { width: 700px; }
+</template>
+<template data-papel="html">
+  <section class="hero"><h2>Uma medida, uma referência</h2><p>Este texto deve caber sem depender de uma largura fixa.</p><p>Amplie a fonte e reduza o viewport para conferir.</p></section>
+</template>
+</div>
+
+<h2>9. Aplique ao projeto integrador</h2>
+
+<ol>
+  <li>liste cada medida rígida da home e registre o que ela deveria acompanhar;</li>
+  <li>use <code>rem</code> para a escala global e <code>em</code> onde o espaço pertence ao componente;</li>
+  <li>limite a linha de leitura e elimine larguras que transbordam em 320px;</li>
+  <li>se houver hero de tela cheia, teste barras móveis, zoom e fonte ampliada;</li>
+  <li>use <code>clamp()</code> apenas quando houver piso, preferência e teto justificáveis.</li>
+</ol>
+
+<div class="callout"><span class="callout-title">Entrega da A6</span><p>Atualize
+<code>styles.css</code> e acrescente a <code>COMPATIBILIDADE.md</code> uma tabela com:
+medida, unidade escolhida, referência e teste. Pelo menos um caso deve manter
+<code>px</code> com justificativa e outro deve usar limite fluido.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Conceito</th><th>Teste rápido</th></tr></thead><tbody>
+<tr><td><code>px</code></td><td>É unidade CSS de referência, não promessa de ponto físico.</td></tr>
+<tr><td><code>em</code>/<code>rem</code></td><td>A referência é o pai, o elemento ou a raiz nesta propriedade?</td></tr>
+<tr><td><code>%</code></td><td>Qual definição da propriedade determina a base?</td></tr>
+<tr><td>Viewport</td><td>O conteúdo sobrevive a barras móveis e crescimento?</td></tr>
+<tr><td>Fluidez</td><td>Há piso e teto coerentes, além do valor preferido?</td></tr>
+</tbody></table></div>
+
+<hr>
+<h2>Leitura primária</h2>
+<p>Leia a referência MDN de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/length"><strong>comprimentos CSS</strong></a>
+e o guia de <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Values_and_units"><strong>valores e unidades</strong></a>.
+Escolha três medidas do projeto e escreva a referência de cada uma antes da A7.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a
+propriedade inteira, não só a unidade. <code>50%</code> sem contexto ainda não diz
+qual comprimento será calculado.</p>
+
+<nav class="aula-nav">
+  <a href="0005-pseudo-classes-e-pseudo-elementos.html">← A5 — Pseudo-classes</a>
+  <a href="0007-flexbox.html">A7 — Flexbox →</a>
+</nav>
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

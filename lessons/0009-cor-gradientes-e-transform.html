@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A9 — Cor, gradientes e transform</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 9 de 22 · 3h · CSS3 — cor, gradientes e transform</p>
+<h1>Cor, gradientes<br>e <code>transform</code></h1>
+
+<p class="deck">Cor cria hierarquia, mas não pode carregar significado sozinha.
+Gradientes são imagens geradas e precisam preservar legibilidade. Transformações movem,
+giram e redimensionam a pintura de uma caixa sem reorganizar o espaço que ela ocupava.
+Hoje a turma usa os três recursos com contraste, fallback e testes de fluxo.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Um campo inválido muda somente a borda de cinza para vermelha. O
+  que falta?</p>
+  <ul class="quiz-opts">
+    <li>Um gradiente mais forte</li>
+    <li>Outra pista perceptível além da cor</li>
+    <li>Uma transformação 3D</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. Formato não decide qualidade da cor</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Formato</th><th>Bom para expressar</th><th>Exemplo</th></tr></thead><tbody>
+  <tr><td>Hexadecimal</td><td>Canais RGB compactos</td><td><code>#1d6373</code></td></tr>
+  <tr><td><code>rgb()</code></td><td>Canais e alfa no espaço sRGB</td><td><code>rgb(29 99 115 / 80%)</code></td></tr>
+  <tr><td><code>hsl()</code></td><td>Matiz, saturação e luminosidade</td><td><code>hsl(191 60% 28%)</code></td></tr>
+  <tr><td><code>oklch()</code></td><td>Luminosidade perceptual, croma e matiz</td><td><code>oklch(48% .09 215)</code></td></tr>
+  <tr><td><code>currentColor</code></td><td>Reutilizar o valor calculado de <code>color</code></td><td><code>border-color: currentColor</code></td></tr>
+</tbody></table></div>
+
+<p>O formato não garante contraste nem harmonia. Verifique sempre o par real de primeiro
+plano e fundo. Para texto comum, WCAG 2.2 nível AA exige pelo menos 4,5:1; texto grande
+tem limite de 3:1. Logotipos e elementos incidentais têm exceções específicas.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value">MDN — &lt;color&gt;</a></p>
+<p class="fonte"><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">W3C WAI — contraste mínimo</a></p>
+
+<h2>2. Tokens separam decisão de aplicação</h2>
+
+<pre><code>:root {
+  --cor-texto: #292722;
+  --cor-fundo: #fffdf8;
+  --cor-acao: #1d6373;
+  --cor-perigo: #9c2f22;
+}
+
+.botao {
+  color: var(--cor-fundo);
+  background: var(--cor-acao);
+  border: 2px solid currentColor;
+}</code></pre>
+
+<p>Nomeie tokens pelo papel, não por uma aparência que pode mudar. Mesmo assim, uma
+variável não prova que todas as combinações têm contraste suficiente: teste cada uso.</p>
+
+<div class="atelier" data-modo="demo" data-titulo="Estado com cor e forma" data-vp="390">
+<template data-papel="css">
+  .mensagem { padding: 1rem; border: 2px solid currentColor; border-left-width: .6rem; }
+  .erro { color: #7d2118; background: #fff1ef; }
+  .erro strong { text-decoration: underline; text-decoration-thickness: .15em; }
+</template>
+<template data-papel="html">
+  <p class="mensagem erro"><strong>Erro:</strong> revise o endereço de e-mail.</p>
+</template>
+</div>
+
+<h2>3. Corrija a mensagem sem depender da cor</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a9-ex1-cor" data-titulo="Contraste, texto e borda" data-vp="390">
+<p data-papel="enunciado">A mensagem usa texto cinza-claro sobre branco e o estado
+aparece apenas numa borda vermelha fina. Torne o texto escuro, forneça fundo claro,
+engrosse a borda inicial e sublinhe o rótulo “Erro”. Mantenha o significado no HTML.</p>
+<template data-papel="css">
+  .mensagem { color: #aaa; background: #fff; padding: 1rem; border-left: 1px solid #d22; }
+</template>
+<template data-papel="html">
+  <p class="mensagem"><strong>Erro:</strong> o e-mail precisa conter @.</p>
+</template>
+</div>
+
+<h2>4. Gradiente é uma imagem CSS</h2>
+
+<p><code>linear-gradient()</code>, <code>radial-gradient()</code> e
+<code>conic-gradient()</code> produzem valores de imagem. Podem ser usados em
+<code>background-image</code> e combinados em camadas. Não substituem automaticamente
+uma cor-base segura para texto.</p>
+
+<div class="versus">
+  <div class="bad"><h4>Somente a imagem</h4><pre><code>.hero {
+  color: white;
+  background-image:
+    linear-gradient(135deg, #1d6373, #9c2f22);
+}</code></pre><p>Se a imagem não for aplicada, o fundo pode não sustentar o texto.</p></div>
+  <div class="good"><h4>Cor-base e melhoria</h4><pre><code>.hero {
+  color: white;
+  background-color: #154b57;
+  background-image:
+    linear-gradient(135deg, #154b57, #74251c);
+}</code></pre><p>A camada sólida mantém um fundo definido.</p></div>
+</div>
+
+<p>Stops controlam onde as cores participam da interpolação. Uma faixa abrupta pode
+repetir posições; transparência revela as camadas abaixo. Quanto mais variável o fundo,
+mais necessário testar o contraste em todos os pontos onde existe texto.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Images/Using_gradients">MDN — usando gradientes CSS</a></p>
+
+<h2>5. Transformação pinta em outro lugar, mas o fluxo permanece</h2>
+
+<p><code>translate()</code>, <code>rotate()</code>, <code>scale()</code> e
+<code>skew()</code> transformam o sistema de coordenadas da caixa depois que ela foi
+dimensionada e posicionada. Os elementos vizinhos continuam reservando o espaço
+original. A região transformada pode ampliar o overflow, mas não reorganiza o fluxo.</p>
+
+<div class="atelier" data-modo="demo" data-titulo="Pintura diferente, espaço original" data-vp="390">
+<template data-papel="css">
+  .linha { display: flex; gap: 1rem; padding: 2rem; }
+  .caixa { inline-size: 5rem; block-size: 5rem; background: #1d6373; color: white; }
+  .movida { transform: translateX(3rem) rotate(8deg); background: #9c2f22; }
+</template>
+<template data-papel="html">
+  <div class="linha"><div class="caixa">Original</div><div class="caixa movida">Transformada</div><div class="caixa">Vizinha</div></div>
+</template>
+</div>
+
+<p>A ordem das funções importa: mudar <code>translate() rotate()</code> para
+<code>rotate() translate()</code> pode produzir outro resultado porque as matrizes são
+compostas. Teste a expressão completa, não cada função como se atuasse isoladamente.</p>
+
+<p>Qualquer <code>transform</code> diferente de <code>none</code> cria um novo contexto de
+empilhamento e também pode estabelecer bloco de contenção para descendentes
+posicionados. Esse efeito explica vários “z-index não funciona”.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform">MDN — transform</a></p>
+
+<div class="quiz">
+  <p class="quiz-q">Ao aplicar <code>transform: translateX(4rem)</code>, o que acontece
+  com o espaço original?</p>
+  <ul class="quiz-opts">
+    <li>Os vizinhos recalculam o fluxo e fecham o espaço</li>
+    <li>O espaço original continua reservado</li>
+    <li>O elemento passa a usar <code>position: absolute</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>6. Audite a aparência e suas consequências</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a9-auditoria-visual" data-titulo="Uma IA modernizou o painel" data-vp="390">
+<p data-papel="enunciado">O painel deve manter texto legível, comunicar estados sem
+depender de matiz e preservar controles confortáveis. Marque somente problemas reais;
+há três escolhas corretas entre os seis achados.</p>
+<template data-papel="css">
+  .painel { color: #aaa; background: #fff; border: 1px solid currentColor; }
+  .cabecalho { color: white; background-color: #154b57; background-image: linear-gradient(135deg, #154b57, #74251c); }
+  .falhou { color: #c22; }
+  .decoracao { inline-size: 2rem; block-size: 2rem; background: #e1a43a; transform: rotate(6deg); transform-origin: center; }
+  .confirmar { transform: scale(.65); }
+</template>
+<template data-papel="html">
+  <section class="painel"><header class="cabecalho"><h3>Relatório</h3></header><p>Texto normal do painel.</p><p class="falhou">Pagamento</p><span class="decoracao" aria-hidden="true"></span><p><button class="confirmar">Confirmar pagamento</button></p></section>
+</template>
+<ol data-papel="achados">
+  <li>O texto comum usa cinza muito claro sobre branco.</li>
+  <li>O estado de falha é indicado apenas pela cor.</li>
+  <li>O botão essencial é reduzido para 65% por transform.</li>
+  <li>O cabeçalho declara cor-base antes do gradiente.</li>
+  <li>A borda usa <code>currentColor</code>.</li>
+  <li>A decoração é girada seis graus.</li>
+</ol>
+</div>
+
+<h2>7. Corrija a transformação que invade seus vizinhos</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a9-ex2-transform" data-titulo="Ênfase sem mudar o fluxo" data-vp="390">
+<p data-papel="enunciado">O cartão cresce demais no hover e invade os vizinhos; o
+botão foi deslocado visualmente, mas deixou um espaço vazio no local original. Remova
+o deslocamento do botão e limite o realce do cartão a uma elevação de
+<code>-.25rem</code>. Forneça o mesmo realce quando houver foco dentro do cartão.</p>
+<template data-papel="css">
+  .lista { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .cartao { flex: 1 1 12rem; padding: 1rem; border: 1px solid #777; }
+  .cartao:hover { transform: scale(1.4); }
+  .cartao button { transform: translateX(8rem); }
+</template>
+<template data-papel="html">
+  <div class="lista"><article class="cartao"><h3>Curso</h3><button>Inscrever-se</button></article><article class="cartao"><h3>Oficina</h3><button>Inscrever-se</button></article></div>
+</template>
+</div>
+
+<h2>8. Aplique ao projeto integrador</h2>
+
+<ol>
+  <li>registre tokens de cor pelo papel e teste todos os pares usados por texto;</li>
+  <li>adicione texto, forma ou padrão a estados que hoje dependem apenas de cor;</li>
+  <li>se usar gradiente atrás de texto, declare cor-base e teste toda a área;</li>
+  <li>use transformações para efeito visual, nunca para corrigir espaço de layout;</li>
+  <li>inspecione overflow, foco e empilhamento depois de transformar componentes.</li>
+</ol>
+
+<div class="callout"><span class="callout-title">Entrega da A9</span><p>Atualize
+<code>styles.css</code> com uma paleta funcional, um gradiente com fallback e uma
+transformação justificada. Em <code>COMPATIBILIDADE.md</code>, registre os pares de
+contraste, a pista não cromática e o teste de fluxo da transformação.</p></div>
+
+<h2>9. O que precisa ficar de pé</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Conceito</th><th>Teste rápido</th></tr></thead><tbody>
+  <tr><td>Cor</td><td>O par real tem contraste e o estado possui outra pista?</td></tr>
+  <tr><td>Gradiente</td><td>Existe cor-base e o texto é legível em toda a imagem?</td></tr>
+  <tr><td>Transform</td><td>O fluxo ainda reserva qual espaço?</td></tr>
+  <tr><td>Ordem</td><td>Trocar as funções produz o mesmo resultado?</td></tr>
+  <tr><td>Empilhamento</td><td>Qual novo contexto foi criado?</td></tr>
+</tbody></table></div>
+
+<hr>
+<h2>Leitura primária</h2>
+<p>Leia os guias MDN de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value"><strong>cor</strong></a>,
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Images/Using_gradients"><strong>gradientes</strong></a>
+e <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/transform"><strong>transform</strong></a>.
+Escolha um componente e registre o que permanece quando cor, imagem e transformação são removidas.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o par de
+cores, a caixa antes da transformação e o resultado esperado. “Ficou estranho” sem
+esses três dados mistura contraste, fluxo e pintura.</p>
+
+<nav class="aula-nav">
+  <a href="0008-grid.html">← A8 — Grid</a>
+  <a href="0010-transition-animation-e-movimento-acessivel.html">A10 — Movimento acessível →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

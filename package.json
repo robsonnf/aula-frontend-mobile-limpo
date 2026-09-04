@@ -1,0 +1,15 @@
+{
+  "name": "aula-frontend-mobile-aluno",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Desenvolvimento Web Mobile — projeto exclusivo do aluno, sem gabaritos ou conteúdo reservado.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node scripts/servir.mjs",
+    "verificar": "node scripts/verificar.mjs",
+    "build": "npm run verificar && node scripts/empacotar.mjs"
+  }
+}

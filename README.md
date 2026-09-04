@@ -1,0 +1,35 @@
+# Desenvolvimento Web Mobile — projeto do aluno
+
+Este projeto contém somente o material destinado aos alunos. As aulas ficam em
+`lessons/`, os recursos compartilhados em `assets/` e não há gabaritos, soluções,
+roteiros de fala ou documentos internos de avaliação.
+
+## Rodar
+
+```bash
+npm start
+```
+
+Abra `http://localhost:4321`. Também é possível abrir `index.html` diretamente,
+mas o servidor local oferece a experiência completa dos editores interativos.
+
+## Verificar e empacotar
+
+```bash
+npm run verificar
+npm run build
+```
+
+O build verifica novamente que não existem marcadores reservados ao professor e
+gera `dist/aula-frontend-mobile-aluno.zip`.
+
+## Organização
+
+- `lessons/`: aulas disponíveis para estudo;
+- `assets/`: estilos e comportamentos compartilhados;
+- `scripts/`: servidor, verificação e empacotamento;
+- `CURRICULUM.md`: mapa completo da disciplina;
+- `MISSION.md`: objetivos da disciplina.
+
+Este projeto é publicado a partir do projeto do professor. As aulas geradas não
+devem ser corrigidas manualmente aqui, pois uma nova publicação poderá substituí-las.

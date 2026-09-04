@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A8 — Grid</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 8 de 22 · 3h · CSS3 — Grid</p>
+<h1>Grid</h1>
+
+<p class="deck">Grid cria relações explícitas entre linhas e colunas. Hoje a turma
+define trilhas flexíveis, distingue grade explícita de implícita, posiciona por linhas
+e áreas sem quebrar a ordem lógica e constrói listagens que respondem ao espaço do
+contêiner sem adivinhar modelos de aparelho.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Qual necessidade aponta diretamente para Grid?</p>
+  <ul class="quiz-opts">
+    <li>Centralizar um botão dentro de uma linha</li>
+    <li>Alinhar cartões simultaneamente por linhas e colunas</li>
+    <li>Colorir o primeiro item de uma lista</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. Contêiner, itens, linhas, trilhas e células</h2>
+
+<p><code>display: grid</code> transforma os filhos diretos em itens de grade. Linhas
+numeradas delimitam trilhas; a interseção de uma linha e uma coluna forma uma célula;
+uma área ocupa uma ou mais células. O conteúdo interno de cada item continua com seu
+próprio modelo de layout.</p>
+
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>Significado</th></tr></thead><tbody>
+  <tr><td>Linha</td><td>Limite numerado ou nomeado entre trilhas.</td></tr>
+  <tr><td>Trilha</td><td>Espaço entre duas linhas adjacentes: uma linha ou coluna.</td></tr>
+  <tr><td>Célula</td><td>Interseção de uma trilha de linha com uma de coluna.</td></tr>
+  <tr><td>Área</td><td>Retângulo formado por uma ou mais células.</td></tr>
+  <tr><td><code>gap</code></td><td>Intervalo entre trilhas, não nas bordas externas.</td></tr>
+</tbody></table></div>
+
+<div class="atelier" data-modo="demo" data-titulo="Duas dimensões explícitas" data-vp="390">
+<template data-papel="css">
+  .grade { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
+  .item { padding: 1rem; border: 1px solid #777; background: #eef6f7; }
+  .destaque { grid-column: 1 / -1; }
+</template>
+<template data-papel="html">
+  <section class="grade"><article class="item">Uma fração</article><article class="item">Duas frações</article><article class="item destaque">De primeira à última linha</article></section>
+</template>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Grid_layout/Basic_concepts">MDN — conceitos básicos de Grid</a></p>
+
+<h2>2. Grade explícita e grade implícita</h2>
+
+<p><code>grid-template-columns</code> e <code>grid-template-rows</code> definem a grade
+explícita. Quando a colocação ou a quantidade de itens exige outras trilhas, o algoritmo
+cria grade implícita. Essas trilhas são automáticas por padrão e podem ser controladas
+com <code>grid-auto-rows</code> e <code>grid-auto-columns</code>.</p>
+
+<pre><code>.galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(8rem, auto);
+  gap: 1rem;
+}</code></pre>
+
+<p>Uma altura fixa em linha pode recortar conteúdo ampliado. O par
+<code>minmax(8rem, auto)</code> estabelece um piso e permite crescimento conforme o
+conteúdo.</p>
+
+<h2>3. Faça as colunas caberem pelo conteúdo</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a8-ex1-auto-fit" data-titulo="Galeria sem breakpoint mágico" data-vp="390">
+<p data-papel="enunciado">Três colunas fixas de 18rem transbordam no celular. Crie
+tantas colunas quanto couberem, cada uma com mínimo de <code>14rem</code> e máximo de
+uma fração. Garanta que o mínimo nunca seja maior que o próprio contêiner e mantenha
+<code>gap: 1rem</code>.</p>
+<template data-papel="css">
+  .galeria { display: grid; grid-template-columns: repeat(3, 18rem); }
+  .cartao { padding: 1rem; border: 1px solid #777; }
+</template>
+<template data-papel="html">
+  <section class="galeria"><article class="cartao">Projeto um</article><article class="cartao">Projeto dois com título maior</article><article class="cartao">Projeto três</article><article class="cartao">Projeto quatro</article></section>
+</template>
+</div>
+
+<h2>4. <code>fr</code> distribui espaço flexível, não ignora conteúdo</h2>
+
+<p>A unidade <code>fr</code> representa uma fração do espaço flexível disponível. Uma
+trilha <code>1fr</code> possui mínimo automático, frequentemente influenciado por
+<code>min-content</code>. Conteúdo longo pode fazê-la ultrapassar o contêiner. Quando o
+contrato permite encolher, <code>minmax(0, 1fr)</code> explicita mínimo zero.</p>
+
+<div class="versus">
+  <div class="bad"><h4>Mínimo automático pode dominar</h4><pre><code>.layout {
+  grid-template-columns: 16rem 1fr;
+}</code></pre><p>Uma palavra contínua pode alargar a segunda trilha.</p></div>
+  <div class="good"><h4>Mínimo liberado com intenção</h4><pre><code>.layout {
+  grid-template-columns: 16rem minmax(0, 1fr);
+}
+main { overflow-wrap: anywhere; }</code></pre><p>A trilha pode encolher e o conteúdo ganha quebra.</p></div>
+</div>
+
+<h2>5. Posicionamento por linhas e áreas</h2>
+
+<p>Itens podem ocupar linhas numeradas com <code>grid-column</code> e
+<code>grid-row</code>, ou áreas nomeadas com <code>grid-template-areas</code> e
+<code>grid-area</code>. Áreas formam retângulos; repetir um nome em forma de L torna a
+declaração inválida.</p>
+
+<pre><code>.pagina {
+  display: grid;
+  grid-template-areas:
+    "cabecalho cabecalho"
+    "principal lateral"
+    "rodape rodape";
+  grid-template-columns: minmax(0, 1fr) 16rem;
+}</code></pre>
+
+<p>Colocação visual não altera a ordem do documento, da fala nem da navegação
+sequencial. Estruture o HTML na sequência lógica e use Grid para apresentação, não para
+consertar significado.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Na presença de espaço para colunas vazias, o que
+  <code>auto-fit</code> faz?</p>
+  <ul class="quiz-opts">
+    <li>Cria sempre exatamente três colunas</li>
+    <li>Recolhe as trilhas vazias e expande as ocupadas</li>
+    <li>Muda a ordem lógica dos itens</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>6. Alinhe itens e alinhe a grade conscientemente</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Propriedade</th><th>Alvo</th></tr></thead><tbody>
+  <tr><td><code>justify-items</code></td><td>Itens dentro de suas áreas no eixo inline.</td></tr>
+  <tr><td><code>align-items</code></td><td>Itens dentro de suas áreas no eixo de bloco.</td></tr>
+  <tr><td><code>justify-content</code></td><td>A grade inteira quando sobra espaço inline.</td></tr>
+  <tr><td><code>align-content</code></td><td>A grade inteira quando sobra espaço no bloco.</td></tr>
+  <tr><td><code>place-items</code></td><td>Atalho para align-items e justify-items.</td></tr>
+</tbody></table></div>
+
+<p>Alinhamento de itens e distribuição das trilhas não são a mesma operação. Se a grade
+ocupa todo o contêiner, <code>justify-content</code> pode não produzir mudança visível.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Grid_layout/Box_alignment">MDN — alinhamento em Grid</a></p>
+
+<h2>7. Audite trilhas, conteúdo e ordem</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a8-auditoria-grid" data-titulo="Uma IA criou um dashboard perfeito" data-vp="390">
+<p data-papel="enunciado">O dashboard deve caber em 320px, crescer com o conteúdo e
+manter a sequência lógica dos três links. Marque somente problemas reais; três escolhas
+são adequadas e funcionam como decoys.</p>
+<template data-papel="css">
+  .dashboard { display: grid; grid-template-columns: repeat(3, 20rem); gap: 1rem; align-items: start; grid-template-areas: "acoes resumo saldo"; }
+  .saldo { grid-area: saldo; }
+  .resumo { grid-area: resumo; min-inline-size: 0; }
+  .acoes { grid-area: acoes; block-size: 8rem; overflow: hidden; }
+</template>
+<template data-papel="html">
+  <section class="dashboard"><a class="saldo" href="#saldo">1. Saldo</a><a class="resumo" href="#resumo">2. Resumo mensal com conteúdo variável</a><a class="acoes" href="#acoes">3. Ações e avisos que podem crescer quando a fonte é ampliada</a></section>
+</template>
+<ol data-papel="achados">
+  <li>A grade exige três colunas rígidas de 20rem.</li>
+  <li>As áreas invertem visualmente a sequência numerada.</li>
+  <li>O cartão de ações corta conteúdo acima de 8rem.</li>
+  <li>A grade usa <code>gap: 1rem</code>.</li>
+  <li>Os cartões são alinhados no início.</li>
+  <li>O resumo libera seu mínimo inline.</li>
+</ol>
+</div>
+
+<h2>8. Corrija a trilha que não encolhe</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a8-ex2-minmax" data-titulo="Sidebar e conteúdo sem overflow" data-vp="390">
+<p data-papel="enunciado">A segunda coluna transborda por causa da URL longa. Mantenha
+a sidebar entre <code>10rem</code> e <code>16rem</code>, faça o conteúdo ocupar o restante
+com mínimo zero e permita quebra em qualquer ponto. Em viewport estreito, a solução
+deve caber sem largura fixa total.</p>
+<template data-papel="css">
+  .layout { display: grid; grid-template-columns: 16rem 1fr; gap: 1rem; }
+  .conteudo { white-space: nowrap; }
+</template>
+<template data-papel="html">
+  <div class="layout"><aside>Filtros e categorias</aside><main class="conteudo">https://exemplo.test/um-endereco-continuo-muito-longo-sem-pontos-de-quebra</main></div>
+</template>
+</div>
+
+<h2>9. Aplique ao projeto integrador</h2>
+
+<ol>
+  <li>escolha um conjunto que exija alinhamento real por linhas e colunas;</li>
+  <li>desenhe linhas e trilhas antes de escrever áreas ou números;</li>
+  <li>permita que cartões decidam a quebra com <code>auto-fit</code> e <code>minmax()</code>;</li>
+  <li>injete conteúdo longo e revise mínimos intrínsecos;</li>
+  <li>desative o CSS e use Tab para confirmar que a ordem lógica permanece correta.</li>
+</ol>
+
+<div class="callout"><span class="callout-title">Entrega da A8</span><p>Implemente
+uma galeria ou seção bidimensional no <code>styles.css</code>. Em
+<code>COMPATIBILIDADE.md</code>, registre: trilhas explícitas, comportamento das
+implícitas, mínimo de conteúdo, teste em 320px e sequência sem CSS.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Conceito</th><th>Teste rápido</th></tr></thead><tbody>
+  <tr><td>Duas dimensões</td><td>Quais relações de linha e coluna precisam alinhar?</td></tr>
+  <tr><td>Trilhas</td><td>Quais são explícitas e quais podem surgir implicitamente?</td></tr>
+  <tr><td>Fração</td><td>Qual espaço flexível e qual mínimo estão sendo distribuídos?</td></tr>
+  <tr><td>Colocação</td><td>A área é retangular e a fonte conserva a lógica?</td></tr>
+  <tr><td>Conteúdo</td><td>O layout resiste a 320px, fonte maior e palavra longa?</td></tr>
+</tbody></table></div>
+
+<hr>
+<h2>Leitura primária</h2>
+<p>Use o guia MDN de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Grid_layout"><strong>CSS Grid Layout</strong></a>
+e a seção de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Grid_layout/Accessibility"><strong>Grid e acessibilidade</strong></a>.
+Escolha um componente do projeto e explique por que Grid é melhor que Flexbox para ele.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o
+contêiner, as trilhas e um item. “Saiu do lugar” sem essas três evidências não revela
+se o problema está no tamanho, na colocação ou na grade implícita.</p>
+
+<nav class="aula-nav">
+  <a href="0007-flexbox.html">← A7 — Flexbox</a>
+  <a href="0009-cor-gradientes-e-transform.html">A9 — Cor, gradientes e transform →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>
