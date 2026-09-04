@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A4 — Cascata, especificidade, herança e seletores complexos</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 4 de 22 · 3h · CSS3 — seletores complexos</p>
+
+<h1>Cascata, especificidade,<br>herança e seletores complexos</h1>
+
+<p class="deck">Quando duas regras disputam a mesma propriedade, CSS não “se confunde”:
+ele executa um algoritmo. Hoje a turma aprende a prever o vencedor, reduzir seletores
+caros e usar a estrutura do HTML sem transformar cada correção numa guerra de
+<code>!important</code>.</p>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — retomada (15 min)</span>
+  <p>Sem consulta: (1) o que precisa sobreviver quando a melhoria some? (2) o que
+  <code>@supports</code> testa? (3) Baseline substitui teste no público? (4) por que
+  prefixo sem navegador-alvo não é evidência? Intercalar A1: qual camada todo viewport
+  aplica antes das media queries?</p>
+  <p>Projetar uma resposta anônima e pedir consequência concreta. “Compatibilidade”
+  sem tarefa essencial e sem alvo ainda é palavra, não decisão.</p>
+</div>
+
+<div class="quiz" data-explica="@supports faz feature detection da sintaxe declarada. Ele não identifica o navegador nem garante que a implementação esteja livre de defeitos.">
+  <p class="quiz-q">O que uma regra <code>@supports (display: grid)</code> informa?</p>
+  <ul class="quiz-opts">
+    <li data-correta="sim">O navegador declara reconhecer esse par propriedade–valor.</li>
+    <li>O navegador é Chrome, Firefox ou Safari atual.</li>
+    <li>O layout não terá bugs nesse navegador.</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. A cascata é uma fila de decisões</h2>
+
+<p>A cascata escolhe um valor para <strong>cada propriedade</strong> de cada elemento.
+Ela não compara “regras inteiras” nem começa contando IDs. Primeiro elimina o que não
+se aplica; depois compara precedência; só então chega à especificidade.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Ordem</th><th>Pergunta</th><th>Exemplo</th></tr></thead>
+  <tbody>
+    <tr><td>1. Relevância</td><td>A regra corresponde ao elemento e ao contexto?</td><td>Uma regra de impressão sai da disputa na tela.</td></tr>
+    <tr><td>2. Origem, importância e camada</td><td>De onde veio e em qual camada está?</td><td>Normal, animação, <code>!important</code>, usuário.</td></tr>
+    <tr><td>3. Especificidade</td><td>Qual seletor tem maior peso?</td><td>ID supera classe; classe supera tipo.</td></tr>
+    <tr><td>4. Proximidade de escopo</td><td>Em <code>@scope</code>, qual raiz está mais perto?</td><td>Só entra quando há empate anterior.</td></tr>
+    <tr><td>5. Ordem</td><td>Persistiu o empate?</td><td>A declaração posterior vence.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction">MDN — Introduction to the CSS cascade</a></p>
+
+<div class="callout">
+  <span class="callout-title">Especificidade não governa tudo</span>
+  <p>Uma regra extremamente específica numa camada de menor precedência pode perder
+  antes de a especificidade ser comparada. “Coloque mais IDs” não corrige uma decisão
+  de origem, importância ou camada.</p>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — exposição 1 (40 min)</span>
+  <p>Abrir DevTools no exemplo abaixo e ler o painel Styles de cima para baixo. Mostrar
+  a declaração riscada e pedir: “em qual etapa ela perdeu?”. Não aceitar “porque a
+  outra está embaixo” quando os seletores têm pesos diferentes.</p>
+  <p>Apresentar a ordem completa, mas limitar os cálculos da prática a CSS de autor,
+  normal e sem camadas. Origem, animação, transição e <code>@scope</code> entram para
+  impedir uma regra falsa: especificidade não é a primeira nem a última etapa.</p>
+</div>
+
+<h2>2. Especificidade: compare colunas, não some pontos</h2>
+
+<p>Para seletores comuns, registre três colunas: <strong>ID – classe – tipo</strong>.
+Compare da esquerda para a direita. Uma coluna maior decide; não existe conversão de
+dez classes em um ID.</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Seletor</th><th>ID</th><th>Classe/atributo/pseudo-classe</th><th>Tipo/pseudo-elemento</th></tr></thead>
+  <tbody>
+    <tr><td><code>article h2</code></td><td>0</td><td>0</td><td>2</td></tr>
+    <tr><td><code>.card .titulo</code></td><td>0</td><td>2</td><td>0</td></tr>
+    <tr><td><code>#app .titulo</code></td><td>1</td><td>1</td><td>0</td></tr>
+    <tr><td><code>:where(.card) h2</code></td><td>0</td><td>0</td><td>1</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>:where()</code> e seus argumentos contribuem com especificidade zero.
+<code>:is()</code>, <code>:not()</code> e <code>:has()</code> não adicionam peso próprio,
+mas recebem o peso do argumento mais específico presente na lista.</p>
+
+<pre><code>:where(.card, .painel) h2 { margin-block: 0; } /* 0-0-1 */
+:is(.card, #destaque) h2  { color: navy; }    /* 1-0-1 */</code></pre>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Specificity">MDN — Specificity</a></p>
+
+<div class="atelier" data-modo="demo" data-titulo="Preveja antes de olhar" data-vp="390">
+<template data-papel="css">
+  h2 { color: #6b665d; }
+  .card h2 { color: #1d6373; }
+  .lista .card h2 { color: #9c2f22; }
+  :where(.lista) h2 { color: #6d4a8f; }
+  .card h2 { color: #236a4b; }
+
+  .card { padding: 1rem; border: 1px solid #cbc5b9; border-radius: .5rem; }
+</template>
+<template data-papel="html">
+  <div class="lista">
+    <article class="card"><h2>Qual cor vence?</h2><p>Abra o DevTools depois de prever.</p></article>
+  </div>
+</template>
+</div>
+
+<p>A cor vermelha vence: <code>.lista .card h2</code> tem especificidade 0–2–1.
+A última regra verde aparece depois, mas tem apenas 0–1–1. Ordem só resolve empate.</p>
+
+<h2>3. Pare de aumentar o seletor</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a4-ex1-especificidade" data-titulo="Desarme a guerra de peso" data-vp="390">
+<p data-papel="enunciado">
+  O botão promocional deveria ser azul, mas uma correção acumulou ID e
+  <code>!important</code>. Reorganize o CSS para que classes simples expressem base e
+  variação. Não altere o HTML, não use ID no CSS e não use <code>!important</code>.
+</p>
+<template data-papel="css">
+  #pagina main .acoes .botao {
+    background: #555;
+    color: white;
+    padding: .75rem 1rem;
+    border: 0;
+    border-radius: .4rem;
+  }
+
+  .botao--promocao { background: #1d6373 !important; }
+</template>
+<template data-papel="html">
+  <div id="pagina">
+    <main>
+      <div class="acoes">
+        <button class="botao botao--promocao">Ver promoção</button>
+        <button class="botao">Continuar</button>
+      </div>
+    </main>
+  </div>
+</template>
+<template data-papel="solucao">
+  .botao {
+    background: #555;
+    color: white;
+    padding: .75rem 1rem;
+    border: 0;
+    border-radius: .4rem;
+  }
+
+  .botao--promocao { background: #1d6373; }
+</template>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — prática 1 (30 min)</span>
+  <p>10 min individual, 8 min em dupla calculando antes/depois, 7 min projetando duas
+  respostas e 5 min de síntese. A solução esperada reduz 1–3–1 para 0–1–0 na base;
+  a variação empata e vence por ordem.</p>
+  <p>Intervalo de 15 min. Deixar no quadro: “se todo conserto precisa pesar mais, a
+  dívida cresce a cada regra”.</p>
+</div>
+
+<h2>4. Herança não é cascata entre pai e filho</h2>
+
+<p>Depois que a cascata encontra o valor de uma propriedade em um elemento, a herança
+pode fornecer um valor ao descendente quando ele não recebeu valor especificado.
+Propriedades tipográficas como <code>color</code> e <code>font-family</code> normalmente
+herdam; propriedades de caixa como <code>margin</code>, <code>padding</code> e
+<code>border</code> normalmente não.</p>
+
+<div class="versus">
+  <div class="good">
+    <h4>Use a herança</h4>
+<pre><code>body {
+  color: #292722;
+  font-family: system-ui;
+}</code></pre>
+    <p>Descendentes recebem a base textual sem repetição.</p>
+  </div>
+  <div class="bad">
+    <h4>Não suponha tudo herdado</h4>
+<pre><code>.card { border: 1px solid; }
+/* filhos não recebem essa borda */</code></pre>
+    <p>Consulte a definição da propriedade quando houver dúvida.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Valor global</th><th>Efeito</th></tr></thead>
+  <tbody>
+    <tr><td><code>inherit</code></td><td>Usa explicitamente o valor calculado do pai.</td></tr>
+    <tr><td><code>initial</code></td><td>Usa o valor inicial definido pela especificação.</td></tr>
+    <tr><td><code>unset</code></td><td>Age como <code>inherit</code> se a propriedade herda; caso contrário, como <code>initial</code>.</td></tr>
+    <tr><td><code>revert</code></td><td>Recua para o valor da origem anterior na cascata.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Inheritance">MDN — Inheritance</a></p>
+
+<h2>5. Seletores complexos descrevem relações</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Seletor</th><th>Relação</th><th>Leitura</th></tr></thead>
+  <tbody>
+    <tr><td><code>.card h2</code></td><td>Descendente</td><td>Qualquer h2 dentro de card.</td></tr>
+    <tr><td><code>.card &gt; h2</code></td><td>Filho</td><td>h2 diretamente filho de card.</td></tr>
+    <tr><td><code>h2 + p</code></td><td>Irmão adjacente</td><td>Primeiro p imediatamente após h2.</td></tr>
+    <tr><td><code>h2 ~ p</code></td><td>Irmãos seguintes</td><td>Todo p posterior com o mesmo pai.</td></tr>
+    <tr><td><code>[aria-expanded="true"]</code></td><td>Atributo</td><td>Elemento cujo estado exposto é verdadeiro.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Um seletor complexo não é melhor por ser longo. Ele deve expressar uma relação que
+o HTML garante. Se depender de cinco níveis acidentais de wrappers, uma mudança de
+marcação quebra o CSS mesmo quando o componente continua semanticamente igual.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Selectors/Selectors_and_combinators">MDN — Selectors and combinators</a></p>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a4-ex2-seletores" data-titulo="Escolha a relação exata" data-vp="390">
+<p data-papel="enunciado">
+  Sem adicionar classes ao HTML: (1) remova a margem apenas do parágrafo imediatamente
+  após cada título; (2) destaque links externos pelo atributo <code>href</code>; (3)
+  estilize somente listas diretamente filhas de <code>nav</code>. Evite afetar a lista
+  aninhada dentro do item “Ajuda”.
+</p>
+<template data-papel="css">
+  body { font: 16px/1.5 system-ui; color: #292722; }
+  p { margin-block: 1rem; }
+  a { color: #1d6373; }
+  ul { padding-left: 1.25rem; }
+</template>
+<template data-papel="html">
+  <article><h2>Notícia</h2><p>Resumo logo após o título.</p><p>Segundo parágrafo.</p></article>
+  <p><a href="/contato">Contato</a> · <a href="https://developer.mozilla.org/">MDN</a></p>
+  <nav aria-label="Principal"><ul><li>Início</li><li>Ajuda<ul><li>FAQ</li></ul></li></ul></nav>
+</template>
+<template data-papel="solucao">
+  body { font: 16px/1.5 system-ui; color: #292722; }
+  p { margin-block: 1rem; }
+  h2 + p { margin-top: 0; }
+
+  a { color: #1d6373; }
+  a[href^="http"] { text-decoration-style: double; }
+
+  ul { padding-left: 1.25rem; }
+  nav > ul { border-left: .3rem solid #1d6373; padding-block: .5rem; }
+</template>
+</div>
+
+<h2>6. Audite uma folha que “resolveu” a cascata</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a4-auditoria-cascata" data-titulo="Uma IA eliminou os conflitos" data-vp="390">
+<p data-papel="enunciado">
+  Pediram: <em>“faça o CSS sempre aplicar o estilo certo”</em>. O resultado funciona
+  nesta marcação. Marque apenas os problemas reais; alguns seletores são precisos e
+  deliberadamente leves.
+</p>
+<template data-papel="css">
+  #app main .lista .card .titulo { color: #292722 !important; }
+  #app main .lista .card.destaque .titulo { color: #9c2f22 !important; }
+
+  .menu a { padding: .5rem; }
+  .menu a a { padding: 0; }
+
+  :where(.card, .painel) h2 { margin-block: 0; }
+  button[aria-expanded="true"] { background: #1d6373; color: white; }
+  nav > ul { list-style: none; padding: 0; }
+</template>
+<template data-papel="html">
+  <div id="app">
+    <main><div class="lista">
+      <article class="card destaque"><h2 class="titulo">Plano recomendado</h2><p>Conteúdo do cartão.</p></article>
+    </div></main>
+    <nav class="menu" aria-label="Conta"><ul><li><a href="#perfil">Perfil</a></li></ul></nav>
+    <button aria-expanded="true">Detalhes</button>
+  </div>
+</template>
+<ol data-papel="achados">
+  <li data-real="sim" data-explica="Os IDs e cinco componentes de seletor tornam qualquer variação futura mais cara. Uma classe de componente e uma classe de estado resolvem a mesma intenção com menor acoplamento ao DOM.">
+    Os seletores dos títulos acumulam estrutura e especificidade desnecessárias.
+  </li>
+  <li data-real="sim" data-explica="O !important não corrige o modelo; ele cria uma nova faixa de disputa. As duas regras já precisam de important para competir entre si e forçam futuras exceções a repetir a escalada.">
+    <code>!important</code> foi usado como estratégia normal de manutenção.
+  </li>
+  <li data-real="sim" data-explica=".menu a seleciona qualquer link em qualquer profundidade. A regra .menu a a tenta corrigir um caso impossível em HTML válido, porque um elemento a não pode ser descendente de outro a. O seletor revela que a estrutura não foi compreendida.">
+    A correção <code>.menu a a</code> procura links dentro de links.
+  </li>
+  <li data-real="nao" data-explica=":where() mantém o contexto de card/painel com peso zero; apenas h2 contribui para a especificidade. É uma forma deliberada de criar padrão fácil de sobrescrever.">
+    Usar <code>:where(.card, .painel) h2</code> para manter baixa especificidade.
+  </li>
+  <li data-real="nao" data-explica="O seletor de atributo liga a apresentação a um estado real exposto pelo controle. Ele tem especificidade de classe e evita criar uma segunda fonte de verdade como .aberto.">
+    Estilizar o botão por <code>[aria-expanded="true"]</code>.
+  </li>
+  <li data-real="nao" data-explica="O combinador de filho expressa o contrato desejado: somente a lista que pertence diretamente ao nav. Listas aninhadas não são atingidas.">
+    Usar <code>nav &gt; ul</code> para limitar a seleção à lista direta.
+  </li>
+</ol>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — exposição 2 + auditoria (35 min)</span>
+  <p>15 min para herança e combinadores, 15 min para auditoria silenciosa, 5 min para
+  debate. Não informar que são três problemas e três decoys. Pedir a etapa da cascata
+  afetada por cada crítica.</p>
+  <p>Na regra impossível <code>.menu a a</code>, abrir o inspector e tentar produzir o
+  alvo. O parser HTML encerra ou reorganiza links aninhados; o CSS denuncia uma hipótese
+  estrutural inválida.</p>
+</div>
+
+<h2>7. Aplique ao projeto integrador</h2>
+
+<p>Abra o esqueleto da home e crie a primeira folha do projeto. O objetivo ainda não é
+layout sofisticado; é estabelecer uma cascata sustentável:</p>
+
+<ol>
+  <li>defina tipografia e cor herdáveis no <code>body</code>;</li>
+  <li>estilize componentes com classes únicas e previsíveis;</li>
+  <li>use combinador somente quando a relação fizer parte do contrato do HTML;</li>
+  <li>não use ID para apresentação nem <code>!important</code> para ganhar disputa;</li>
+  <li>no DevTools, explique uma declaração aplicada e uma riscada.</li>
+</ol>
+
+<div class="callout">
+  <span class="callout-title">Entrega da A4</span>
+  <p><code>styles.css</code> ligado à home, com base tipográfica, links, um componente e
+  uma variação. Acrescente a <code>COMPATIBILIDADE.md</code>: registre o seletor mais
+  específico da folha e justifique por que ele precisa daquele peso.</p>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — prática 2 / projeto (40 min)</span>
+  <p>15 min no exercício de seletores, 20 min na folha do projeto e 5 min de revisão em
+  dupla. O colega precisa localizar o vencedor no DevTools, não apenas olhar a tela.</p>
+  <p>Se aparecer <code>!important</code>, não proibir por slogan. Perguntar: quais regras
+  competem, em qual etapa e qual estrutura tornaria a exceção desnecessária?</p>
+</div>
+
+<h2>8. O que precisa ficar de pé</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Conceito</th><th>Teste rápido</th></tr></thead>
+  <tbody>
+    <tr><td>Cascata</td><td>Você consegue dizer em qual etapa uma declaração perdeu?</td></tr>
+    <tr><td>Especificidade</td><td>Comparou ID–classe–tipo sem converter colunas?</td></tr>
+    <tr><td>Herança</td><td>O valor veio do pai ou venceu diretamente no elemento?</td></tr>
+    <tr><td>Seletor complexo</td><td>A relação é contrato do HTML ou acidente de wrappers?</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — fechamento (5 min)</span>
+  <p>Projetar duas regras e pedir quatro respostas: relevância, precedência, peso e
+  ordem. Anunciar A5: pseudo-classes e pseudo-elementos acrescentam estado e partes
+  geradas — e entram exatamente nessas colunas de especificidade.</p>
+</div>
+
+<hr>
+
+<h2>Leitura primária</h2>
+
+<p>Leia <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction"><strong>MDN — Introduction to the CSS cascade</strong></a>
+até “Cascading order” e use a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Specificity"><strong>referência de especificidade</strong></a>
+para calcular três seletores do seu projeto. Leve os cálculos para a A5.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o elemento,
+a propriedade e as regras que competem. “Meu CSS não pega” fica solucionável quando a
+disputa ganha nomes.</p>
+
+<nav class="aula-nav">
+  <a href="0003-progressive-enhancement-e-retrocompatibilidade.html">← A3 — Progressive enhancement</a>
+  <a href="0005-pseudo-classes-e-pseudo-elementos.html">A5 — Pseudo-classes e pseudo-elementos →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

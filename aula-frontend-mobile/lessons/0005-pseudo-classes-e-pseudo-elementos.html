@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A5 — Pseudo-classes e pseudo-elementos</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 5 de 22 · 3h · CSS3 — pseudo-classes e pseudo-elementos</p>
+
+<h1>Pseudo-classes<br>e pseudo-elementos</h1>
+
+<p class="deck">Uma classe escrita no HTML nomeia algo. Uma pseudo-classe seleciona
+um estado ou uma relação que já existe; um pseudo-elemento seleciona uma parte ou cria
+uma caixa que não exige marcação extra. Hoje a turma estiliza interação sem esconder
+foco e acrescenta decoração sem transformar CSS em fonte de conteúdo.</p>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — retomada (15 min)</span>
+  <p>Sem consulta: calcular <code>.card h2</code>, <code>#app h2</code> e
+  <code>:where(.card) h2</code>; explicar quando a ordem resolve empate; dizer se
+  <code>color</code> no filho venceu ou foi herdado. Intercalar A2: por que um título
+  visual feito com <code>div</code> continua sem papel de título?</p>
+  <p>Fechar lembrando as colunas: pseudo-classe pesa como classe; pseudo-elemento pesa
+  como tipo. Essa frase será testada antes do intervalo.</p>
+</div>
+
+<div class="quiz" data-explica="Pseudo-classes entram na coluna de classes; pseudo-elementos entram na coluna de tipos. :where() e seus argumentos são a exceção de peso zero.">
+  <p class="quiz-q">Qual seletor tem especificidade 0–1–1?</p>
+  <ul class="quiz-opts">
+    <li><code>::before</code></li>
+    <li data-correta="sim"><code>a:hover</code></li>
+    <li><code>:where(a:hover)</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. Um ou dois pontos mudam a pergunta</h2>
+
+<div class="versus">
+  <div class="good">
+    <h4>Pseudo-classe · <code>:</code></h4>
+    <p>Seleciona o elemento por estado, posição, histórico ou relação.</p>
+<pre><code>button:hover { … }
+input:checked { … }
+li:nth-child(odd) { … }</code></pre>
+  </div>
+  <div class="good">
+    <h4>Pseudo-elemento · <code>::</code></h4>
+    <p>Seleciona uma parte do elemento ou uma caixa gerada.</p>
+<pre><code>p::first-line { … }
+li::marker { … }
+.aviso::before { … }</code></pre>
+  </div>
+</div>
+
+<p>Em CSS moderno, pseudo-elementos usam dois pontos duplos. Navegadores ainda aceitam
+a forma antiga de um ponto para <code>:before</code> e <code>:after</code>, mas escrever
+<code>::before</code> deixa explícito que não estamos selecionando um estado.</p>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/Pseudo-classes">MDN — Pseudo-classes</a></p>
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/Pseudo-elements">MDN — Pseudo-elements</a></p>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — exposição 1 (40 min)</span>
+  <p>Escrever no quadro “qual elemento?”, “em qual estado?” e “qual parte?”. Para cada
+  seletor mostrado, a turma precisa responder às três perguntas antes de ver a tela.</p>
+  <p>Não apresentar catálogo inteiro. Organizar por necessidade: interação, formulário,
+  posição estrutural e partes geradas. A lista completa fica na referência MDN.</p>
+</div>
+
+<h2>2. Interação não é sinônimo de hover</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Estado</th><th>Quando corresponde</th><th>Cuidado</th></tr></thead>
+  <tbody>
+    <tr><td><code>:hover</code></td><td>O ponteiro designa o elemento.</td><td>Toque pode não ter hover ou mantê-lo de forma diferente.</td></tr>
+    <tr><td><code>:active</code></td><td>Durante a ativação.</td><td>É momentâneo; não significa “item atual”.</td></tr>
+    <tr><td><code>:focus</code></td><td>O elemento possui foco.</td><td>Corresponde independentemente de como o foco chegou.</td></tr>
+    <tr><td><code>:focus-visible</code></td><td>O agente entende que o foco deve ser evidenciado.</td><td>Use para personalizar, nunca para eliminar a indicação.</td></tr>
+    <tr><td><code>:focus-within</code></td><td>O elemento ou um descendente possui foco.</td><td>Útil para destacar um grupo de formulário.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code>.botao:hover { background: #154b57; }
+.botao:active { transform: translateY(1px); }
+.botao:focus-visible {
+  outline: 3px solid #e1a43a;
+  outline-offset: 3px;
+}</code></pre>
+
+<div class="callout">
+  <span class="callout-title">Regra de sobrevivência</span>
+  <p>Se uma informação ou ação aparece somente em <code>:hover</code>, ela não tem rota
+  garantida por teclado ou toque. Hover pode melhorar uma pista; não pode ser a única
+  porta para a tarefa.</p>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:focus-visible">MDN — :focus-visible</a></p>
+
+<div class="atelier" data-modo="demo" data-titulo="Mouse, teclado e foco dentro" data-vp="390">
+<template data-papel="css">
+  .campo { padding: 1rem; border: 2px solid #cbc5b9; border-radius: .5rem; }
+  .campo:focus-within { border-color: #1d6373; background: #eef6f7; }
+  label { display: block; font-weight: 650; }
+  input { width: 100%; margin-top: .4rem; padding: .7rem; border: 1px solid #777; }
+  input:focus-visible { outline: 3px solid #e1a43a; outline-offset: 2px; }
+  button { margin-top: 1rem; padding: .7rem 1rem; border: 0; background: #1d6373; color: white; }
+  button:hover { background: #154b57; }
+  button:active { transform: translateY(1px); }
+  button:focus-visible { outline: 3px solid #e1a43a; outline-offset: 3px; }
+</template>
+<template data-papel="html">
+  <form><div class="campo"><label for="email">E-mail</label><input id="email" type="email" required></div><button>Continuar</button></form>
+</template>
+</div>
+
+<p><strong>Teste:</strong> clique, use <kbd>Tab</kbd> e mantenha o foco no campo. São
+três estados diferentes. A borda do grupo vem de <code>:focus-within</code>; o anel do
+controle vem de <code>:focus-visible</code>.</p>
+
+<h2>3. Corrija os estados sem apagar o navegador</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a5-ex1-estados" data-titulo="Devolva o foco e o toque" data-vp="390">
+<p data-papel="enunciado">
+  O link só parece interativo com mouse e todo foco foi removido. Preserve o estilo de
+  hover, acrescente uma indicação equivalente para teclado e um retorno durante a
+  ativação. Não use <code>outline: none</code> em nenhum estado.
+</p>
+<template data-papel="css">
+  .acao {
+    display: inline-block;
+    padding: .75rem 1rem;
+    color: #1d6373;
+    border: 2px solid currentColor;
+    border-radius: .4rem;
+    text-decoration: none;
+  }
+
+  .acao:hover { color: white; background: #1d6373; }
+  .acao:focus { outline: none; }
+</template>
+<template data-papel="html">
+  <a class="acao" href="#destino">Conhecer o projeto</a>
+  <p id="destino">Destino do link.</p>
+</template>
+<template data-papel="solucao">
+  .acao {
+    display: inline-block;
+    padding: .75rem 1rem;
+    color: #1d6373;
+    border: 2px solid currentColor;
+    border-radius: .4rem;
+    text-decoration: none;
+  }
+
+  .acao:hover { color: white; background: #1d6373; }
+  .acao:active { transform: translateY(1px); }
+  .acao:focus-visible { outline: 3px solid #e1a43a; outline-offset: 3px; }
+</template>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — prática 1 (30 min)</span>
+  <p>8 min individual, 7 min testando a solução do colega só com teclado, 10 min
+  projetando duas respostas, 5 min síntese. O critério é localizar o foco em fundo
+  claro e escuro, não copiar exatamente cor e espessura do gabarito.</p>
+  <p>Intervalo de 15 min. Deixar o exercício com o anel visível na projeção.</p>
+</div>
+
+<h2>4. Estado estrutural e estado de formulário</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Pseudo-classe</th><th>Seleciona</th><th>Exemplo</th></tr></thead>
+  <tbody>
+    <tr><td><code>:first-child</code></td><td>Primeiro elemento entre irmãos.</td><td>Retirar a borda inicial de uma lista.</td></tr>
+    <tr><td><code>:nth-child(2n)</code></td><td>Irmãos nas posições pares.</td><td>Faixas alternadas em tabela.</td></tr>
+    <tr><td><code>:checked</code></td><td>Checkbox ou radio marcado.</td><td>Destacar a opção escolhida.</td></tr>
+    <tr><td><code>:required</code></td><td>Controle com requisito nativo.</td><td>Indicar campo obrigatório sem classe duplicada.</td></tr>
+    <tr><td><code>:user-invalid</code></td><td>Controle inválido após interação do usuário.</td><td>Evitar pintar o formulário inteiro antes da tentativa.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>:nth-child()</code> conta elementos entre todos os irmãos; o filtro opcional
+<code>of &lt;selector&gt;</code> pode limitar o conjunto. Não escolha <code>:nth-child</code>
+por aparência de uma lista que pode receber itens de outro tipo sem conferir a árvore.</p>
+
+<div class="quiz" data-explica=":checked representa um estado nativo do controle. A apresentação pode reagir a ele sem duplicar o mesmo estado numa classe inventada.">
+  <p class="quiz-q">Qual seletor acompanha diretamente o estado de um checkbox?</p>
+  <ul class="quiz-opts">
+    <li><code>.checkbox-clicado</code></li>
+    <li data-correta="sim"><code>input:checked</code></li>
+    <li><code>input::checked</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>5. Pseudo-elemento não substitui conteúdo</h2>
+
+<p><code>::before</code> e <code>::after</code> criam caixas como primeiro ou último
+filho do elemento de origem quando <code>content</code> gera algo. São excelentes para
+decoração. Texto essencial criado apenas no CSS não é confiável: pode desaparecer sem
+a folha e não é exposto de forma consistente por leitores de tela.</p>
+
+<div class="versus">
+  <div class="bad">
+    <h4>Informação só no CSS</h4>
+<pre><code>.preco::before {
+  content: "Promoção: ";
+}</code></pre>
+    <p>Sem CSS, a condição comercial some do documento.</p>
+  </div>
+  <div class="good">
+    <h4>Conteúdo no HTML, ornamento no CSS</h4>
+<pre><code>.preco::before {
+  content: "";
+  inline-size: .6rem;
+  block-size: .6rem;
+  background: currentColor;
+}</code></pre>
+    <p>A palavra “Promoção” continua no HTML; a caixa é apenas decoração.</p>
+  </div>
+</div>
+
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::before">MDN — ::before</a></p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Pseudo-elemento</th><th>Parte selecionada</th></tr></thead>
+  <tbody>
+    <tr><td><code>::first-line</code></td><td>Primeira linha formatada de um bloco.</td></tr>
+    <tr><td><code>::first-letter</code></td><td>Primeira letra segundo as regras tipográficas.</td></tr>
+    <tr><td><code>::marker</code></td><td>Marcador de item de lista.</td></tr>
+    <tr><td><code>::selection</code></td><td>Trecho selecionado pelo usuário.</td></tr>
+    <tr><td><code>::placeholder</code></td><td>Texto de placeholder do controle.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>6. Audite estados e conteúdo gerado</h2>
+
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a5-auditoria-estados" data-titulo="Uma IA deixou a interface elegante" data-vp="390">
+<p data-papel="enunciado">
+  Pediram: <em>“melhore os estados e reduza HTML desnecessário”</em>. O resultado parece
+  limpo. Marque somente problemas reais; há usos corretos de pseudo-classes e
+  pseudo-elementos.
+</p>
+<template data-papel="css">
+  a { color: #292722; text-decoration: none; }
+  a:hover { color: #9c2f22; text-decoration: underline; }
+  a:focus { outline: none; }
+
+  .preco::before { content: "Oferta válida hoje: "; font-weight: 700; }
+  .beneficios li::marker { color: #1d6373; }
+  .beneficios li:nth-child(odd) { background: #eeeae2; }
+
+  input:checked + label { font-weight: 700; color: #1d6373; }
+  .botao::after { content: ""; display: inline-block; inline-size: .5rem; block-size: .5rem; margin-left: .5rem; border: solid currentColor; border-width: 2px 2px 0 0; transform: rotate(45deg); }
+</template>
+<template data-papel="html">
+  <a href="#planos">Ver planos</a>
+  <p class="preco">R$ 49,90</p>
+  <ul class="beneficios"><li>Suporte</li><li>Relatórios</li><li>Exportação</li></ul>
+  <input id="anual" type="checkbox"><label for="anual">Plano anual</label>
+  <p><button class="botao">Continuar</button></p>
+  <div id="planos">Planos disponíveis.</div>
+</template>
+<ol data-papel="achados">
+  <li data-real="sim" data-explica="O link perde a pista visual na condição normal e só recupera distinção com ponteiro. Cor isolada não garante que ele seja reconhecido como link, e toque/teclado não dependem de hover.">
+    O link só ganha distinção clara no estado <code>:hover</code>.
+  </li>
+  <li data-real="sim" data-explica="outline:none remove a indicação sem fornecer substituta. Usuários de teclado podem perder a posição. O correto é preservar ou personalizar um foco visível.">
+    A regra de <code>:focus</code> elimina o indicador do navegador.
+  </li>
+  <li data-real="sim" data-explica="A condição da oferta altera o significado do preço e existe apenas em content. Sem CSS ela desaparece; conteúdo gerado também não é exposto de modo confiável por tecnologia assistiva.">
+    “Oferta válida hoje” é informação essencial criada apenas por <code>::before</code>.
+  </li>
+  <li data-real="nao" data-explica="::marker foi feito para estilizar o marcador da lista. A cor é decorativa; o texto de cada benefício continua no HTML.">
+    Colorir o marcador com <code>li::marker</code>.
+  </li>
+  <li data-real="nao" data-explica=":checked acompanha o estado nativo do checkbox e o combinador adjacente alcança seu label. O HTML continua contendo controle e rótulo reais.">
+    Destacar o rótulo com <code>input:checked + label</code>.
+  </li>
+  <li data-real="nao" data-explica="O pseudo-elemento do botão tem content vazio e desenha apenas uma seta. O texto Continuar está no HTML; perder a seta não remove a ação nem seu nome.">
+    Desenhar uma seta decorativa com <code>.botao::after</code> vazio.
+  </li>
+</ol>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — exposição 2 + auditoria (35 min)</span>
+  <p>15 min para estrutura/formulários e pseudo-elementos; 15 min de auditoria; 5 min
+  de debate. Não informar a divisão 3×3. Pedir sempre: “se o CSS não carregar, qual
+  informação ou operação desaparece?”.</p>
+  <p>Demonstrar o link com mouse, teclado e toque/emulação. Hover não é pecado; depender
+  exclusivamente dele é o defeito.</p>
+</div>
+
+<h2>7. Decore sem fabricar significado</h2>
+
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a5-ex2-pseudo-elementos" data-titulo="Separe conteúdo de ornamento" data-vp="390">
+<p data-papel="enunciado">
+  O CSS inventa os textos “Novo” e “Obrigatório”. Eles são essenciais e já foram
+  colocados no HTML abaixo. Remova os textos de <code>content</code> e use os
+  pseudo-elementos apenas para desenhar uma faixa e um marcador geométrico decorativos.
+</p>
+<template data-papel="css">
+  .produto::before { content: "Novo"; color: white; background: #9c2f22; padding: .2rem .4rem; }
+  .obrigatorio::after { content: " Obrigatório"; color: #9c2f22; }
+  .produto { padding: 1rem; border: 1px solid #cbc5b9; }
+</template>
+<template data-papel="html">
+  <article class="produto"><p><strong>Novo:</strong> Curso de CSS</p><p>Aprenda construindo.</p></article>
+  <p><label class="obrigatorio" for="nome">Nome <span>(obrigatório)</span></label><input id="nome" required></p>
+</template>
+<template data-papel="solucao">
+  .produto { position: relative; padding: 1rem; border: 1px solid #cbc5b9; }
+  .produto::before { content: ""; position: absolute; inset: 0 auto auto 0; inline-size: .45rem; block-size: 100%; background: #9c2f22; }
+  .obrigatorio::after { content: ""; display: inline-block; inline-size: .45rem; block-size: .45rem; margin-left: .35rem; background: #9c2f22; transform: rotate(45deg); }
+</template>
+</div>
+
+<h2>8. Aplique ao projeto integrador</h2>
+
+<ol>
+  <li>estilize links e botões em estado normal, hover, active e focus-visible;</li>
+  <li>use uma pseudo-classe estrutural onde a posição seja realmente o contrato;</li>
+  <li>use um pseudo-elemento apenas para detalhe que pode desaparecer sem perda;</li>
+  <li>navegue a home inteira com <kbd>Tab</kbd> e registre onde o foco aparece;</li>
+  <li>desative o CSS e confirme que rótulos, preços e estados essenciais continuam no HTML.</li>
+</ol>
+
+<div class="callout">
+  <span class="callout-title">Entrega da A5</span>
+  <p>Atualize <code>styles.css</code> com estados de interação e uma decoração gerada.
+  Em <code>COMPATIBILIDADE.md</code>, registre: “conteúdo que permaneceria se
+  <code>::before</code>/<code>::after</code> não existissem”. A resposta precisa ser todo
+  o significado da interface.</p>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — prática 2 / projeto (40 min)</span>
+  <p>15 min no exercício, 20 min no projeto e 5 min de teste cruzado. Um colega navega
+  só com teclado; o autor observa sem orientar. Trocar depois.</p>
+  <p>Se o aluno usar emoji ou palavra no <code>content</code>, perguntar se é ornamento ou
+  informação. Se for informação, mover para HTML; se for ornamento, testar sem ele.</p>
+</div>
+
+<h2>9. O que precisa ficar de pé</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Conceito</th><th>Teste rápido</th></tr></thead>
+  <tbody>
+    <tr><td>Pseudo-classe</td><td>Seleciona qual elemento em qual estado ou relação?</td></tr>
+    <tr><td>Foco</td><td>O usuário de teclado sempre enxerga onde está?</td></tr>
+    <tr><td>Pseudo-elemento</td><td>Seleciona qual parte ou caixa gerada?</td></tr>
+    <tr><td>Conteúdo</td><td>Sem CSS, todo significado permanece no documento?</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="nota">
+  <span class="nota-label">Roteiro — fechamento (5 min)</span>
+  <p>Pedir três respostas rápidas: um estado, uma relação estrutural e uma parte gerada.
+  Anunciar A6: unidades absolutas e relativas vão decidir se esses estados e detalhes
+  crescem com fonte, viewport ou componente.</p>
+</div>
+
+<hr>
+
+<h2>Leitura primária</h2>
+
+<p>Use os índices MDN de <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/Pseudo-classes"><strong>pseudo-classes</strong></a>
+e <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/Pseudo-elements"><strong>pseudo-elementos</strong></a>.
+Escolha um seletor usado no seu projeto, leia a seção de acessibilidade e confira sua
+compatibilidade antes de levá-lo à A6.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Diga o elemento,
+o estado e a modalidade de entrada. Uma interação que funciona com mouse ainda precisa
+responder o que acontece com teclado e toque.</p>
+
+<nav class="aula-nav">
+  <a href="0004-cascata-especificidade-heranca-e-seletores-complexos.html">← A4 — Cascata e especificidade</a>
+  <a href="0006-unidades-absolutas-e-relativas.html">A6 — Unidades de medida →</a>
+</nav>
+
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

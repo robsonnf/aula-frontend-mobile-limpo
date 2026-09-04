@@ -1,0 +1,17 @@
+{
+  "name": "aula-frontend-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Desenvolvimento Web Mobile — 22 aulas, 66h. Material de aula, exercícios e empacotamento das distribuições professor/aluno.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node scripts/servir.mjs",
+    "indice": "node scripts/indice.mjs",
+    "build": "npm run indice && node scripts/empacotar.mjs",
+    "limpar": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
+    "projeto": "node scripts/empacotar-projeto.mjs"
+  }
+}

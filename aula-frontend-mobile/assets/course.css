@@ -1,0 +1,364 @@
+/* ============================================================
+   course.css — folha compartilhada de todas as lessons e refs
+   Disciplina: Desenvolvimento Web Mobile (66h)
+
+   Dois modos, um arquivo:
+   <body class="lesson">    projeção ao vivo — tipo grande, muito ar
+   <body class="reference"> material do aluno — denso, imprime bem
+   ============================================================ */
+
+:root {
+  --ink:        #1a1a1a;
+  --ink-soft:   #55524c;
+  --ink-faint:  #8a857d;
+  --paper:      #fdfcf9;
+  --paper-sunk: #f3f0e9;
+  --rule:       #ddd8cd;
+  --accent:     #9c2f22;   /* vermelho terroso — destaque e "errado" */
+  --accent-2:   #1f5c4d;   /* verde escuro — "certo" */
+  --code-bg:    #f3f0e9;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Charter, Georgia, serif;
+  --sans:  ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --measure: 34rem;   /* medida de leitura confortável */
+
+  /* Paleta de tokens do editor. Curta de propósito: cor demais vira ruído
+     quando a turma olha de longe, projetado. */
+  --cm-prop: #2f6f9f;   /* propriedade CSS, atributo HTML */
+  --cm-num:  #9c5d1f;   /* número, unidade */
+  --cm-str:  #1f5c4d;   /* string */
+  --cm-key:  #7d3fa8;   /* palavra-chave, @media */
+  --cm-tag:  #9c2f22;   /* seletor, tag */
+  --cm-fn:   #1f5c4d;   /* função: repeat(), clamp() */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8e4dc; --ink-soft: #b3ada2; --ink-faint: #7e796f;
+    --paper: #161513; --paper-sunk: #201e1b; --rule: #34312c;
+    --accent: #e07a68; --accent-2: #6fbfa5; --code-bg: #1c1a18;
+
+    --cm-prop: #7fb2d8;
+    --cm-num:  #dba36a;
+    --cm-str:  #7fc4ac;
+    --cm-key:  #c39ae0;
+    --cm-tag:  #e58a78;
+    --cm-fn:   #7fc4ac;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- ritmo tipográfico ---------- */
+
+h1, h2, h3, h4 { font-family: var(--sans); font-weight: 650; line-height: 1.15; letter-spacing: -0.015em; }
+h1 { margin: 0 0 .3em; }
+h2 { margin: 2.4em 0 .6em; }
+h3 { margin: 1.8em 0 .4em; }
+p, ul, ol { max-width: var(--measure); }
+li { margin-bottom: .35em; }
+a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: .18em; }
+a:hover { color: var(--accent); }
+strong { font-weight: 650; }
+code { font-family: var(--mono); font-size: .88em; background: var(--code-bg); padding: .12em .35em; border-radius: 3px; }
+pre { background: var(--code-bg); padding: 1rem 1.15rem; border-radius: 6px; overflow-x: auto; border-left: 3px solid var(--rule); }
+pre code { background: none; padding: 0; font-size: .82em; line-height: 1.55; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
+
+/* ---------- modo lesson: projeção ---------- */
+
+body.lesson {
+  font-size: clamp(1.05rem, .9rem + .55vw, 1.28rem);
+  padding: clamp(1.5rem, 4vw, 4rem) clamp(1.2rem, 6vw, 6rem) 8rem;
+}
+body.lesson h1 { font-size: clamp(2rem, 1.2rem + 3.2vw, 4rem); }
+body.lesson h2 { font-size: clamp(1.4rem, 1rem + 1.6vw, 2.3rem); }
+body.lesson h3 { font-size: clamp(1.1rem, .95rem + .7vw, 1.5rem); }
+body.lesson { --measure: 30rem; }
+
+/* ---------- modo reference: consulta e impressão ---------- */
+
+body.reference {
+  font-size: 16px;
+  max-width: 52rem;
+  margin-inline: auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+body.reference h1 { font-size: 2rem; }
+body.reference h2 { font-size: 1.3rem; margin-top: 2rem; }
+body.reference h3 { font-size: 1.05rem; }
+body.reference { --measure: 100%; }
+
+/* ---------- cabeçalho de aula ---------- */
+
+.aula-tag {
+  font-family: var(--sans); font-size: .72em; font-weight: 650;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent); margin: 0 0 .8rem;
+}
+.deck { font-size: 1.15em; color: var(--ink-soft); font-style: italic; max-width: var(--measure); margin-bottom: 2.5rem; }
+
+/* ---------- tabelas ---------- */
+
+table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: .82em; margin: 1.5rem 0; }
+.table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+.table-wrap table { margin: 0; }
+th, td { text-align: left; padding: .55em .7em; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 650; color: var(--ink-soft); border-bottom-width: 2px; }
+
+/* ---------- blocos de destaque ---------- */
+
+.callout { border-left: 3px solid var(--accent); background: var(--paper-sunk); padding: 1rem 1.2rem; margin: 1.8rem 0; border-radius: 0 5px 5px 0; max-width: var(--measure); }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+.callout-title { font-family: var(--sans); font-weight: 650; font-size: .78em; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .4rem; }
+.callout.ok { border-left-color: var(--accent-2); }
+.callout.ok .callout-title { color: var(--accent-2); }
+
+/* certo × errado, lado a lado */
+.versus { display: grid; gap: 1rem; grid-template-columns: 1fr; margin: 1.8rem 0; }
+@media (min-width: 48rem) { .versus { grid-template-columns: 1fr 1fr; } }
+/* min-width:0 — sem isso o <pre> impõe a largura do conteúdo e o item de grid
+   se recusa a encolher, estourando a coluna. É a pegadinha clássica de grid,
+   e vira exemplo na A8. */
+.versus > div { border: 1px solid var(--rule); border-radius: 6px; padding: .9rem 1rem; min-width: 0; }
+.versus > div > :first-child { margin-top: 0; }
+.versus .bad  { border-top: 3px solid var(--accent); }
+.versus .good { border-top: 3px solid var(--accent-2); }
+.versus pre { font-size: .95em; padding: .8rem .9rem; }
+.versus pre code { font-size: .71em; }
+.versus h4 { font-size: .78em; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 .6rem; }
+.versus .bad  h4 { color: var(--accent); }
+.versus .good h4 { color: var(--accent-2); }
+
+/* ---------- fonte citada ---------- */
+
+.fonte { font-family: var(--sans); font-size: .74em; color: var(--ink-faint); margin-top: .5rem; }
+.fonte::before { content: "▸ "; }
+
+/* ---------- roteiro de fala (só o professor vê) ---------- */
+
+.nota {
+  display: none;
+  font-family: var(--sans); font-size: .8em; line-height: 1.5;
+  background: repeating-linear-gradient(45deg, var(--paper-sunk), var(--paper-sunk) 10px, transparent 10px, transparent 20px);
+  border: 1px dashed var(--ink-faint); border-radius: 6px;
+  padding: .9rem 1.1rem; margin: 1.2rem 0; color: var(--ink-soft); max-width: var(--measure);
+}
+body.notas-visiveis .nota { display: block; }
+.nota-label { font-weight: 650; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; font-size: .82em; }
+
+.notas-toggle {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
+  font-family: var(--sans); font-size: .72rem; letter-spacing: .06em;
+  background: var(--ink); color: var(--paper); border: 0;
+  padding: .5rem .8rem; border-radius: 999px; cursor: pointer; opacity: .35;
+}
+.notas-toggle:hover, .notas-toggle:focus-visible { opacity: 1; }
+
+/* ---------- quiz de recuperação ativa ---------- */
+
+.quiz { border: 1px solid var(--rule); border-radius: 8px; padding: 1.2rem 1.3rem; margin: 2rem 0; max-width: var(--measure); background: var(--paper-sunk); }
+.quiz-q { font-family: var(--sans); font-weight: 650; margin: 0 0 .9rem; }
+.quiz-opts { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.quiz-opts button {
+  width: 100%; text-align: left; font: inherit; font-family: var(--sans); font-size: .9em;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 5px; padding: .6rem .8rem; cursor: pointer;
+}
+.quiz-opts button:hover { border-color: var(--ink-faint); }
+.quiz-opts button[data-state="certo"]  { border-color: var(--accent-2); box-shadow: inset 3px 0 0 var(--accent-2); }
+.quiz-opts button[data-state="errado"] { border-color: var(--accent);   box-shadow: inset 3px 0 0 var(--accent); opacity: .65; }
+.quiz-opts button[data-state="selecionado"] { border-color: var(--ink); box-shadow: inset 3px 0 0 var(--ink); }
+.quiz-feedback { font-family: var(--sans); font-size: .85em; margin-top: .9rem; display: none; }
+.quiz-feedback.visivel { display: block; }
+
+/* ---------- navegação entre aulas ---------- */
+
+.aula-nav { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; font-family: var(--sans); font-size: .82em; border-top: 1px solid var(--rule); margin-top: 4rem; padding-top: 1.2rem; }
+.aula-nav a { color: var(--ink-soft); text-decoration: none; }
+.aula-nav a:hover { color: var(--accent); }
+
+/* ---------- rodapé de lesson ---------- */
+
+.pergunte { font-family: var(--sans); font-size: .85em; color: var(--ink-soft); border-left: 3px solid var(--ink-faint); padding-left: 1rem; margin: 3rem 0 0; max-width: var(--measure); }
+
+/* ---------- impressão ---------- */
+
+@media print {
+  :root { --paper: #fff; --ink: #000; --paper-sunk: #f4f4f4; --code-bg: #f4f4f4; --rule: #bbb; }
+  body { font-size: 10.5pt; }
+  .notas-toggle, .nota, .aula-nav { display: none !important; }
+  h2, h3 { break-after: avoid; }
+  pre, .callout, .quiz, table { break-inside: avoid; }
+  a::after { content: " (" attr(href) ")"; font-size: .78em; color: #555; word-break: break-all; }
+  a[href^="#"]::after { content: ""; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ============================================================
+   Casca de curso — montada por shell.js
+   Sem JS nada disto existe e a aula segue como documento simples.
+   ============================================================ */
+
+.pular-para {
+  position: absolute; left: -9999px;
+  background: var(--ink); color: var(--paper);
+  padding: .6rem 1rem; border-radius: 0 0 6px 0; z-index: 100;
+  font-family: var(--sans); font-size: .85rem;
+}
+.pular-para:focus { left: 0; top: 0; }
+
+.curso-app { display: block; }
+
+@media (min-width: 64rem) {
+  .curso-app {
+    display: grid;
+    grid-template-columns: 18rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* --- lateral --- */
+
+.curso-lateral {
+  font-family: var(--sans);
+  border-bottom: 1px solid var(--rule);
+  padding: 1.5rem 1.2rem 2rem;
+  background: var(--paper-sunk);
+}
+@media (min-width: 64rem) {
+  .curso-lateral {
+    position: sticky; top: 0; height: 100dvh; overflow-y: auto;
+    border-bottom: 0; border-right: 1px solid var(--rule);
+    padding: 2rem 1.2rem 3rem;
+  }
+}
+
+.lateral-topo { margin-bottom: 1.5rem; }
+.lateral-curso { font-size: .92rem; font-weight: 700; margin: 0; line-height: 1.25; max-width: none; }
+.lateral-carga { font-size: .74rem; color: var(--ink-faint); margin: .25rem 0 0; max-width: none; }
+
+.lateral-aulas { list-style: none; margin: 0; padding: 0; max-width: none; }
+
+.lateral-bloco {
+  font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-faint); margin: 1.4rem 0 .5rem; padding-bottom: .3rem;
+  border-bottom: 1px solid var(--rule);
+}
+.lateral-bloco:first-child { margin-top: 0; }
+
+.lateral-aula {
+  display: grid; grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: .1rem .4rem; align-items: baseline;
+  margin-bottom: .55rem; font-size: .82rem; line-height: 1.35;
+}
+.lateral-num { font-size: .68rem; font-weight: 700; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.lateral-titulo { color: var(--ink-soft); text-decoration: none; }
+a.lateral-titulo:hover { color: var(--accent); text-decoration: underline; text-underline-offset: .15em; }
+.lateral-aula.indisponivel .lateral-titulo { color: var(--ink-faint); opacity: .55; }
+.lateral-aula.indisponivel .lateral-num { opacity: .55; }
+.lateral-aula.e-atual .lateral-num { color: var(--accent); }
+.lateral-aula.e-atual .lateral-titulo { color: var(--ink); font-weight: 650; }
+
+.lateral-secoes {
+  grid-column: 2; list-style: none; margin: .5rem 0 .3rem; padding: 0 0 0 .1rem;
+  border-left: 2px solid var(--rule); max-width: none;
+}
+.lateral-secoes li { margin: 0; }
+.lateral-secoes a {
+  display: block; padding: .22rem 0 .22rem .6rem; margin-left: -2px;
+  border-left: 2px solid transparent;
+  font-size: .76rem; color: var(--ink-faint); text-decoration: none; line-height: 1.3;
+}
+.lateral-secoes a:hover { color: var(--ink-soft); }
+.lateral-secoes a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+
+/* --- gaveta no celular --- */
+
+.lateral-botao {
+  display: block; width: 100%;
+  font-family: var(--sans); font-size: .82rem; font-weight: 650; text-align: left;
+  background: var(--paper-sunk); color: var(--ink);
+  border: 0; border-bottom: 1px solid var(--rule);
+  padding: .8rem 1.2rem; cursor: pointer;
+}
+@media (max-width: 63.99rem) {
+  .curso-lateral { display: none; }
+  body.lateral-aberta .curso-lateral { display: block; }
+}
+@media (min-width: 64rem) {
+  .lateral-botao { display: none; }
+}
+
+/* --- conteúdo --- */
+
+.curso-conteudo {
+  /* Duas larguras, uma borda esquerda.
+     A prosa fica na medida legível (~70 caracteres); exercício, comparação e
+     tabela crescem até o fim da tela. Como TUDO é ancorado à esquerda e nada é
+     centralizado, os dois grupos compartilham a mesma borda — a diferença de
+     largura lê como intenção, não como bloco solto flutuando.
+     Centralizar era o que criava duas bordas esquerdas diferentes. */
+  --col-texto: 46rem;
+  --col-larga: min(100%, 92rem);
+
+  min-width: 0;
+  padding: clamp(1.5rem, 3vw, 3.5rem) clamp(1.2rem, 4vw, 3.5rem) 8rem;
+}
+
+body.lesson:has(.curso-app) { --measure: 100%; padding: 0; }
+
+/* margin-inline: 0 é o ponto todo — sem isso o auto centraliza e a borda
+   esquerda se desalinha entre um bloco e o seguinte. */
+.curso-conteudo > * {
+  margin-inline: 0;
+  max-width: var(--col-texto);
+}
+
+.curso-conteudo > .atelier,
+.curso-conteudo > .versus,
+.curso-conteudo > .table-wrap { max-width: var(--col-larga); }
+
+/* --- modo apresentação (tecla P) --- */
+
+body.modo-apresentacao .curso-lateral,
+body.modo-apresentacao .lateral-botao { display: none; }
+body.modo-apresentacao .curso-app { grid-template-columns: minmax(0, 1fr); }
+body.modo-apresentacao { font-size: clamp(1.2rem, .95rem + .9vw, 1.75rem); }
+body.modo-apresentacao .curso-conteudo {
+  --col-texto: 54rem;
+  --col-larga: 100%;
+  padding-inline: clamp(1.5rem, 5vw, 5rem);
+}
+
+/* Empilhada acima do botão de roteiro, à direita: à esquerda ela cobria o fim
+   da lista de aulas na lateral. */
+.modo-dica {
+  position: fixed; right: 1rem; bottom: 2.9rem; z-index: 50;
+  text-align: right;
+  font-family: var(--sans); font-size: .68rem; letter-spacing: .06em;
+  color: var(--ink-faint); pointer-events: none;
+}
+
+@media print {
+  .curso-lateral, .lateral-botao, .pular-para, .modo-dica { display: none !important; }
+  .curso-app { display: block; }
+  .curso-conteudo { padding: 0; }
+}
