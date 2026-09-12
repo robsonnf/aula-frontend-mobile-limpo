@@ -40,7 +40,7 @@ no fim.
 
 ## As 22 aulas
 
-`bin/atualizar-indice.py` lê esta tabela e gera `assets/aulas.js`, que alimenta a
+`scripts/indice.mjs` lê esta tabela e gera `assets/aulas.js`, que alimenta a
 navegação lateral de todas as lessons. **Esta tabela é a fonte da verdade da grade** —
 mexeu aqui, roda o script.
 

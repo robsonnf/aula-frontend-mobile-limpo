@@ -283,3 +283,7 @@
   font-family: var(--mono); max-width: none;
 }
 .at-achados-placar.registrado { color: var(--selection); font-weight: 650; }
+
+.at-dica { padding: .8rem 1rem; border-block-end: 1px solid var(--rule); font-family: var(--sans); font-size: .9rem; }
+.at-dica summary { cursor: pointer; color: var(--selection); font-weight: 650; }
+.at-dica-texto { margin-block-start: .65rem; max-width: var(--measure); }

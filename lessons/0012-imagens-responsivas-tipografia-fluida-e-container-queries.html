@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A12 — Imagens responsivas, tipografia fluida e container queries</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 12 de 22 · 3h · Responsividade — técnicas</p>
+<h1>Imagens responsivas,<br>tipografia fluida<br>e container queries</h1>
+<p class="deck">A janela não é a única medida. Uma imagem precisa de uma fonte
+adequada, um título deve crescer sem bloquear a leitura e um componente deve responder
+ao espaço que recebe. Hoje fechamos a fase sem framework do projeto integrador.</p>
+
+<div class="quiz">
+  <p class="quiz-q">Aplicar max-inline-size: 100% numa imagem de vários megabytes resolve o quê?</p>
+  <ul class="quiz-opts">
+    <li>Reduz necessariamente o tamanho do download</li>
+    <li>Limita a caixa visual, mas não comprime o arquivo baixado</li>
+    <li>Gera automaticamente versões menores do arquivo</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. Separe caixa visual, recurso e significado</h2>
+<p>CSS evita que a imagem ultrapasse a caixa disponível. O HTML oferece candidatos de
+recurso. Texto alternativo comunica o significado quando a imagem não é percebida.
+Nenhuma dessas responsabilidades substitui as outras.</p>
+<pre><code>img { display: block; max-inline-size: 100%; block-size: auto; }
+/* No HTML: width e height descrevem as dimensões/proporção intrínsecas. */</code></pre>
+<p>Os atributos <code>width</code> e <code>height</code> permitem reservar a proporção
+antes do carregamento. CSS fluido pode mudar o tamanho renderizado mantendo essa
+proporção. <code>object-fit: cover</code> pode recortar quando a caixa impõe outra
+proporção; não significa “mostrar a imagem inteira”.</p>
+<p>Use <code>alt</code> conforme o contexto. Imagem informativa recebe descrição útil;
+puramente decorativa recebe <code>alt=""</code>. Uma legenda não torna o atributo
+automaticamente dispensável.</p>
+
+<h2>2. <code>srcset</code> oferece candidatos; <code>sizes</code> descreve o slot</h2>
+<p>Com descritores <code>w</code>, cada número informa a largura intrínseca real do
+arquivo. <code>sizes</code> estima a largura que a imagem ocupará no layout, em pixels
+CSS. As condições são avaliadas em ordem: a primeira correspondente fornece o tamanho;
+o último valor funciona como fallback.</p>
+<pre><code>&lt;img src="paisagem-960.jpg"
+     srcset="paisagem-480.jpg 480w, paisagem-960.jpg 960w, paisagem-1440.jpg 1440w"
+     sizes="(min-width: 48rem) 48rem, 100vw"
+     width="960" height="640" alt="Descrição contextual"&gt;</code></pre>
+<p>Neste exemplo, o CSS deve realmente limitar o slot a 48rem e usar a janela inteira
+abaixo disso. <code>sizes</code> não aplica esse layout: ele precisa concordar com o CSS.</p>
+<p>O navegador escolhe considerando o slot, a densidade da tela e suas políticas de
+carregamento/cache. Não há promessa de baixar sempre o menor arquivo nem de trocar por
+um menor ao encolher a janela. Inspecione <code>currentSrc</code>, a rede e a caixa
+renderizada; para comparar downloads, faça uma nova carga com cache desativado.</p>
+<p>Para uma imagem de tamanho CSS fixo, candidatos <code>1x</code> e <code>2x</code>
+representam densidades. Não misture descritores <code>w</code> e <code>x</code> no mesmo
+conjunto. <code>sizes</code> se relaciona ao conjunto com descritores <code>w</code>.</p>
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images">MDN — imagens responsivas</a></p>
+
+<h2>3. Exercício: fonte adequada para uma caixa fluida</h2>
+<div class="atelier" data-modo="exercicio" data-edita="html"
+     data-id="a12-ex1-imagens" data-titulo="Candidatos, slot e proporção" data-vp="390">
+<p data-papel="enunciado">A hero ocupa 100% da janela até 48rem e fica limitada a
+48rem depois. Acrescente os candidatos locais <code>a12-paisagem-480.svg</code> (480×320),
+<code>a12-paisagem-960.svg</code> (960×640) e <code>a12-paisagem-1440.svg</code> (1440×960),
+todos dentro de <code>../assets/</code>. Declare larguras reais, sizes coerente e
+dimensões intrínsecas. Preserve o texto alternativo e a fonte de fallback.</p>
+<p data-papel="dica">Separe três perguntas: quais larguras os arquivos realmente têm,
+quanto espaço o CSS oferece e qual proporção precisa ser reservada? Compare o slot
+antes e depois de 48rem. A lista de candidatos não muda o CSS da caixa.</p>
+<template data-papel="css">
+  body { margin: 0; }
+  .hero { margin: 0; max-inline-size: 48rem; }
+  .hero img { display: block; inline-size: 100%; block-size: auto; }
+</template>
+<template data-papel="html">
+  <figure class="hero">
+    <img src="../assets/a12-paisagem-960.svg" alt="Ilustração de montanhas ao redor de um lago">
+    <figcaption>Paisagem em três tamanhos intrínsecos.</figcaption>
+  </figure>
+</template>
+</div>
+
+<h2>4. <code>picture</code>: direção de arte e formatos</h2>
+<p>Quando o enquadramento deve mudar, use <code>picture</code>. Cada
+<code>source</code> pode oferecer um conjunto condicionado por <code>media</code> ou
+<code>type</code>. O <code>img</code> final é obrigatório: contém o texto alternativo e
+o fallback. Não coloque <code>alt</code> em <code>source</code>.</p>
+<div class="atelier" data-modo="demo" data-titulo="Mudar o enquadramento, não apenas o tamanho" data-vp="390">
+<template data-papel="css">
+  body { margin: 0; }
+  img { display: block; inline-size: 100%; max-inline-size: 48rem; block-size: auto; }
+</template>
+<template data-papel="html">
+  <picture>
+    <source media="(max-width: 35rem)" srcset="../assets/a12-detalhe-640.svg" width="640" height="640">
+    <img src="../assets/a12-paisagem-960.svg" width="960" height="640" alt="Ilustração de um lago entre montanhas, com foco no lago na composição estreita">
+  </picture>
+</template>
+</div>
+<p>O recorte estreito acima tem proporção diferente: as dimensões no
+<code>source</code> descrevem esse recurso. Os SVGs locais são esquemas didáticos
+leves, utilizáveis offline; não demonstram ganho de compressão de uma fotografia.
+No projeto, exporte e meça versões raster reais quando o conteúdo for fotográfico.</p>
+<p>Para formatos, uma sequência comum é <code>source type="image/avif"</code>, depois
+WebP e, no <code>img</code>, um fallback adequado. Arquivos e MIME devem corresponder.
+Use <code>loading="lazy"</code> para imagens fora da área inicial quando apropriado;
+não adie automaticamente a imagem principal que precisa aparecer de imediato.</p>
+
+<h2>5. Tipografia fluida com limites e leitura</h2>
+<p><code>clamp(mínimo, preferido, máximo)</code> limita um valor fluido. Aqui o título
+combina uma parcela relativa à raiz com outra relativa ao viewport:</p>
+<pre><code>h1 { font-size: 2rem; /* fallback */
+     font-size: clamp(2rem, 1.5rem + 2vw, 3.5rem); }
+p { max-inline-size: 65ch; line-height: 1.6; }</code></pre>
+<p><code>ch</code> se baseia na medida de avanço do glifo “0”, não numa contagem exata
+de letras. <code>line-height</code> sem unidade escala com a fonte do elemento.
+Evite alturas rígidas e recortes que impeçam o texto ampliado de caber.</p>
+<p>Usar <code>rem</code> junto de <code>vw</code> ajuda a considerar a preferência de
+fonte, mas não certifica acessibilidade. Teste aumento de texto até 200%, zoom e
+refluxo sem perda de conteúdo/funcionalidade; valores baseados em viewport podem
+compensar parte do crescimento sob zoom. Se necessário, ajuste a fórmula ou use
+tamanhos relativos sem a parcela de viewport.</p>
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a12-ex2-tipografia" data-titulo="Crescer sem recortar" data-vp="390">
+<p data-papel="enunciado">Substitua o título de 8vw por clamp com mínimo 2rem,
+preferido 1.5rem + 2vw e máximo 3.5rem, mantendo fallback de 2rem. Remova a altura
+rígida e o recorte do artigo. Limite o parágrafo a 65ch e use entrelinha 1.6 sem unidade.</p>
+<p data-papel="dica">Teste o título nos extremos da janela e o parágrafo com texto
+extra. Que regra esconde o conteúdo em vez de permitir que a caixa cresça? Observe
+se os limites da fonte e a entrelinha acompanham o tamanho do texto.</p>
+<template data-papel="css">
+  article { block-size: 8rem; overflow: hidden; padding: 1rem; border: 1px solid #777; }
+  h1 { font-size: 8vw; }
+  p { line-height: 20px; }
+</template>
+<template data-papel="html">
+  <article><h1>Uma leitura que acompanha o espaço</h1><p>Responsividade também significa manter toda a mensagem visível quando a fonte cresce, quando a janela encolhe e quando o conteúdo real é maior do que o previsto.</p></article>
+</template>
+</div>
+
+<h2>6. A query pertence ao espaço do componente</h2>
+<p>Media query observa o ambiente; size container query observa o tamanho de um
+ancestral elegível. Declare um wrapper com <code>container-type: inline-size</code>.
+Em escrita horizontal, inline-size corresponde à largura. Um nome permite escolher
+o contexto desejado quando existem containers aninhados.</p>
+<pre><code>.slot { container: ficha / inline-size; }
+.ficha { display: grid; gap: 1rem; }
+@container ficha (min-width: 30rem) {
+  .ficha { grid-template-columns: 1fr 2fr; }
+}</code></pre>
+<p>A query de tamanho não permite ao container consultar o próprio tamanho para
+estilizar a si mesmo: o elemento estilizado procura um ancestral elegível. Separe
+<code>.slot</code> e <code>.ficha</code>. Contenção de tamanho afeta dimensionamento;
+evite <code>container-type: size</code> sem entender também a dimensão de bloco.</p>
+<div class="atelier" data-modo="demo" data-titulo="Mesmo viewport, dois contextos diferentes" data-vp="1000">
+<template data-papel="css">
+  .contextos { display: grid; gap: 1rem; }
+  @media (min-width: 55rem) { .contextos { grid-template-columns: 16rem minmax(0, 1fr); } }
+  .slot { container: ficha / inline-size; min-inline-size: 0; }
+  .ficha { display: grid; gap: 1rem; padding: 1rem; border: 2px solid #1769aa; }
+  .ficha h3 { margin: 0; font-size: 1.25rem; }
+  .selo { padding: 1rem; background: #deebf5; color: #123; }
+  @container ficha (min-width: 30rem) { .ficha { grid-template-columns: 1fr 2fr; } }
+</template>
+<template data-papel="html">
+  <div class="contextos">
+    <div class="slot"><article class="ficha"><div class="selo">Imagem</div><div><h3>Na lateral</h3><p>O wrapper é estreito mesmo com janela larga.</p></div></article></div>
+    <div class="slot"><article class="ficha"><div class="selo">Imagem</div><div><h3>No conteúdo</h3><p>O mesmo componente ganha outro arranjo quando seu wrapper permite.</p></div></article></div>
+  </div>
+</template>
+</div>
+<p><code>1cqi</code> equivale a 1% do inline-size do container elegível para esse eixo.
+Sem container elegível, a unidade usa a unidade de viewport pequeno correspondente,
+não zero. Não confunda esse fallback com a condição <code>@container</code> funcionando.</p>
+<p>Use base legível fora da query. A melhoria pode ficar em
+<code>@supports (container-type: inline-size)</code>. Uma media query baseada na
+janela não é equivalente automática a uma query do componente.</p>
+<p class="fonte"><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries">MDN — container queries</a></p>
+<div class="quiz">
+  <p class="quiz-q">A mesma ficha está na lateral e no conteúdo principal. O que deve orientar seu arranjo interno?</p>
+  <ul class="quiz-opts">
+    <li>A marca do aparelho</li>
+    <li>Uma largura fixa global para todas as fichas</li>
+    <li>O tamanho de um ancestral elegível de cada ficha</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>7. Auditoria: técnica moderna não é prova de correção</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css"
+     data-id="a12-auditoria-tecnicas" data-titulo="A IA tornou tudo responsivo?" data-vp="390">
+<p data-papel="enunciado">A ficha deve caber no wrapper, mostrar todo o texto com
+fonte ampliada e ganhar duas colunas quando seu wrapper alcançar 30rem. Não há outro
+container ancestral. Investigue as afirmações e marque somente problemas reais.</p>
+<p data-papel="dica">Compare separadamente imagem, texto e contexto de consulta.
+Procure evidências: a regra limita a caixa ou a deixa transbordar? O ancestral tem
+o tipo de contenção necessário? O texto permanece completo? Uma unidade moderna,
+por si só, não garante nem invalida o resultado.</p>
+<template data-papel="css">
+  .slot { container-name: ficha; }
+  .ficha { display: grid; gap: 1rem; block-size: 9rem; overflow: hidden; }
+  .foto { inline-size: 960px; max-inline-size: none; block-size: auto; }
+  h2 { font-size: 6vw; }
+  p { max-inline-size: 65ch; line-height: 1.6; }
+  @container ficha (min-width: 30rem) { .ficha { grid-template-columns: 1fr 2fr; } }
+</template>
+<template data-papel="html">
+  <div class="slot"><article class="ficha"><img class="foto" src="../assets/a12-paisagem-960.svg" width="960" height="640" alt="Ilustração de montanhas e um lago"><div><h2>Responsividade além da janela</h2><p>Este texto deve continuar completo quando o usuário ampliar a fonte e quando a ficha for reutilizada numa lateral estreita.</p></div></article></div>
+</template>
+<ol data-papel="achados">
+  <li>A largura rígida da foto pode ultrapassar o wrapper.</li>
+  <li>A altura automática da foto deveria ser substituída por um valor fixo.</li>
+  <li>Nomear o wrapper, sem tipar a contenção, não basta para a size query.</li>
+  <li>A query deveria estilizar o próprio wrapper em vez da ficha descendente.</li>
+  <li>O título apenas em vw exige revisão para leitura com fonte ampliada.</li>
+  <li>line-height sem unidade é inválido.</li>
+  <li>Altura rígida com recorte ameaça a integridade do conteúdo.</li>
+  <li>Limitar o parágrafo em ch é um erro por não usar pixels.</li>
+</ol>
+</div>
+
+<h2>8. Exercício: um componente, dois espaços</h2>
+<div class="atelier" data-modo="exercicio" data-edita="css"
+     data-id="a12-ex3-container" data-titulo="O wrapper decide" data-vp="1000">
+<p data-papel="enunciado">Mantenha a composição externa. Remova a media query que
+torna todas as fichas horizontais. Crie um container nomeado ficha de inline-size em
+cada slot. Preserve a base de uma coluna e use duas colunas 1fr/2fr somente quando o
+wrapper atingir 30rem. Aplique ao h3 fallback 1.25rem e clamp(1.25rem, 1rem + 1cqi, 2rem).</p>
+<p data-papel="dica">Compare as duas fichas sem mudar a janela. Qual ancestral de
+cada ficha realmente recebe a largura disponível? O alvo da query é esse ancestral
+ou uma descendente? Confira se existe uma base legível quando a melhoria não atua.</p>
+<template data-papel="css">
+  .contextos { display: grid; gap: 1rem; }
+  @media (min-width: 55rem) { .contextos { grid-template-columns: 16rem minmax(0, 1fr); } }
+  .slot { min-inline-size: 0; }
+  .ficha { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #777; }
+  .ficha h3 { font-size: 1.25rem; }
+  .selo { padding: 1rem; background: #deebf5; color: #123; }
+  @media (min-width: 30rem) { .ficha { grid-template-columns: 1fr 2fr; } }
+</template>
+<template data-papel="html">
+  <div class="contextos">
+    <div class="slot"><article class="ficha"><div class="selo">Imagem</div><div><h3>Ficha na lateral</h3><p>O texto deve permanecer legível num wrapper estreito.</p></div></article></div>
+    <div class="slot"><article class="ficha"><div class="selo">Imagem</div><div><h3>Ficha no conteúdo</h3><p>Mesmo componente, outro espaço disponível.</p></div></article></div>
+  </div>
+</template>
+</div>
+
+<h2>9. Feche a fase F1 do projeto</h2>
+<ol>
+  <li>adapte uma imagem informativa com dimensões, alt e candidatos reais;</li>
+  <li>justifique o slot de sizes pela caixa medida, não pelo nome do aparelho;</li>
+  <li>use picture somente quando recorte/formato justificar;</li>
+  <li>revise título, entrelinha e medida de leitura com conteúdo extenso;</li>
+  <li>reutilize um componente em dois wrappers e teste sua query de tamanho;</li>
+  <li>confira a base sem a melhoria e ampliação sem perda de informação.</li>
+</ol>
+<div class="callout"><span class="callout-title">Entrega da A12 — F1 concluída</span>
+<p>Entregue HTML semântico, CSS próprio e imagens locais, sem framework. Atualize
+<code>COMPATIBILIDADE.md</code> com larguras dos recursos, sizes, currentSrc observado,
+slot medido, testes de fonte/zoom e os dois contextos do componente. Não afirme ganho
+de rede sem medir os bytes.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Pergunta</th><th>Evidência</th></tr></thead><tbody>
+  <tr><td>Qual caixa?</td><td>Tamanho renderizado e limite CSS</td></tr>
+  <tr><td>Qual recurso?</td><td>srcset, sizes, currentSrc e bytes medidos</td></tr>
+  <tr><td>Qual enquadramento?</td><td>source correspondente e img de fallback</td></tr>
+  <tr><td>Qual leitura?</td><td>Texto ampliado sem corte ou perda de operação</td></tr>
+  <tr><td>Qual contexto?</td><td>Ancestral elegível, nome, tipo e descendente</td></tr>
+</tbody></table></div>
+
+<hr>
+<h2>Leitura primária</h2>
+<p>Consulte <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images">imagens responsivas (MDN)</a>,
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/picture">picture (MDN)</a>,
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/clamp">clamp (MDN)</a>,
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Container_queries">container queries (MDN)</a>
+e <a href="https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html">ampliação de texto (W3C/WAI)</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o tamanho
+da caixa, o recurso escolhido, o tamanho da fonte e o ancestral consultado. Uma técnica
+com nome moderno continua precisando de evidência.</p>
+<nav class="aula-nav">
+  <a href="0011-media-queries-e-estrategia-de-breakpoints.html">← A11 — Media queries</a>
+  A13 — Bootstrap I →
+</nav>
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

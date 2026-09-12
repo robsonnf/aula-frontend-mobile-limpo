@@ -96,8 +96,8 @@ window.AULAS = [
     "bloco": "Responsividade",
     "titulo": "Imagens responsivas, tipografia fluida, container queries",
     "ementa": "Responsividade – técnicas",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0012-imagens-responsivas-tipografia-fluida-e-container-queries.html",
+    "disponivel": true
   },
   {
     "n": 13,

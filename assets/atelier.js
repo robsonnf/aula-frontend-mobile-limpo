@@ -305,7 +305,7 @@
   function montar(host) {
     var modo = host.dataset.modo || 'demo';
     var id = host.dataset.id || '';
-    var chave = 'atelier:' + (id || location.pathname + ':' + Array.prototype.indexOf.call(
+    var chave = 'atelier:' + location.pathname + ':' + (id || Array.prototype.indexOf.call(
       document.querySelectorAll('.atelier'), host));
 
     var editavel = modo === 'exercicio' || modo === 'auditoria';
@@ -316,6 +316,8 @@
     });
     var enunciadoNo = host.querySelector('[data-papel="enunciado"]');
     var enunciadoHTML = enunciadoNo ? enunciadoNo.innerHTML : '';
+    var dicaNo = host.querySelector('[data-papel="dica"]');
+    var dicaHTML = dicaNo ? dicaNo.innerHTML : '';
 
     var listaAchados = null;
     var achadosNo = host.querySelector('[data-papel="achados"]');
@@ -323,6 +325,18 @@
       listaAchados = Array.prototype.map.call(achadosNo.querySelectorAll('li'), function (li) {
         return { texto: li.innerHTML, real: li.dataset.real === 'sim', explica: li.dataset.explica || '' };
       });
+      // Fisher–Yates embaralha objetos completos: a justificativa acompanha o item.
+      // Não usa a classificação, que nem existe no HTML sanitizado do aluno.
+      var ordemOriginal = listaAchados.slice();
+      for (var i = listaAchados.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temporario = listaAchados[i];
+        listaAchados[i] = listaAchados[j];
+        listaAchados[j] = temporario;
+      }
+      if (listaAchados.length > 1 && listaAchados.every(function (item, indice) {
+        return item === ordemOriginal[indice];
+      })) listaAchados.push(listaAchados.shift());
     }
 
     var htmlBase = partes.html || '';
@@ -347,6 +361,20 @@
       var enun = el('div', 'at-enunciado');
       enun.innerHTML = enunciadoHTML;
       host.appendChild(enun);
+    }
+
+    var temMaterialProfessor = !!solucao || (listaAchados && listaAchados.some(function (item) {
+      return !!item.explica;
+    }));
+    if (editavel && !temMaterialProfessor) {
+      var dicas = el('details', 'at-dica');
+      dicas.appendChild(el('summary', '', 'Dica de raciocínio — sem resposta'));
+      var textoDica = el('div', 'at-dica-texto');
+      textoDica.innerHTML = dicaHTML || (modo === 'auditoria'
+        ? 'Examine uma afirmação de cada vez. Localize a regra citada, compare-a ao requisito e teste a hipótese na prévia. Nem toda técnica diferente é um erro; registre a evidência, não uma sequência de marcações.'
+        : 'Divida o enunciado em requisitos observáveis. Altere uma regra por vez, compare o resultado antes e depois e teste larguras diferentes. Uma aparência melhor não basta: confira todos os requisitos.');
+      dicas.appendChild(textoDica);
+      host.appendChild(dicas);
     }
 
     var corpo = el('div', 'at-corpo');

@@ -58,6 +58,15 @@ esconde o editor e devolve a largura toda.
 
 Seu código fica salvo no navegador. "Reiniciar" volta ao original.
 
+Quizzes e marcações de auditoria começam limpos a cada abertura ou
+recarregamento. Ao escolher, a seleção azul e o ícone indicam apenas
+"Resposta registrada", não acerto ou erro. A auditoria mostra o contador
+de itens marcados e permite desmarcar. A ordem dos itens é embaralhada
+a cada abertura; identifique cada afirmação pelo texto, não pela posição.
+Abra "Dica de raciocínio — sem resposta" para investigar o exercício.
+A correção será apresentada após o fim do exercício, com o professor.
+Ela não é desbloqueada automaticamente neste pacote.
+
 
 USO DE IA
 ---------
@@ -80,3 +89,4 @@ CONTEÚDO
   - A9 — Cor, gradientes e transform
   - A10 — transition, animation e movimento acessível
   - A11 — Media queries e estratégia de breakpoints
+  - A12 — Imagens responsivas, tipografia fluida e container queries

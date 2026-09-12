@@ -64,6 +64,16 @@
       var temGabarito = Array.prototype.some.call(botoes, function (b) {
         return b.hasAttribute('data-correta');
       });
+      if (!temGabarito) {
+        var dica = document.createElement('details');
+        dica.className = 'at-dica';
+        var resumoDica = document.createElement('summary');
+        resumoDica.textContent = 'Dica de raciocínio — sem resposta';
+        var textoDica = document.createElement('p');
+        textoDica.textContent = quiz.dataset.dica || 'Releia a pergunta e compare cada alternativa ao conceito estudado. Procure uma justificativa e um exemplo que confirmem ou contradigam cada hipótese antes de registrar sua escolha.';
+        dica.append(resumoDica, textoDica);
+        quiz.appendChild(dica);
+      }
       function registrarEscolha(indice) {
         botoes.forEach(function (outro, i) {
           outro.dataset.state = i === indice ? 'selecionado' : '';
