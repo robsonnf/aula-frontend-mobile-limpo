@@ -13,6 +13,8 @@ npm start
 Abra `http://localhost:4321`. Também é possível abrir `index.html` diretamente,
 mas o servidor local oferece a experiência completa dos editores interativos.
 
+O endereço `/lessons/` também redireciona para o índice inicial, evitando erro 404.
+
 ## Verificar e empacotar
 
 ```bash

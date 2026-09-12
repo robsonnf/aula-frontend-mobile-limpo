@@ -43,9 +43,13 @@ function enderecoDeRede() {
   return null;
 }
 
-createServer(async (req, res) => {
+const servidor = createServer(async (req, res) => {
   try {
     let caminho = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+    if (['/lessons', '/lessons/', '/lessons/index.html'].includes(caminho)) {
+      res.writeHead(302, { location: '/', 'cache-control': 'no-store' }).end();
+      return;
+    }
     if (caminho.endsWith('/')) caminho += 'index.html';
 
     // normalize + prefixo: impede ../../ sair da raiz servida
@@ -72,8 +76,9 @@ createServer(async (req, res) => {
   }
 }).listen(PORTA, () => {
   const rede = enderecoDeRede();
+  const portaAtiva = servidor.address().port;
   console.log(`\n  Material servido:`);
-  console.log(`    http://localhost:${PORTA}/`);
-  if (rede) console.log(`    http://${rede}:${PORTA}/   (celulares na mesma rede)`);
+  console.log(`    http://localhost:${portaAtiva}/`);
+  if (rede) console.log(`    http://${rede}:${portaAtiva}/   (celulares na mesma rede)`);
   console.log(`\n  Ctrl+C para parar.\n`);
 });
