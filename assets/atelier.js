@@ -30,6 +30,7 @@
 
 (function () {
   'use strict';
+  var bootstrapCSS = new URL('bootstrap-5.3.8.min.css', document.currentScript.src).href;
 
   // esm.sh com ?deps= — a razão é específica, não é gosto:
   //
@@ -418,7 +419,9 @@
         '<meta name="viewport" content="width=device-width, initial-scale=1">' +
         '<style>*,*::before,*::after{box-sizing:border-box}' +
         'body{margin:0;font:16px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1a1a;background:#fff}' +
-        '</style><style>' + estado.css + '</style></head><body>' + estado.html + '</body></html>';
+        '</style>' + (host.hasAttribute('data-bootstrap')
+          ? '<link rel="stylesheet" href="' + bootstrapCSS + '">' : '') +
+        '<style>' + estado.css + '</style></head><body>' + estado.html + '</body></html>';
     }
 
     var timer = null;

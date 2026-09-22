@@ -104,8 +104,8 @@ window.AULAS = [
     "bloco": "Bootstrap",
     "titulo": "Bootstrap 5.3 I: grid, breakpoints, utilities",
     "ementa": "Bootstrap – recursos mobile",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0013-bootstrap-5-3-i-grid-breakpoints-utilities.html",
+    "disponivel": true
   },
   {
     "n": 14,

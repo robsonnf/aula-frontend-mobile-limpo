@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A13 — Bootstrap 5.3 I: grid, breakpoints, utilities</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 13 de 22 · 3h · Bootstrap — fundamentos de layout</p>
+<h1>Bootstrap 5.3 I:<br>grid, breakpoints<br>e utilities</h1>
+<p class="deck">Reconstrua a composição da sua home com um vocabulário de classes.
+Leia o CSS que essas classes representam, teste as fronteiras e conserve uma base
+legível. O framework acelera decisões recorrentes; os requisitos do conteúdo continuam guiando o layout.</p>
+
+<div class="quiz" data-dica="Observe qual condição mede a janela e qual mede o wrapper de um componente.">
+<p class="quiz-q">Uma classe col-md-6 reage a qual espaço?</p><ul class="quiz-opts"><li>À largura do cartão ancestral</li><li>Ao breakpoint do viewport</li><li>Ao tamanho físico do monitor</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Carregue a folha e observe a composição</h2>
+<p>Esta aula fixa Bootstrap <strong>5.3.8</strong>, da linha 5.3, com CSS oficial e licença MIT locais.
+Grid e utilities desta aula funcionam somente com CSS. Componentes que dependem de comportamento
+JavaScript serão tratados na A14; não acrescente um bundle sem necessidade.</p>
+<pre><code>&lt;link rel="stylesheet" href="../assets/bootstrap-5.3.8.min.css"&gt;
+&lt;!-- CSS próprio depois, considerando a cascata e !important --&gt;</code></pre>
+<p>A meta viewport continua necessária. A folha inclui Reboot, que normaliza estilos básicos.
+Nas prévias abaixo ela está isolada em um iframe: os controles da aula mantêm seus próprios estilos.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-inicio" data-titulo="Uma composição feita com utilities" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><main class="container"><section class="p-4 border rounded bg-light"><p class="text-uppercase fw-bold mb-2">Portfólio</p><h2 class="h3">Meu próximo projeto</h2><p class="mb-0">Inspecione padding, borda, título e margem do parágrafo.</p></section></main></template></div>
+
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/getting-started/introduction/">Bootstrap — introdução</a></p>
+
+<h2>2. Container, row e col: três responsabilidades</h2>
+<p>O grid padrão usa <strong>Flexbox</strong>. Container envolve e alinha a composição;
+row agrupa colunas; colunas abrigam conteúdo. Não confunda esse sistema com a implementação
+opcional de CSS Grid do Bootstrap.</p>
+<p><code>.container</code> tem largura máxima por faixa. <code>.container-fluid</code> usa
+100% de largura em todas elas. <code>.container-md</code> fica fluido abaixo de md e recebe
+os limites de container de md em diante. “Fluido” ainda admite padding interno.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-containers" data-titulo="Container limitado versus fluido" data-vp="1000" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><div class="container mb-3"><div class="bloco">.container — observe a largura máxima</div></div><div class="container-fluid"><div class="bloco bloco-alt">.container-fluid — ocupa a largura disponível</div></div></template></div>
+
+<pre><code>&lt;div class="container"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col"&gt;Conteúdo&lt;/div&gt;
+    &lt;div class="col"&gt;Conteúdo&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+<h2>3. Doze partes, larguras automáticas e quebra de linha</h2>
+<p><code>col-4</code> ocupa 4/12 da linha, <code>col-6</code> ocupa metade e
+<code>col-12</code> ocupa toda a linha. As larguras são percentuais. <code>col</code>
+divide o espaço restante entre colunas flexíveis; <code>col-auto</code> se ajusta ao conteúdo.</p>
+<p>Se a soma ultrapassa 12, o wrapping pode levar a próxima coluna para outra linha.
+Isso não significa que existam somente 12 elementos permitidos. Classes de coluna
+devem ser filhas da row; para aninhar, coloque outra row dentro de uma coluna.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-doze" data-titulo="4 + 8 e depois uma linha aninhada" data-vp="800" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><div class="container"><div class="row g-3"><aside class="col-4"><div class="bloco">4 / 12</div></aside><main class="col-8"><div class="bloco">8 / 12<div class="row g-2 mt-1"><div class="col-6"><div class="bloco bloco-alt">Metade interna</div></div><div class="col-6"><div class="bloco bloco-alt">Metade interna</div></div></div></div></main></div><div class="row g-3 mt-1"><div class="col-auto"><div class="bloco">Auto</div></div><div class="col"><div class="bloco">Restante</div></div></div></div></template></div>
+
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/layout/grid/">Bootstrap — grid</a></p>
+
+<h2>4. Breakpoints são faixas cumulativas</h2>
+<div class="table-wrap"><table><thead><tr><th>Faixa</th><th>A partir de</th><th>Container máximo</th></tr></thead><tbody>
+<tr><td>Base, sem infixo xs</td><td>0</td><td>100%</td></tr>
+<tr><td>sm</td><td>576px</td><td>540px</td></tr><tr><td>md</td><td>768px</td><td>720px</td></tr>
+<tr><td>lg</td><td>992px</td><td>960px</td></tr><tr><td>xl</td><td>1200px</td><td>1140px</td></tr>
+<tr><td>xxl</td><td>1400px</td><td>1320px</td></tr></tbody></table></div>
+<p>Os valores são os padrões do CSS distribuído nesta aula. <code>col-md-6</code>
+começa em 768px e continua nas faixas superiores até outra regra aplicável alterar a largura.
+Não há <code>col-xs-12</code> no Bootstrap 5.3. O nome md não detecta um tipo de aparelho.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-breakpoints" data-titulo="Uma, duas e três colunas" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><div class="container"><div class="row g-3"><article class="col-12 col-md-6 col-lg-4"><div class="bloco"><h3 class="h5">Pesquisa</h3><p class="mb-0">Conteúdo do portfólio.</p></div></article><article class="col-12 col-md-6 col-lg-4"><div class="bloco"><h3 class="h5">Projeto</h3><p class="mb-0">Conteúdo do portfólio.</p></div></article><article class="col-12 col-md-6 col-lg-4"><div class="bloco"><h3 class="h5">Entrega</h3><p class="mb-0">Conteúdo do portfólio.</p></div></article></div></div></template></div>
+
+<p>Arraste a prévia por 767/768/769 e 991/992/993px. Em 768, cada cartão ocupa metade
+da linha; o terceiro quebra. Em 992, os três cabem. A ordem das palavras em class não
+define qual regra vence: isso depende da cascata do CSS.</p>
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/layout/breakpoints/">Bootstrap — breakpoints</a></p>
+
+<h2>5. Exercício: catálogo que cresce por faixas</h2>
+<div class="atelier" data-bootstrap data-modo="exercicio" data-edita="html" data-id="a13-ex1-grid" data-titulo="Um catálogo com três estados" data-vp="390" data-vp-max="1600"><p data-papel="enunciado">Os cartões estão sempre em três colunas. Faça cada cartão ocupar toda a linha na base, metade a partir de md e um terço a partir de lg. Preserve a estrutura, textos e gutter.</p><p data-papel="dica">Escreva primeiro os três estados desejados. Relacione cada largura a uma fração das 12 partes; depois descubra em qual faixa cada mudança começa. Teste imediatamente antes e depois de cada fronteira.</p><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }</template><template data-papel="html"><div class="container"><div class="row g-3"><article class="col-4"><div class="bloco"><h3 class="h5">Pesquisa</h3><p class="mb-0">Conteúdo do portfólio.</p></div></article><article class="col-4"><div class="bloco"><h3 class="h5">Projeto</h3><p class="mb-0">Conteúdo do portfólio.</p></div></article><article class="col-4"><div class="bloco"><h3 class="h5">Entrega</h3><p class="mb-0">Conteúdo do portfólio.</p></div></article></div></div></template>
+</div>
+
+<h2>6. Gutters e espaçamento: entenda a caixa</h2>
+<p><code>g-*</code>, <code>gx-*</code> e <code>gy-*</code> controlam os gutters da row.
+O horizontal combina padding das colunas e margens negativas da row; o vertical usa
+margens nas colunas. Não é simplesmente gap. Aumentar gutters pode exigir ajustar o
+padding do wrapper para evitar transbordamento.</p>
+<p>Na escala padrão, 0, 1, 2, 3, 4 e 5 equivalem a 0, .25rem, .5rem, 1rem, 1.5rem e 3rem.
+Em <code>p-3</code>, p indica padding; em <code>mt-md-4</code>, m indica margem,
+t o topo, md a faixa e 4 a escala. <code>x</code>/<code>y</code> representam os eixos;
+<code>s</code>/<code>e</code> representam início/fim. Para RTL, use o build RTL apropriado.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-espacos" data-titulo="Gutter entre cartões e padding dentro deles" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><div class="container"><div class="row gx-4 gy-3"><div class="col-12 col-md-6"><div class="bloco p-2">p-2: respiro interno menor</div></div><div class="col-12 col-md-6"><div class="bloco p-4">p-4: respiro interno maior</div></div></div><p class="mt-4 mb-0 border p-3">mt-4 separa este parágrafo da linha.</p></div></template></div>
+
+<p>Use <code>gap-3</code> em um flex/grid adequado. Aplicar gap adicional a uma row com
+duas col-6 pode fazer a segunda quebrar, pois as larguras já somam 100%. Para o grid
+Bootstrap, prefira gutters. Margem negativa por utility não vem habilitada por padrão.</p>
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/layout/gutters/">Gutters</a> · <a href="https://getbootstrap.com/docs/5.3/utilities/spacing/">Espaçamento</a></p>
+
+<h2>7. Display, flex e leitura do conteúdo</h2>
+<p><code>d-flex</code> estabelece flex; <code>flex-column flex-md-row</code> muda direção;
+<code>justify-content-between</code> distribui no eixo principal e <code>align-items-center</code>
+alinha no transversal. O eixo muda quando a direção muda.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-flex" data-titulo="Barra vertical que passa a horizontal" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><div class="container"><div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border p-3"><strong>Projetos da turma</strong><div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="#pesquisa">Pesquisa</a><a class="btn btn-outline-primary" href="#entrega">Entrega</a></div></div><p id="pesquisa" class="mt-3">Pesquisa: escolha um problema real.</p><p id="entrega">Entrega: documente o resultado.</p></div></template></div>
+
+<p><code>d-none d-md-block</code> oculta abaixo de md. <code>d-none</code> remove a caixa
+do layout e da apresentação habitual às tecnologias assistivas; não serve para manter
+uma instrução essencial disponível. <code>visually-hidden</code> preserva conteúdo para
+leitores de tela, mas não é alternativa visual para quem precisa ler a instrução.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-display" data-titulo="Um detalhe opcional muda; a instrução essencial permanece" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><div class="container"><p class="border p-3">Instrução essencial: identifique cada arquivo com seu nome.</p><p class="d-none d-md-block bg-light p-3">Detalhe opcional: uma descrição longa disponível quando há espaço.</p><p class="d-md-none p-3 bg-light">Versão compacta do detalhe opcional.</p></div></template></div>
+
+<p>Classes de ordem mudam a apresentação visual, não a ordem do DOM. Preserve uma
+sequência de leitura e foco coerente. Nem toda utility tem variação responsiva: por
+exemplo, <code>w-md-50</code> não existe no CSS padrão; consulte a documentação antes de inventar nomes.</p>
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/utilities/display/">Display</a> · <a href="https://getbootstrap.com/docs/5.3/utilities/flex/">Flex</a></p>
+
+<h2>8. Utilities, cascata e CSS próprio</h2>
+<p>Muitas utilities são geradas com <code>!important</code> por padrão. Uma regra normal
+depois da folha pode não vencer. Remova a utility conflitante ou escolha a utility
+adequada; evite empilhar correções sem inspecionar o estilo calculado.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-cascata" data-titulo="Observe o espaço apesar do CSS posterior" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+.exemplo { padding: 0; }</template><template data-papel="html"><div class="container"><div class="p-4 exemplo border">A utility p-4 usa prioridade importante; a regra normal posterior tenta padding:0. Inspecione os 24px com raiz de 16px.</div><p class="mt-3 mb-0">A segunda caixa usa somente o CSS próprio:</p><div class="exemplo border">Sem p-4, padding:0 participa normalmente.</div></div></template></div>
+
+<p><code>text-center</code> alinha conteúdo inline, não centraliza qualquer caixa.
+<code>mx-auto</code> usa margens horizontais automáticas; precisa de espaço livre e
+um contexto apropriado. Bordas, arredondamento e cores auxiliam a leitura visual, mas
+não substituem título, rótulo, contraste e HTML semântico.</p>
+<div class="quiz" data-dica="Abra o estilo calculado e compare a prioridade das duas declarações.">
+<p class="quiz-q">Por que padding:0 normal, escrito depois, pode perder para p-4?</p><ul class="quiz-opts"><li>A última classe no atributo sempre ganha</li><li>Bootstrap impede qualquer CSS próprio</li><li>A utility usa !important no build padrão</li></ul><p class="quiz-feedback"></p></div>
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/utilities/api/">Bootstrap — Utility API</a></p>
+
+<h2>9. Auditoria: o framework cumpriu o enunciado?</h2>
+<div class="atelier" data-bootstrap data-modo="auditoria" data-edita="html" data-id="a13-auditoria" data-titulo="Uma IA montou o catálogo" data-vp="390" data-vp-max="1600">
+<p data-papel="enunciado">Os dois cartões devem ficar empilhados abaixo de md e lado a lado de md em diante. As instruções precisam estar visíveis em todas as larguras. O painel final deve ter padding zero. Examine HTML e CSS e marque somente falhas reais.</p>
+<p data-papel="dica">Monte uma tabela de requisitos e larguras. Para cada afirmação, localize a classe e observe seu efeito calculado. Confira os pontos 767/768 e 991/992. Diferencie decisão válida de descumprimento do enunciado; a posição do item não informa seu julgamento.</p>
+<template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; } .painel { padding: 0; }</template>
+<template data-papel="html">
+<div class="container"><div class="row g-3">
+<article class="col-6"><div class="bloco">Projeto A</div></article>
+<article class="col-6"><div class="bloco">Projeto B</div></article>
+</div><p class="d-none d-lg-block">Instruções essenciais para entregar.</p>
+<div class="painel p-4 border">O enunciado exige padding zero.</div>
+<div class="d-flex flex-wrap gap-2 mt-3"><span>HTML</span><span>CSS</span></div></div>
+</template>
+<ol data-papel="achados">
+<li>Os cartões continuam lado a lado abaixo de md.</li>
+<li>A row deveria usar display:grid obrigatoriamente.</li>
+<li>A instrução essencial desaparece em janelas pequenas.</li>
+<li>Usar g-3 na row é inválido.</li>
+<li>O painel conserva padding apesar da regra normal posterior.</li>
+<li>flex-wrap e gap-2 não podem ser combinados.</li>
+<li>Todo layout responsivo exige container-fluid.</li>
+<li>A falta do JavaScript do Bootstrap impede estas colunas de responder.</li>
+</ol></div>
+
+<h2>10. Exercício: utilitários com requisitos verificáveis</h2>
+<div class="atelier" data-bootstrap data-modo="exercicio" data-edita="html" data-id="a13-ex2-utilities" data-titulo="Organização, respiro e acesso" data-vp="390" data-vp-max="1600"><p data-papel="enunciado">Mantenha a instrução visível em todas as larguras. Organize os dois links em coluna na base e linha a partir de md, com gap-3. O painel deve ter padding de escala 2 na base e escala 4 de md em diante. Preserve destinos e ordem do HTML.</p><p data-papel="dica">Separe visibilidade, direção, espaço entre itens e espaço interno. Descubra qual elemento controla cada responsabilidade. Teste teclado e compare as caixas abaixo e acima da fronteira.</p><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }</template><template data-papel="html"><div class="container"><section class="painel p-5 border"><p class="d-none d-md-block">Leia os critérios antes de enviar.</p><nav class="d-flex flex-row"><a href="#criterios">Critérios</a><a href="#envio">Envio</a></nav></section><p id="criterios">Critérios: clareza e evidências.</p><p id="envio">Envio: entregue o arquivo ao professor.</p></div></template>
+</div>
+
+<h2>11. Aplique à home do projeto — início da F2</h2>
+<p>Reproduza a hierarquia da sua home da F1: container, linha de cartões e uma barra de
+links. Mantenha textos, semântica e destinos. Compare o que foi expresso por utilities
+e o que ainda exige CSS próprio. Documente o peso do CSS local e o que foi utilizado.</p>
+<div class="atelier" data-bootstrap data-modo="demo" data-id="a13-projeto" data-titulo="Composição de referência para a F2" data-vp="390" data-vp-max="1600"><template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; }
+</template><template data-papel="html"><main class="container"><header class="py-4"><p class="fw-bold mb-1">Portfólio da turma</p><h2>Projetos que resolvem problemas</h2></header><div class="row g-3"><article class="col-12 col-md-6 col-lg-4"><div class="bloco h-100"><h3 class="h5">Pesquisa</h3><p>Pergunta e evidência.</p></div></article><article class="col-12 col-md-6 col-lg-4"><div class="bloco h-100"><h3 class="h5">Protótipo</h3><p>Hipótese e teste.</p></div></article><article class="col-12 col-md-6 col-lg-4"><div class="bloco h-100"><h3 class="h5">Resultado</h3><p>Aprendizado e próximos passos.</p></div></article></div><footer class="d-flex flex-column flex-md-row gap-2 justify-content-between py-4"><span>Fase F2</span><a href="#contato">Contato</a></footer><p id="contato">Apresente sua proposta à turma.</p></main></template></div>
+
+<div class="callout"><span class="callout-title">Entrega da A13</span><p>Entregue a home com Bootstrap local e registre em COMPATIBILIDADE.md: versão, classes principais, larguras testadas, CSS próprio e diferença para a F1. Preserve a versão anterior para comparação.</p></div>
+
+<h2>12. O que precisa ficar de pé</h2>
+<ul><li>Você consegue apontar container, row e col?</li><li>Explica o que vale antes e depois de cada breakpoint?</li><li>Distingue padding, margem, gap e gutter?</li><li>Consegue justificar uma utility pelo requisito?</li><li>Conserva conteúdo essencial e ordem de leitura?</li></ul>
+
+<hr><h2>Leitura primária</h2><p>Documentação oficial Bootstrap 5.3:
+<a href="https://getbootstrap.com/docs/5.3/layout/grid/">grid</a>,
+<a href="https://getbootstrap.com/docs/5.3/layout/breakpoints/">breakpoints</a>,
+<a href="https://getbootstrap.com/docs/5.3/layout/gutters/">gutters</a>,
+<a href="https://getbootstrap.com/docs/5.3/utilities/spacing/">spacing</a>,
+<a href="https://getbootstrap.com/docs/5.3/utilities/display/">display</a>,
+<a href="https://getbootstrap.com/docs/5.3/utilities/flex/">flex</a> e
+<a href="https://getbootstrap.com/docs/5.3/utilities/api/">Utility API</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o requisito, as classes, a largura da janela e o estilo calculado.</p>
+<nav class="aula-nav"><a href="0012-imagens-responsivas-tipografia-fluida-e-container-queries.html">← A12 — Técnicas responsivas</a>A14 — Bootstrap II →</nav>
+<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>
