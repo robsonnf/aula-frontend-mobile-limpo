@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A14 — Bootstrap 5.3 II: componentes mobile e customização</title>
+<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../assets/atelier.css">
+</head>
+<body class="lesson">
+
+<p class="aula-tag">Aula 14 de 22 · 3h · Bootstrap — componentes e customização</p>
+<h1>Bootstrap 5.3 II:<br>componentes mobile<br>e customização</h1>
+
+<p class="deck">Uma classe não cria comportamento sozinha. Componentes interativos
+dependem de marcação coerente, alvo único, bundle carregado e estado perceptível.
+Hoje a turma fecha a F2 com navegação, conteúdo revelável e tema próprio — sempre
+confirmando no DevTools o que o framework realmente mudou.</p>
+
+<div class="quiz" data-dica="Separe aparência de comportamento. Inspecione se o arquivo JavaScript foi solicitado e se o seletor do botão encontra um alvo único."
+    >
+  <p class="quiz-q">O CSS 5.3.8 carregou, mas o botão da navbar não abre o menu. Qual
+  verificação vem primeiro?</p>
+  <ul class="quiz-opts">
+    <li>Adicionar <code>z-index: 999999</code></li>
+    <li>Conferir o bundle JavaScript e a correspondência entre alvo e <code>id</code></li>
+    <li>Trocar <code>.container</code> por <code>.container-fluid</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>1. CSS apresenta; o plug-in controla o estado</h2>
+
+<p>Grid e utilities da A13 funcionam apenas com CSS. Já <code>collapse</code>,
+<code>offcanvas</code>, <code>modal</code>, <code>dropdown</code>, <code>accordion</code>
+e <code>carousel</code> possuem comportamento JavaScript. Nesta aula usamos o bundle
+oficial 5.3.8 local, que já inclui Popper. Não carregue ao mesmo tempo o bundle e outra
+cópia compilada do Bootstrap.</p>
+
+<pre><code>&lt;link rel="stylesheet" href="../assets/bootstrap-5.3.8.min.css"&gt;
+...
+&lt;script src="../assets/bootstrap-5.3.8.bundle.min.js"&gt;&lt;/script&gt;</code></pre>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-collapse-base" data-titulo="O mesmo botão controla um alvo" data-vp="390" data-vp-max="1200">
+<template data-papel="css">
+  body { padding: 1rem; }
+</template>
+<template data-papel="html">
+  <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+          data-bs-target="#criteriosA14" aria-expanded="false" aria-controls="criteriosA14">
+    Mostrar critérios
+  </button>
+  <div class="collapse mt-3" id="criteriosA14">
+    <div class="card card-body">O alvo único recebeu ou perdeu a classe <code>show</code>.</div>
+  </div>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p><strong>Network</strong> → filtre por “bootstrap” e confirme status 200 para CSS e
+bundle. Em <strong>Console</strong>, execute <code>bootstrap.Collapse.VERSION</code>.
+Em <strong>Sources</strong>, localize <code>bootstrap-5.3.8.bundle.min.js</code>.</p></div>
+
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/getting-started/javascript/">Bootstrap — JavaScript</a></p>
+
+<h2>2. A Data API liga acionador, alvo e estado</h2>
+
+<p>A Data API permite ativar plug-ins com atributos <code>data-bs-*</code>. O acionador
+declara o plug-in e o seletor; o alvo oferece um <code>id</code> único. O plug-in muda
+classes, atributos ARIA e, em alguns componentes, cria backdrop e ajusta o
+<code>body</code>. Usar atributos não elimina a necessidade de HTML semântico.</p>
+
+<div class="versus">
+  <div class="bad"><h4>Alvo que não existe</h4><pre><code>&lt;button data-bs-toggle="collapse"
+  data-bs-target="#menu"&gt;Menu&lt;/button&gt;
+&lt;div id="menu-principal" class="collapse"&gt;</code></pre></div>
+  <div class="good"><h4>Contrato correspondente</h4><pre><code>&lt;button data-bs-toggle="collapse"
+  data-bs-target="#menu"
+  aria-controls="menu"&gt;Menu&lt;/button&gt;
+&lt;div id="menu" class="collapse"&gt;</code></pre></div>
+</div>
+
+<p>Os métodos com transição são assíncronos: uma chamada inicia o processo e retorna
+antes de ele terminar. Quando código próprio depender do fim, escute eventos como
+<code>shown.bs.collapse</code> ou <code>hidden.bs.modal</code>, em vez de adivinhar um
+tempo com <code>setTimeout</code>.</p>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p><strong>Elements</strong> → selecione o botão e o alvo. Use <kbd>Ctrl</kbd>+<kbd>F</kbd>
+para procurar o valor do <code>data-bs-target</code> e confirmar um único <code>id</code>.
+Clique e observe <code>aria-expanded</code>, <code>collapse</code>, <code>collapsing</code>
+e <code>show</code>. Em <strong>Event Listeners</strong>, filtre por <code>click</code>.</p></div>
+
+<h2>3. Navbar móvel preserva navegação e estado atual</h2>
+
+<p><code>.navbar-expand-md</code> mantém o conteúdo recolhido abaixo de 768px e expandido
+de md em diante. O comportamento recolhível depende do plug-in Collapse. Use
+<code>&lt;nav&gt;</code>, rótulo do botão, <code>aria-controls</code> e
+<code>aria-current="page"</code> no destino atual. Em 5.3, prefira
+<code>data-bs-theme="dark"</code> para o modo escuro do componente; variantes antigas
+como <code>.navbar-dark</code> estão depreciadas.</p>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-navbar" data-titulo="Navbar que recolhe abaixo de md" data-vp="390" data-vp-max="1000">
+<template data-papel="css">
+  body { min-block-size: 12rem; }
+</template>
+<template data-papel="html">
+  <nav class="navbar navbar-expand-md bg-dark" data-bs-theme="dark" aria-label="Navegação principal">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#inicio">Projeto F2</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navA14" aria-controls="navA14" aria-expanded="false"
+              aria-label="Alternar navegação">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navA14">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="#inicio">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="#projetos">Projetos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contato">Contato</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <main id="inicio" class="container py-3"><p>Reduza e amplie a prévia; teste também com Tab e Enter.</p></main>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Ative a <strong>Device Toolbar</strong> e compare 767/768/769px. Em
+<strong>Elements</strong>, veja qual media query de <code>.navbar-expand-md</code> está
+ativa em <strong>Styles</strong>. Na árvore de acessibilidade, confira o nome da região,
+o nome do botão e o estado expandido.</p></div>
+
+<h2>4. Exercício: repare a navegação sem apagar seus destinos</h2>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="exercicio" data-edita="html"
+     data-id="a14-ex1-navbar" data-titulo="Um contrato de navegação completo" data-vp="390" data-vp-max="1000">
+<p data-papel="enunciado">Faça a navbar recolher abaixo de md e expandir de md em
+diante. O botão deve controlar exatamente <code>#menuPrincipal</code>, começar fechado
+e ter o rótulo “Alternar navegação”. Marque Início como página atual. Preserve a ordem,
+os textos e os destinos dos três links.</p>
+<p data-papel="dica">Investigue quatro contratos separadamente: breakpoint da navbar,
+seletor do acionador, id do alvo e estado anunciado. Teste em 767/768px e navegue com
+Tab; não troque os links por elementos sem destino.</p>
+<template data-papel="css">
+  body { min-block-size: 12rem; }
+</template>
+<template data-papel="html">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" aria-label="Navegação principal">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#inicio">Portfólio</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#menuPrincipal" aria-controls="menuPrincipal"
+              aria-expanded="true" aria-label="Abrir menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="#inicio">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="#projetos">Projetos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contato">Contato</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Use <strong>Elements</strong> para confirmar que <code>#menuPrincipal</code> aparece
+uma vez. Em <strong>Styles</strong>, filtre por <code>navbar-expand-md</code>. Com o foco
+no botão, abra <strong>Accessibility</strong> e confirme nome, papel e estado expandido.
+No painel da prévia, compare exatamente 767 e 768px.</p></div>
+
+<h2>5. Offcanvas é uma região temporária, não um remendo de layout</h2>
+
+<p>Offcanvas entra por uma borda do viewport, cria backdrop por padrão e oferece ação
+de fechar. Botão ou link pode acioná-lo; o alvo precisa de <code>tabindex="-1"</code>,
+nome associado e uma saída explícita. Apenas um offcanvas deve ficar aberto por vez.
+Não aplique <code>margin</code> ou <code>translate</code> ao próprio
+<code>.offcanvas</code>: a transformação faz parte do mecanismo do componente.</p>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-offcanvas" data-titulo="Menu lateral com largura limitada" data-vp="390" data-vp-max="900">
+<template data-papel="css">
+  body { padding: 1rem; }
+  #menuLateralA14 { --bs-offcanvas-width: min(88vw, 22rem); }
+</template>
+<template data-papel="html">
+  <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas"
+          data-bs-target="#menuLateralA14" aria-controls="menuLateralA14">
+    Abrir navegação
+  </button>
+  <aside class="offcanvas offcanvas-start" tabindex="-1" id="menuLateralA14"
+         aria-labelledby="tituloMenuA14">
+    <div class="offcanvas-header">
+      <h2 class="offcanvas-title fs-5" id="tituloMenuA14">Navegação do projeto</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    </div>
+    <div class="offcanvas-body">
+      <nav aria-label="Seções"><ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="#sobre">Sobre</a></li>
+        <li class="nav-item"><a class="nav-link" href="#trabalhos">Trabalhos</a></li>
+      </ul></nav>
+    </div>
+  </aside>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Abra o componente e, em <strong>Elements</strong>, procure
+<code>.offcanvas.show</code>, o <code>.offcanvas-backdrop</code> criado e os ajustes no
+<code>&lt;body&gt;</code>. Em <strong>Computed</strong>, filtre por
+<code>--bs-offcanvas-width</code> e <code>transform</code>. Acompanhe o foco ao abrir,
+fechar e pressionar Esc.</p></div>
+
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/components/offcanvas/">Bootstrap — offcanvas</a></p>
+
+<h2>6. Modal serve a uma decisão delimitada</h2>
+
+<p>Modal bloqueia a interação com o restante da página e deve ser reservado a uma
+tarefa ou decisão que justifique a interrupção. Bootstrap suporta um modal por vez;
+modais aninhados não são suportados. Coloque sua marcação em nível superior, longe de
+ancestrais fixos. <code>autofocus</code> não produz o efeito esperado dentro do modal;
+quando necessário, mova o foco no evento <code>shown.bs.modal</code>.</p>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-modal" data-titulo="Diálogo em tela cheia somente na base" data-vp="390" data-vp-max="900">
+<template data-papel="css">
+  body { padding: 1rem; }
+</template>
+<template data-papel="html">
+  <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#confirmacaoA14">
+    Revisar envio
+  </button>
+  <div class="modal fade" id="confirmacaoA14" tabindex="-1"
+       aria-labelledby="tituloModalA14" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="tituloModalA14">Confirmar envio</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body"><p>Revise o arquivo antes de concluir.</p></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+          <button type="button" class="btn btn-primary">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Em <strong>Elements</strong>, observe <code>.modal.show</code>,
+<code>.modal-backdrop</code> e <code>body.modal-open</code>. Em
+<strong>Accessibility</strong>, confirme que o nome vem de
+<code>#tituloModalA14</code>. Em <strong>Console</strong>, registre eventos com
+<code>monitorEvents(document.querySelector('#confirmacaoA14'))</code> e abra o modal.</p></div>
+
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/components/modal/">Bootstrap — modal</a></p>
+
+<h2>7. Accordion revela; carousel troca — nenhum decide conteúdo por você</h2>
+
+<p>Accordion combina o plug-in Collapse com uma estrutura de títulos, botões e painéis.
+<code>data-bs-parent</code> faz um painel fechar quando outro abre; removê-lo permite
+vários abertos. Carousel alterna slides e pode trazer desafios de uso e acessibilidade.
+Não ative reprodução automática por hábito. Controles manuais, textos completos e uma
+ordem compreensível continuam sendo decisões do autor.</p>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-accordion" data-titulo="Perguntas com relações explícitas" data-vp="390" data-vp-max="900">
+<template data-papel="css">
+  body { padding: 1rem; }
+</template>
+<template data-papel="html">
+  <div class="accordion" id="faqA14">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                data-bs-target="#respostaUmA14" aria-expanded="true" aria-controls="respostaUmA14">
+          O conteúdo existe quando está fechado?
+        </button>
+      </h2>
+      <div id="respostaUmA14" class="accordion-collapse collapse show" data-bs-parent="#faqA14">
+        <div class="accordion-body">Sim. Ele permanece no DOM; a apresentação muda.</div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#respostaDoisA14" aria-expanded="false" aria-controls="respostaDoisA14">
+          Preciso fechar o anterior?
+        </button>
+      </h2>
+      <div id="respostaDoisA14" class="accordion-collapse collapse" data-bs-parent="#faqA14">
+        <div class="accordion-body">Só se esse comportamento fizer sentido para a tarefa.</div>
+      </div>
+    </div>
+  </div>
+</template>
+</div>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-carousel" data-titulo="Carousel manual, sem autoplay" data-vp="390" data-vp-max="900">
+<template data-papel="css">
+  body { padding: 1rem; }
+  .slide-aula { min-block-size: 12rem; padding: 3rem; background: #183a52; color: white; }
+</template>
+<template data-papel="html">
+  <div id="etapasA14" class="carousel slide" aria-label="Etapas do projeto">
+    <div class="carousel-inner">
+      <div class="carousel-item active"><section class="slide-aula"><h2>Pesquisar</h2><p>Defina o problema.</p></section></div>
+      <div class="carousel-item"><section class="slide-aula"><h2>Prototipar</h2><p>Teste uma hipótese.</p></section></div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#etapasA14" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#etapasA14" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Próximo</span>
+    </button>
+  </div>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>No accordion, acompanhe <code>aria-expanded</code>, <code>collapsed</code> e
+<code>show</code> em <strong>Elements</strong>. No carousel, observe qual
+<code>.carousel-item</code> recebe <code>active</code>. Em <strong>Rendering</strong>,
+emule <em>prefers-reduced-motion: reduce</em> e compare a transição; isso reduz efeito,
+mas não cria controles de pausa para conteúdo automático.</p></div>
+
+<p class="fonte"><a href="https://getbootstrap.com/docs/5.3/components/accordion/">Bootstrap — accordion</a> ·
+<a href="https://getbootstrap.com/docs/5.3/components/carousel/">Bootstrap — carousel</a></p>
+
+<h2>8. Customize o contrato público, não uma cópia do arquivo minificado</h2>
+
+<p>Bootstrap expõe variáveis CSS globais e variáveis locais por componente. Elas
+permitem ajustes em tempo de execução sem editar o arquivo distribuído. Para alterar
+um botão, sobrescreva o conjunto de estados <code>--bs-btn-*</code>; não mude só o
+fundo normal e abandone hover, foco, ativo e desabilitado. Alterar apenas
+<code>--bs-primary</code> não regenera automaticamente todas as regras já compiladas de
+<code>.btn-primary</code>. Para mapas, utilities novas ou opções globais, use Sass e
+compile um build próprio.</p>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-tema" data-titulo="Variáveis locais e modo de cor por escopo" data-vp="700" data-vp-max="1000">
+<template data-papel="css">
+  body { padding: 1rem; }
+  .tema-curso .btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #245b78;
+    --bs-btn-border-color: #245b78;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #19465e;
+    --bs-btn-hover-border-color: #19465e;
+    --bs-btn-active-bg: #12384d;
+    --bs-btn-active-border-color: #12384d;
+    --bs-btn-focus-shadow-rgb: 36, 91, 120;
+  }
+</template>
+<template data-papel="html">
+  <div class="tema-curso row g-3">
+    <div class="col-12 col-sm-6"><section class="border rounded p-3" data-bs-theme="light">
+      <h2 class="h5">Escopo claro</h2><button class="btn btn-primary">Ação principal</button>
+    </section></div>
+    <div class="col-12 col-sm-6"><section class="border rounded p-3 bg-body text-body" data-bs-theme="dark">
+      <h2 class="h5">Escopo escuro</h2><button class="btn btn-primary">Ação principal</button>
+    </section></div>
+  </div>
+</template>
+</div>
+
+<p><code>data-bs-theme="dark"</code> pode ficar em <code>&lt;html&gt;</code> para o documento
+inteiro ou num componente para um escopo local. Bootstrap oferece os modos claro e
+escuro, mas não entrega um seletor de preferência pronto: a lógica do controle, o
+armazenamento da escolha e a relação com a preferência do sistema pertencem ao projeto.</p>
+
+<div class="quiz" data-dica="No painel Styles, procure a origem da variável usada pelo estado do botão. Diferencie variável global de variável local do componente."
+    >
+  <p class="quiz-q">Trocar apenas <code>--bs-primary</code> garante que todos os estados de <code>.btn-primary</code> usem a nova cor?</p>
+  <ul class="quiz-opts">
+    <li>Sim, porque qualquer variável com “primary” controla todo o framework</li>
+    <li>Não; o botão compilado usa seu próprio conjunto <code>--bs-btn-*</code></li>
+    <li>Somente quando o bundle JavaScript está carregado</li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Em <strong>Elements → Styles</strong>, filtre por <code>--bs-btn</code> e clique no
+valor de uma variável para seguir sua origem. Force <code>:hover</code>,
+<code>:focus-visible</code> e <code>:active</code> no botão. Edite
+<code>data-bs-theme</code> entre <code>light</code> e <code>dark</code>; em
+<strong>Computed</strong>, compare <code>color-scheme</code>, fundo, texto e contraste.</p></div>
+
+<h2>9. Auditoria: o kit móvel cumpre os contratos?</h2>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="auditoria" data-edita="html,css"
+     data-id="a14-auditoria-componentes" data-titulo="Uma IA reuniu componentes móveis" data-vp="390" data-vp-max="1000">
+
+<p data-papel="enunciado">A navbar deve recolher abaixo de md; offcanvas, accordion e
+modal precisam de alvos únicos e nomes coerentes; o carousel deve ser manual; a marca
+deve usar a customização local. Examine código e comportamento e marque somente
+problemas reais.</p>
+<p data-papel="dica">Monte uma tabela com acionador, seletor, alvo, estado e requisito.
+Pesquise cada id na árvore, observe as classes depois do clique e descubra de onde vêm
+as variáveis. Uma técnica antiga, opcional ou diferente não é automaticamente uma falha.</p>
+<template data-papel="css">
+  body { padding: 4.5rem 1rem 1rem; }
+  .menu-lateral { margin-inline: 1rem; transform: translateX(1rem); }
+  .btn-projeto {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: #245b78;
+    --bs-btn-border-color: #245b78;
+    --bs-btn-hover-bg: #19465e;
+    --bs-btn-hover-border-color: #19465e;
+  }
+  .slide-auditoria { min-block-size: 8rem; padding: 2rem 3rem; background: #183a52; color: #fff; }
+</template>
+<template data-papel="html">
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top" data-bs-theme="dark" aria-label="Principal">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#inicio">F2</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#menuA14" aria-controls="menuA14" aria-expanded="false"
+              aria-label="Alternar navegação"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="menu-a14"><a class="nav-link text-white" href="#inicio">Início</a></div>
+      <button class="btn btn-sm btn-light" type="button" data-bs-toggle="modal" data-bs-target="#modalA14">Ajuda</button>
+      <div class="modal fade" id="modalA14" tabindex="-1" aria-labelledby="tituloModalAuditoria" aria-hidden="true">
+        <div class="modal-dialog"><div class="modal-content"><div class="modal-header">
+          <h1 class="modal-title fs-5" id="tituloModalAuditoria">Ajuda</h1>
+          <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div><div class="modal-body">Conteúdo de ajuda.</div></div></div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="inicio">
+    <button class="btn btn-projeto" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#detalhesA14" aria-controls="detalhesA14">Abrir detalhes</button>
+    <aside class="offcanvas offcanvas-start menu-lateral" tabindex="-1" id="detalhesA14"
+           aria-labelledby="tituloLateralA14">
+      <div class="offcanvas-header"><h2 class="offcanvas-title fs-5" id="tituloLateralA14">Detalhes</h2>
+        <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Fechar"></button></div>
+      <div class="offcanvas-body">Informação complementar.</div>
+    </aside>
+
+    <div class="accordion mt-3" id="faqAuditoriaA14">
+      <div class="accordion-item"><h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#detalhesA14" aria-expanded="false" aria-controls="detalhesA14">Como entregar?</button>
+      </h2><div id="detalhesA14" class="accordion-collapse collapse" data-bs-parent="#faqAuditoriaA14">
+        <div class="accordion-body">Entregue a pasta completa.</div></div></div>
+    </div>
+
+    <div id="carouselAuditoriaA14" class="carousel slide mt-3" aria-label="Etapas">
+      <div class="carousel-inner"><div class="carousel-item active"><div class="slide-auditoria">Etapa 1</div></div>
+        <div class="carousel-item"><div class="slide-auditoria">Etapa 2</div></div></div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselAuditoriaA14" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span><span class="visually-hidden">Anterior</span></button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselAuditoriaA14" data-bs-slide="next"><span class="carousel-control-next-icon"></span><span class="visually-hidden">Próximo</span></button>
+    </div>
+  </main>
+</template>
+<ol data-papel="achados">
+  <li>O botão da navbar aponta para um id diferente do painel recolhível.</li>
+  <li>A presença de <code>navbar-dark</code> torna a navbar automaticamente inoperante.</li>
+  <li>Offcanvas e accordion reutilizam o mesmo <code>id</code>.</li>
+  <li>O CSS aplica margem e transformação diretamente ao offcanvas.</li>
+  <li>O modal foi aninhado dentro da navbar fixa.</li>
+  <li>Aplicar <code>data-bs-theme="dark"</code> apenas na navbar é inválido.</li>
+  <li>Usar o bundle sem outro arquivo Popper separado é um erro.</li>
+  <li>O accordion usar <code>data-bs-parent</code> é sempre um problema.</li>
+  <li>O carousel não possuir autoplay significa que está quebrado.</li>
+  <li>Customizar o botão por variáveis locais deveria ser substituído por edição do CSS minificado.</li>
+</ol>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Para cada afirmação, escolha um painel: <strong>Elements</strong> para ids e relações,
+<strong>Styles/Computed</strong> para transformações e variáveis,
+<strong>Network/Sources</strong> para dependências e <strong>Accessibility</strong> para
+nomes/estados. Não use a aparência como única evidência; abra e feche cada componente.</p></div>
+
+<h2>10. Exercício: dê identidade sem quebrar os estados</h2>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="exercicio" data-edita="css"
+     data-id="a14-ex2-customizacao" data-titulo="Tema local com variáveis de componente" data-vp="390" data-vp-max="900">
+<p data-papel="enunciado">Remova as sobrescritas com <code>!important</code>. Na área
+<code>.tema-curso</code>, customize <code>.btn-primary</code> com variáveis locais para
+texto, fundo, borda, hover, ativo e anel de foco usando a família azul fornecida.
+Customize também fundo do botão do accordion, estado ativo e anel de foco. Preserve
+contraste, foco visível e o modo escuro do segundo bloco.</p>
+<p data-papel="dica">Inspecione primeiro quais <code>--bs-btn-*</code> e
+<code>--bs-accordion-*</code> o CSS compilado consome. Trate normal, hover, ativo e foco
+como estados distintos. Mude o contrato no escopo, não o arquivo do fornecedor.</p>
+<template data-papel="css">
+  body { padding: 1rem; }
+  .tema-curso .btn-primary {
+    color: #fff !important;
+    background: #ff7a00 !important;
+    border-color: #ff7a00 !important;
+  }
+  .tema-curso .accordion-button { background: #fff !important; color: #777 !important; }
+</template>
+<template data-papel="html">
+  <section class="tema-curso">
+    <button class="btn btn-primary mb-3" type="button">Enviar projeto</button>
+    <div class="accordion" id="criteriosTemaA14">
+      <div class="accordion-item"><h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                data-bs-target="#painelTemaA14" aria-expanded="true" aria-controls="painelTemaA14">Critérios</button>
+      </h2><div id="painelTemaA14" class="accordion-collapse collapse show">
+        <div class="accordion-body">Clareza, evidência e funcionamento.</div></div></div>
+    </div>
+    <div class="mt-3 p-3 rounded bg-body text-body border" data-bs-theme="dark">Este bloco comprova o modo escuro local.</div>
+  </section>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Force os estados do botão em <strong>Elements → :hov</strong>. Em
+<strong>Computed</strong>, confira cor, fundo, borda e <code>box-shadow</code>. Na regra
+do accordion, expanda cada variável para ver a cadeia de herança. Use o seletor de
+cores do DevTools para medir o par real, não apenas os tokens isolados.</p></div>
+
+<h2>11. Feche a F2 com uma home funcional e justificável</h2>
+
+<p>Reabra o <strong>Mapa para A13</strong> produzido na A12. Mostre quais decisões
+viraram grid/utilities e quais agora viraram componentes. A home da F2 deve preservar
+conteúdo, semântica e destinos da F1; framework não autoriza apagar informação nem
+trocar elementos nativos por caixas genéricas.</p>
+
+<ol>
+  <li>inclua CSS e bundle 5.3.8 locais uma única vez e registre seus tamanhos;</li>
+  <li>implemente navegação mobile operável por toque e teclado;</li>
+  <li>use offcanvas, modal, accordion ou carousel somente quando a tarefa justificar;</li>
+  <li>garanta ids únicos, nomes, estados e ações de fechar;</li>
+  <li>customize por variables públicas ou por build Sass documentado;</li>
+  <li>teste 320px, fronteiras dos breakpoints, zoom, teclado e movimento reduzido;</li>
+  <li>compare F1 e F2 em peso, velocidade de escrita, controle e quantidade de CSS próprio.</li>
+</ol>
+
+<div class="atelier" data-bootstrap data-bootstrap-js data-modo="demo"
+     data-id="a14-projeto-f2" data-titulo="Referência compacta para a entrega F2" data-vp="390" data-vp-max="1200">
+<template data-papel="css">
+  .marca-f2 .btn-primary { --bs-btn-bg: #245b78; --bs-btn-border-color: #245b78; --bs-btn-hover-bg: #19465e; --bs-btn-hover-border-color: #19465e; }
+  .hero-f2 { background: #e8f2f7; }
+</template>
+<template data-papel="html">
+  <div class="marca-f2">
+    <nav class="navbar navbar-expand-md bg-body-tertiary" aria-label="Principal">
+      <div class="container"><a class="navbar-brand" href="#homeF2">Portfólio</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navF2" aria-controls="navF2" aria-expanded="false" aria-label="Alternar navegação"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navF2"><ul class="navbar-nav ms-auto"><li class="nav-item"><a class="nav-link active" aria-current="page" href="#homeF2">Início</a></li><li class="nav-item"><a class="nav-link" href="#cardsF2">Projetos</a></li></ul></div>
+      </div>
+    </nav>
+    <main id="homeF2"><section class="hero-f2 py-5"><div class="container"><h1>Projetos com evidência</h1><p class="lead">A mesma hierarquia da F1, agora com contratos do framework.</p><button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#contatoF2">Entrar em contato</button></div></section>
+      <section id="cardsF2" class="container py-4"><div class="row g-3"><article class="col-12 col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h5">Pesquisa</h2><p>Problema e evidência.</p></div></div></article><article class="col-12 col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h5">Entrega</h2><p>Resultado e aprendizado.</p></div></div></article></div></section>
+    </main>
+    <div class="modal fade" id="contatoF2" tabindex="-1" aria-labelledby="tituloContatoF2" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-5" id="tituloContatoF2">Contato</h1><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Fechar"></button></div><div class="modal-body">Use o formulário da página de contato.</div></div></div></div>
+  </div>
+</template>
+</div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 11</span>
+<p>Em <strong>Network</strong>, marque <em>Disable cache</em>, recarregue e registre bytes
+de CSS e JS. Em <strong>Coverage</strong>, observe código utilizado sem tratá-lo como
+sentença automática. Em <strong>Elements</strong>, demonstre um alvo e sua variável.
+Em <strong>Device Toolbar</strong>, grave as larguras testadas. Compare esses dados com F1.</p></div>
+
+<div class="callout"><span class="callout-title">Entrega da A14 — F2 concluída</span>
+<p>Entregue a home Bootstrap, recursos locais, CSS próprio e
+<code>COMPATIBILIDADE.md</code> atualizado. Inclua tabela F1 × F2, componentes adotados
+ou rejeitados, contrato de cada alvo, variáveis customizadas, tamanhos transferidos e
+capturas do DevTools que sustentem as decisões.</p></div>
+
+<h2>12. O que precisa ficar de pé</h2>
+
+<div class="table-wrap"><table><thead><tr><th>Pergunta</th><th>Evidência</th></tr></thead><tbody>
+  <tr><td>O recurso carregou?</td><td>Network, Sources e versão no Console</td></tr>
+  <tr><td>Quem aciona quem?</td><td>data-bs-toggle, seletor e id único</td></tr>
+  <tr><td>Qual estado mudou?</td><td>Classes, ARIA, foco, backdrop e eventos</td></tr>
+  <tr><td>O componente cabe na tarefa?</td><td>Conteúdo, interrupção e rota por teclado/toque</td></tr>
+  <tr><td>Como foi customizado?</td><td>Origem das variáveis ou build Sass documentado</td></tr>
+  <tr><td>O que o framework não decidiu?</td><td>Semântica, rótulos, contraste, conteúdo e testes</td></tr>
+</tbody></table></div>
+
+<div class="callout"><span class="callout-title">No DevTools — seção 12</span>
+<p>Refaça o percurso sem editar código: <strong>Network → Elements → Styles → Computed
+→ Accessibility → Rendering</strong>. Em cada painel, mostre uma evidência da sua home.
+Se a explicação não aponta uma observação verificável, ela ainda é apenas opinião.</p></div>
+
+<hr>
+<h2>Leitura primária</h2>
+<p>Documentação oficial Bootstrap 5.3:
+<a href="https://getbootstrap.com/docs/5.3/getting-started/javascript/">JavaScript</a>,
+<a href="https://getbootstrap.com/docs/5.3/components/navbar/">navbar</a>,
+<a href="https://getbootstrap.com/docs/5.3/components/offcanvas/">offcanvas</a>,
+<a href="https://getbootstrap.com/docs/5.3/components/modal/">modal</a>,
+<a href="https://getbootstrap.com/docs/5.3/components/accordion/">accordion</a>,
+<a href="https://getbootstrap.com/docs/5.3/components/carousel/">carousel</a>,
+<a href="https://getbootstrap.com/docs/5.3/customize/css-variables/">variáveis CSS</a>,
+<a href="https://getbootstrap.com/docs/5.3/customize/color-modes/">modos de cor</a> e
+<a href="https://getbootstrap.com/docs/5.3/getting-started/accessibility/">acessibilidade</a>.</p>
+
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o
+acionador, o seletor, o alvo, o estado observado e o painel do DevTools. “Não abriu”
+sem esses dados mistura carga, marcação, breakpoint, estilo e comportamento.</p>
+
+<nav class="aula-nav">
+  <a href="0013-bootstrap-5-3-i-grid-breakpoints-utilities.html">← A13 — Bootstrap I</a>
+  A15 — DOM e eventos →
+</nav>
+<script src="../assets/aulas.js"></script>
+<script src="../assets/shell.js"></script>
+<script src="../assets/course.js"></script>
+<script src="../assets/atelier.js"></script>
+</body>
+</html>

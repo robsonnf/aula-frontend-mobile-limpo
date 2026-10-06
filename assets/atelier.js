@@ -31,6 +31,7 @@
 (function () {
   'use strict';
   var bootstrapCSS = new URL('bootstrap-5.3.8.min.css', document.currentScript.src).href;
+  var bootstrapJS = new URL('bootstrap-5.3.8.bundle.min.js', document.currentScript.src).href;
 
   // esm.sh com ?deps= — a razão é específica, não é gosto:
   //
@@ -310,6 +311,7 @@
       document.querySelectorAll('.atelier'), host));
 
     var editavel = modo === 'exercicio' || modo === 'auditoria';
+    var mostrarBotaoGabarito = !!host.querySelector('[data-auditoria-gabarito]');
 
     var partes = {};
     host.querySelectorAll('template[data-papel]').forEach(function (t) {
@@ -421,7 +423,10 @@
         'body{margin:0;font:16px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1a1a;background:#fff}' +
         '</style>' + (host.hasAttribute('data-bootstrap')
           ? '<link rel="stylesheet" href="' + bootstrapCSS + '">' : '') +
-        '<style>' + estado.css + '</style></head><body>' + estado.html + '</body></html>';
+        '<style>' + estado.css + '</style></head><body>' + estado.html +
+        (host.hasAttribute('data-bootstrap-js')
+          ? '<script src="' + bootstrapJS + '"><\/script>' : '') +
+        '</body></html>';
     }
 
     var timer = null;
@@ -625,8 +630,21 @@
         linha.appendChild(btn);
         linha.appendChild(veredito);
         box.appendChild(linha);
-        itens.push({ linha: linha, real: dados.real });
+        itens.push({ linha: linha, btn: btn, real: dados.real });
       });
+
+      if (temGabarito && mostrarBotaoGabarito) {
+        var bGabarito = el('button', 'at-btn', 'Ver gabarito');
+        bGabarito.type = 'button';
+        bGabarito.addEventListener('click', function () {
+          itens.forEach(function (item) {
+            if (!item.linha.dataset.julgado) item.btn.click();
+          });
+          bGabarito.disabled = true;
+          bGabarito.textContent = 'Gabarito exibido';
+        });
+        box.appendChild(bGabarito);
+      }
 
       var resumo = el('p', 'at-achados-placar');
       resumo.setAttribute('role', 'status');

@@ -112,8 +112,8 @@ window.AULAS = [
     "bloco": "Bootstrap",
     "titulo": "Bootstrap 5.3 II: componentes mobile e customização",
     "ementa": "Bootstrap – recursos mobile",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0014-bootstrap-5-3-ii-componentes-mobile-e-customizacao.html",
+    "disponivel": true
   },
   {
     "n": 15,

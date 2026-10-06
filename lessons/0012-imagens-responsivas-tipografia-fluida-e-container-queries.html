@@ -222,16 +222,21 @@ por si só, não garante nem invalida o resultado.</p>
 </ol>
 </div>
 
-<h2>8. Exercício: um componente, dois espaços</h2>
+<h2>8. Exercício: viewport organiza a página; container organiza o componente</h2>
 <div class="atelier" data-modo="exercicio" data-edita="css"
-     data-id="a12-ex3-container" data-titulo="O wrapper decide" data-vp="1000">
-<p data-papel="enunciado">Mantenha a composição externa. Remova a media query que
-torna todas as fichas horizontais. Crie um container nomeado ficha de inline-size em
-cada slot. Preserve a base de uma coluna e use duas colunas 1fr/2fr somente quando o
-wrapper atingir 30rem. Aplique ao h3 fallback 1.25rem e clamp(1.25rem, 1rem + 1cqi, 2rem).</p>
-<p data-papel="dica">Compare as duas fichas sem mudar a janela. Qual ancestral de
-cada ficha realmente recebe a largura disponível? O alvo da query é esse ancestral
-ou uma descendente? Confira se existe uma base legível quando a melhoria não atua.</p>
+     data-id="a12-ex3-container" data-titulo="Dois gatilhos, duas responsabilidades" data-vp="1000">
+<p data-papel="enunciado">Mantenha a media query de 55rem: ela organiza a página em
+lateral e conteúdo de acordo com o viewport. Remova somente a media query de 30rem,
+que torna todas as fichas horizontais por causa da janela. Crie em cada slot um
+container nomeado <code>ficha</code> de <code>inline-size</code>. Preserve a base de uma
+coluna e use duas colunas <code>1fr 2fr</code> apenas quando o container atingir 30rem.
+Sem alterar o viewport de 1000px, demonstre a ficha estreita empilhada e a larga em
+duas colunas. Aplique ao h3 o fallback 1.25rem e
+<code>clamp(1.25rem, 1rem + 1cqi, 2rem)</code>.</p>
+<p data-papel="dica">Separe as perguntas. A mudança é da composição da página inteira
+ou do arranjo interno de um componente reutilizável? Compare as duas fichas sem mudar
+a janela e identifique qual ancestral realmente oferece espaço a cada uma. Confira
+também se existe uma base legível quando a melhoria não atua.</p>
 <template data-papel="css">
   .contextos { display: grid; gap: 1rem; }
   @media (min-width: 55rem) { .contextos { grid-template-columns: 16rem minmax(0, 1fr); } }
@@ -249,28 +254,60 @@ ou uma descendente? Confira se existe uma base legível quando a melhoria não a
 </template>
 </div>
 
-<h2>9. Feche a fase F1 do projeto</h2>
+<div class="quiz">
+  <p class="quiz-q">Intercale A9: uma transformação muda o espaço reservado no fluxo?</p>
+  <ul class="quiz-opts">
+    <li>Sim. O fluxo passa a usar a posição visual transformada</li>
+    <li>Não. O fluxo continua reservando o espaço original</li>
+    <li>Somente quando a transformação usa <code>rotate()</code></li>
+  </ul>
+  <p class="quiz-feedback"></p>
+</div>
+
+<h2>9. Mostre a home pronta da F1 e mapeie decisões para classes</h2>
+<p>Apresente a home completa da fase F1 funcionando, não apenas capturas de tela.
+Mostre-a em uma largura estreita e em uma larga, com navegação por teclado e texto
+ampliado. Enquanto demonstra, anote no fim de <code>COMPATIBILIDADE.md</code>, sob o
+título <strong>Mapa para A13</strong>, quais decisões da interface poderão ser
+expressas por classes na próxima reconstrução.</p>
+
+<div class="table-wrap"><table><thead><tr><th>Decisão observada</th><th>Evidência na home F1</th><th>Responsabilidade da futura classe</th></tr></thead><tbody>
+  <tr><td>Composição</td><td>Quando colunas surgem ou voltam a empilhar</td><td>Container, linha, coluna e breakpoint</td></tr>
+  <tr><td>Espaçamento</td><td>Distância repetida entre seções e controles</td><td>Margem, padding ou gap</td></tr>
+  <tr><td>Alinhamento</td><td>Distribuição e posição dos elementos</td><td>Display, eixo, alinhamento ou ordem</td></tr>
+  <tr><td>Imagem</td><td>Caixa fluida, proporção e enquadramento</td><td>Dimensionamento responsivo</td></tr>
+  <tr><td>Visibilidade</td><td>Conteúdo que muda com critério justificado</td><td>Exibição por contexto, sem perder informação</td></tr>
+</tbody></table></div>
+
+<p>Registre decisões, não nomes decorativos inventados. Não transforme em classe o que
+é responsabilidade do HTML semântico, do conteúdo, do texto alternativo ou de um
+estado que precisa continuar compreensível sem CSS.</p>
+
+<h2>10. Feche a fase F1 do projeto</h2>
 <ol>
   <li>adapte uma imagem informativa com dimensões, alt e candidatos reais;</li>
   <li>justifique o slot de sizes pela caixa medida, não pelo nome do aparelho;</li>
   <li>use picture somente quando recorte/formato justificar;</li>
   <li>revise título, entrelinha e medida de leitura com conteúdo extenso;</li>
   <li>reutilize um componente em dois wrappers e teste sua query de tamanho;</li>
-  <li>confira a base sem a melhoria e ampliação sem perda de informação.</li>
+  <li>confira a base sem a melhoria e ampliação sem perda de informação;</li>
+  <li>apresente a home pronta e registre o <strong>Mapa para A13</strong>.</li>
 </ol>
 <div class="callout"><span class="callout-title">Entrega da A12 — F1 concluída</span>
 <p>Entregue HTML semântico, CSS próprio e imagens locais, sem framework. Atualize
 <code>COMPATIBILIDADE.md</code> com larguras dos recursos, sizes, currentSrc observado,
 slot medido, testes de fonte/zoom e os dois contextos do componente. Não afirme ganho
-de rede sem medir os bytes.</p></div>
+de rede sem medir os bytes. Inclua o mapa de decisões para classes, distinguindo o que
+pertence ao layout, ao componente e ao HTML semântico.</p></div>
 
-<h2>10. O que precisa ficar de pé</h2>
+<h2>11. O que precisa ficar de pé</h2>
 <div class="table-wrap"><table><thead><tr><th>Pergunta</th><th>Evidência</th></tr></thead><tbody>
   <tr><td>Qual caixa?</td><td>Tamanho renderizado e limite CSS</td></tr>
   <tr><td>Qual recurso?</td><td>srcset, sizes, currentSrc e bytes medidos</td></tr>
   <tr><td>Qual enquadramento?</td><td>source correspondente e img de fallback</td></tr>
   <tr><td>Qual leitura?</td><td>Texto ampliado sem corte ou perda de operação</td></tr>
   <tr><td>Qual contexto?</td><td>Ancestral elegível, nome, tipo e descendente</td></tr>
+  <tr><td>Qual classe?</td><td>Decisão observável de layout ou componente, sem substituir semântica</td></tr>
 </tbody></table></div>
 
 <hr>
@@ -287,7 +324,6 @@ com nome moderno continua precisando de evidência.</p>
   <a href="0011-media-queries-e-estrategia-de-breakpoints.html">← A11 — Media queries</a>
   <a href="0013-bootstrap-5-3-i-grid-breakpoints-utilities.html">A13 — Bootstrap I →</a>
 </nav>
-<p class="modo-dica">N — roteiro · P — modo apresentação</p>
 <script src="../assets/aulas.js"></script>
 <script src="../assets/shell.js"></script>
 <script src="../assets/course.js"></script>

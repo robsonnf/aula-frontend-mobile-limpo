@@ -10,7 +10,8 @@
 Leia o CSS que essas classes representam, teste as fronteiras e conserve uma base
 legível. O framework acelera decisões recorrentes; os requisitos do conteúdo continuam guiando o layout.</p>
 
-<div class="quiz" data-dica="Observe qual condição mede a janela e qual mede o wrapper de um componente.">
+<div class="quiz" data-dica="Observe qual condição mede a janela e qual mede o wrapper de um componente."
+>
 <p class="quiz-q">Uma classe col-md-6 reage a qual espaço?</p><ul class="quiz-opts"><li>À largura do cartão ancestral</li><li>Ao breakpoint do viewport</li><li>Ao tamanho físico do monitor</li></ul><p class="quiz-feedback"></p></div>
 
 <h2>1. Carregue a folha e observe a composição</h2>
@@ -78,8 +79,9 @@ define qual regra vence: isso depende da cascata do CSS.</p>
 
 <h2>6. Gutters e espaçamento: entenda a caixa</h2>
 <p><code>g-*</code>, <code>gx-*</code> e <code>gy-*</code> controlam os gutters da row.
-O horizontal combina padding das colunas e margens negativas da row; o vertical usa
-margens nas colunas. Não é simplesmente gap. Aumentar gutters pode exigir ajustar o
+O horizontal combina padding das colunas e margens negativas da row; o vertical combina
+margem superior negativa na row e margem superior nos filhos imediatos. Não é simplesmente
+gap. Aumentar gutters pode exigir ajustar o
 padding do wrapper para evitar transbordamento.</p>
 <p>Na escala padrão, 0, 1, 2, 3, 4 e 5 equivalem a 0, .25rem, .5rem, 1rem, 1.5rem e 3rem.
 Em <code>p-3</code>, p indica padding; em <code>mt-md-4</code>, m indica margem,
@@ -123,12 +125,14 @@ adequada; evite empilhar correções sem inspecionar o estilo calculado.</p>
 <code>mx-auto</code> usa margens horizontais automáticas; precisa de espaço livre e
 um contexto apropriado. Bordas, arredondamento e cores auxiliam a leitura visual, mas
 não substituem título, rótulo, contraste e HTML semântico.</p>
-<div class="quiz" data-dica="Abra o estilo calculado e compare a prioridade das duas declarações.">
+<div class="quiz" data-dica="Abra o estilo calculado e compare a prioridade das duas declarações."
+>
 <p class="quiz-q">Por que padding:0 normal, escrito depois, pode perder para p-4?</p><ul class="quiz-opts"><li>A última classe no atributo sempre ganha</li><li>Bootstrap impede qualquer CSS próprio</li><li>A utility usa !important no build padrão</li></ul><p class="quiz-feedback"></p></div>
 <p class="fonte"><a href="https://getbootstrap.com/docs/5.3/utilities/api/">Bootstrap — Utility API</a></p>
 
 <h2>9. Auditoria: o framework cumpriu o enunciado?</h2>
 <div class="atelier" data-bootstrap data-modo="auditoria" data-edita="html" data-id="a13-auditoria" data-titulo="Uma IA montou o catálogo" data-vp="390" data-vp-max="1600">
+
 <p data-papel="enunciado">Os dois cartões devem ficar empilhados abaixo de md e lado a lado de md em diante. As instruções precisam estar visíveis em todas as larguras. O painel final deve ter padding zero. Examine HTML e CSS e marque somente falhas reais.</p>
 <p data-papel="dica">Monte uma tabela de requisitos e larguras. Para cada afirmação, localize a classe e observe seu efeito calculado. Confira os pontos 767/768 e 991/992. Diferencie decisão válida de descumprimento do enunciado; a posição do item não informa seu julgamento.</p>
 <template data-papel="css">body { padding-block: 1rem; } .bloco { padding: 1rem; border: 2px solid #1769aa; background: #e8f2fb; color: #172b3a; } .bloco-alt { background: #fff1d6; border-color: #946000; } .painel { padding: 0; }</template>
@@ -176,7 +180,6 @@ e o que ainda exige CSS próprio. Documente o peso do CSS local e o que foi util
 <a href="https://getbootstrap.com/docs/5.3/utilities/flex/">flex</a> e
 <a href="https://getbootstrap.com/docs/5.3/utilities/api/">Utility API</a>.</p>
 <p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o requisito, as classes, a largura da janela e o estilo calculado.</p>
-<nav class="aula-nav"><a href="0012-imagens-responsivas-tipografia-fluida-e-container-queries.html">← A12 — Técnicas responsivas</a>A14 — Bootstrap II →</nav>
-<p class="modo-dica">N — roteiro · P — modo apresentação</p>
+<nav class="aula-nav"><a href="0012-imagens-responsivas-tipografia-fluida-e-container-queries.html">← A12 — Técnicas responsivas</a><a href="0014-bootstrap-5-3-ii-componentes-mobile-e-customizacao.html">A14 — Bootstrap II →</a></nav>
 <script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
 </body></html>

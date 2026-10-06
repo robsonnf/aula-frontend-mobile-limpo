@@ -64,6 +64,11 @@ esta aula não exige JavaScript do Bootstrap. Arraste a largura da prévia para
 observar breakpoints. O código inicial de um exercício pode conter erros
 intencionais descritos no enunciado: investigá-los faz parte da atividade.
 
+A14 acrescenta o bundle oficial Bootstrap 5.3.8, também local e coberto pela
+mesma licença MIT. Navbar, collapse, offcanvas, modal, accordion e carousel
+funcionam offline nas prévias marcadas para JavaScript. Abra o DevTools conforme
+indicado em cada seção para observar carga, alvo, classes, ARIA, foco e variáveis.
+
 Quizzes e marcações de auditoria começam limpos a cada abertura ou
 recarregamento. Ao escolher, a seleção azul e o ícone indicam apenas
 "Resposta registrada", não acerto ou erro. A auditoria mostra o contador
@@ -97,3 +102,4 @@ CONTEÚDO
   - A11 — Media queries e estratégia de breakpoints
   - A12 — Imagens responsivas, tipografia fluida e container queries
   - A13 — Bootstrap 5.3 I: grid, breakpoints, utilities
+  - A14 — Bootstrap 5.3 II: componentes mobile e customização
