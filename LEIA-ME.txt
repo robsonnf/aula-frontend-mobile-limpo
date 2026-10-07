@@ -69,6 +69,15 @@ mesma licença MIT. Navbar, collapse, offcanvas, modal, accordion e carousel
 funcionam offline nas prévias marcadas para JavaScript. Abra o DevTools conforme
 indicado em cada seção para observar carga, alvo, classes, ARIA, foco e variáveis.
 
+A15 e A16 acrescentam a aba JS aos exercícios. A edição reinicia a prévia;
+o rascunho é salvo, mas o estado da demonstração volta ao início. Reiniciar
+restaura o código original. Erros de JavaScript aparecem na prévia e no Console.
+A16 usa jQuery Core 4.0.0 completo, local, com licença em jquery-LICENSE.txt.
+Não inclui jQuery Mobile. As bibliotecas locais e as atividades funcionam offline.
+Cada seção indica o painel do DevTools e o teste a executar. Ao usar o Console,
+selecione o iframe da prévia, e não o contexto top. Para gestos de toque,
+combine emulação com teste em dispositivo real e preserve operação por teclado.
+
 Quizzes e marcações de auditoria começam limpos a cada abertura ou
 recarregamento. Ao escolher, a seleção azul e o ícone indicam apenas
 "Resposta registrada", não acerto ou erro. A auditoria mostra o contador
@@ -103,3 +112,5 @@ CONTEÚDO
   - A12 — Imagens responsivas, tipografia fluida e container queries
   - A13 — Bootstrap 5.3 I: grid, breakpoints, utilities
   - A14 — Bootstrap 5.3 II: componentes mobile e customização
+  - A15 — DOM, eventos, delegação, pointer e touch
+  - A16 — jQuery e bibliotecas para mobile

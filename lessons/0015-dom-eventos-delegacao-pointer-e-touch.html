@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A15 — DOM, eventos, delegação, pointer e touch</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 15 de 22 · 3h · JavaScript</p>
+<h1>DOM, eventos,<br>delegação, pointer<br>e touch</h1>
+<p class="deck">O comportamento começa com um contrato: quem recebe a ação, qual
+estado muda e como a pessoa percebe o resultado. Hoje a home da F2 ganha interações
+próprias, testadas com teclado, mouse e toque.</p>
+<p>Ao final, você deverá selecionar e alterar o DOM, tratar eventos sem duplicar
+ações, atender elementos criados depois e distinguir ativação de botão de um gesto.</p>
+<div class="callout"><span class="callout-title">Como investigar as prévias</span>
+<p>Edite a aba JS; a prévia reinicia após a edição. O rascunho é salvo, mas o estado
+dos botões da demonstração recomeça. Abra DevTools com F12 ou Ctrl+Shift+I no Chrome/Edge.
+Inspecione um elemento <strong>dentro da prévia</strong>: ela é um iframe.
+No seletor de contexto do Console, troque <code>top</code> pelo frame correto.
+Em Sources, procure <code>atelier-a15-…js</code>. A largura do slider muda o iframe;
+a Device Toolbar muda a janela externa. Emulação ajuda, mas o teste de gesto também
+deve ser repetido em um celular real.</p></div>
+
+<div class="quiz" data-dica="Separe largura disponível de dispositivo de entrada. Teste teclado numa janela estreita."
+>
+<p class="quiz-q">Retomada A11/A14: qual conclusão é válida numa janela de 390px?</p>
+<ul class="quiz-opts"><li>A pessoa usa necessariamente toque</li><li>O layout tem pouco espaço; a entrada precisa ser testada separadamente</li><li>Podemos remover os estados de foco</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. DOM: selecionar, criar e atualizar texto</h2>
+<p>O DOM é a árvore de objetos que o navegador constrói. <code>querySelector()</code>
+retorna o primeiro elemento ou null; <code>querySelectorAll()</code> retorna uma
+NodeList estática. Uma seleção antiga não incorpora os nós criados depois.
+Use <code>createElement()</code>, <code>textContent</code> e <code>append()</code>
+para mostrar texto digitado. <code>innerHTML</code> interpreta marcação e não deve
+receber entrada não confiável sem tratamento apropriado.</p>
+<pre><code>const item = document.createElement('li');
+item.textContent = campo.value;
+lista.append(item);</code></pre>
+<div class="atelier" data-modo="demo" data-id="a15-dom" data-titulo="Texto continua texto" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } input, button { font: inherit; padding: .5rem; max-width: 100%; } li { overflow-wrap: anywhere; }</template>
+<template data-papel="html"><label for="nome">Título do projeto</label><input id="nome" value="Meu portfólio"><button type="button" id="adicionar">Adicionar</button><ul id="lista"></ul><p id="status" role="status">Nenhum projeto adicionado.</p></template>
+<template data-papel="js">
+const campo = document.querySelector('#nome');
+const lista = document.querySelector('#lista');
+const antes = lista.querySelectorAll('li');
+document.querySelector('#adicionar').addEventListener('click', () => {
+  if (!campo.value.trim()) return;
+  const item = document.createElement('li');
+  item.textContent = campo.value.trim();
+  lista.append(item);
+  document.querySelector('#status').textContent =
+    'Seleção antiga: ' + antes.length + '; seleção nova: ' + lista.querySelectorAll('li').length;
+});
+</template></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Em Elements, selecione <code>#lista</code>, clique com o botão direito →
+<strong>Break on → Subtree modifications</strong>. Adicione texto contendo
+<code>&lt;strong&gt;Teste&lt;/strong&gt;</code>: observe um nó de texto, sem elemento strong.
+No Console do frame, compare as contagens antes/depois; recarregue a prévia para reiniciar.</p></div>
+
+<h2>2. Eventos: alvo, ouvinte e ação padrão</h2>
+<p><code>addEventListener('click', tratar)</code> registra uma função, sem chamá-la
+na instalação. Em um listener nativo, <code>target</code> é a origem exposta do evento
+e <code>currentTarget</code> é o elemento cujo listener está executando. Muitos eventos,
+como click, percorrem captura, alvo e propagação ascendente; nem todos fazem bubbling.
+<code>preventDefault()</code> cancela uma ação padrão cancelável; não interrompe a
+propagação. <code>stopPropagation()</code> atua na propagação, sem cancelar a ação padrão.</p>
+<div class="atelier" data-modo="demo" data-id="a15-eventos" data-titulo="Clique também no texto interno" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } button { font: inherit; padding: 1rem; } span { border: 1px dashed; padding: .3rem; }</template>
+<template data-papel="html"><div id="regiao"><button id="acao" type="button"><span>Executar</span></button></div><p id="saida" role="status">Aguardando ativação.</p></template>
+<template data-papel="js">
+let total = 0;
+document.querySelector('#regiao').addEventListener('click', (evento) => {
+  total += 1;
+  document.querySelector('#saida').textContent = total + ' ativação(ões); target=' +
+    evento.target.tagName + '; currentTarget=' + evento.currentTarget.id;
+});
+</template></div>
+<p>Um botão nativo oferece ativação por teclado. Para a ação principal use click;
+pointerdown e touchstart descrevem contatos, não substituem esse contrato.
+Para formulário, trate submit no form, incluindo o envio por Enter.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Em Sources → <strong>Event Listener Breakpoints → Mouse → click</strong>, ative a
+pausa. Clique no span e examine <code>evento.target</code> e
+<code>evento.currentTarget</code> em Scope. Elements → Event Listeners mostra listeners
+do elemento e, conforme a opção Ancestors, de ancestrais. Retome com F8 antes de testar Tab/Enter.</p></div>
+
+<h2>3. Delegação: um ancestral estável, inclusive para novos itens</h2>
+<p>Instale o listener na lista e descubra qual botão foi acionado usando
+<code>closest()</code>. Verifique se o botão pertence à lista. Isso atende nós criados
+depois e cliques em um span interno. Não registre novamente o mesmo comportamento
+a cada renderização. Em componentes aninhados, delimite também qual componente é dono do botão.</p>
+<div class="atelier" data-modo="demo" data-id="a15-delegacao" data-titulo="Adicione itens depois do listener" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } button { font: inherit; padding: .7rem; } li { margin-block: .5rem; }</template>
+<template data-papel="html"><button type="button" id="novo">Novo item</button><ul id="tarefas"><li><button type="button" data-acao="selecionar"><span>Projeto 1</span></button></li></ul><p id="status" role="status">Escolha um projeto.</p></template>
+<template data-papel="js">
+const lista = document.querySelector('#tarefas');
+let numero = 1;
+document.querySelector('#novo').addEventListener('click', () => {
+  const li = document.createElement('li');
+  const botao = document.createElement('button');
+  botao.type = 'button';
+  botao.dataset.acao = 'selecionar';
+  botao.textContent = 'Projeto ' + (++numero);
+  li.append(botao);
+  lista.append(li);
+});
+lista.addEventListener('click', (evento) => {
+  const botao = evento.target.closest('button[data-acao="selecionar"]');
+  if (!botao || !lista.contains(botao)) return;
+  document.querySelector('#status').textContent = 'Escolhido: ' + botao.textContent;
+});
+</template></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Selecione <code>#tarefas</code> em Elements → Event Listeners. Adicione dois itens:
+o listener continua na lista. Em Sources, pause dentro do handler e acompanhe
+<code>closest()</code> ao clicar no span. Clique num espaço sem botão e veja a guarda retornar.</p></div>
+
+<h2>4. Exercício: formulário e texto literal</h2>
+<div class="atelier" data-modo="exercicio" data-edita="js" data-id="a15-ex1-formulario" data-titulo="Uma submissão, um resultado" data-vp="390">
+<p data-papel="enunciado">Repare o JS para que o formulário funcione pelo botão e por
+Enter, sem recarregar a página. Ignore um nome só de espaços. Acrescente um li com o
+texto literal, informe o total, limpe o campo e devolva o foco a ele. Não implemente
+envio remoto: este é um cadastro local de demonstração.</p>
+<p data-papel="dica">Compare ativação do botão com submissão do formulário. Observe
+qual nó recebe o listener e qual operação cria o texto. Teste espaços, Enter e
+caracteres que se parecem com HTML, conferindo foco e contagem.</p>
+<template data-papel="css">body { padding: 1rem; } input, button { font: inherit; padding: .6rem; max-width: 100%; } li { overflow-wrap: anywhere; }</template>
+<template data-papel="html"><form id="cadastro"><label for="nome">Projeto</label><input id="nome" required><button type="submit">Registrar projeto</button></form><ul id="projetos"></ul><p id="status" role="status">Nenhum projeto registrado.</p></template>
+<template data-papel="js">
+const form = document.querySelector('#cadastro');
+const campo = document.querySelector('#nome');
+const lista = document.querySelector('#projetos');
+form.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  // Complete o contrato do enunciado.
+  document.querySelector('#status').textContent = 'Envio interceptado; falta registrar o projeto.';
+});
+</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Em Sources, coloque um breakpoint no handler de submit. Em Elements veja os li e,
+no Console do frame, <code>document.activeElement</code>. Em Network confirme que
+registrar não gera navegação nem requisição de cadastro. Isso não prova persistência em servidor.</p></div>
+
+<h2>5. Exercício: delegação sem perder cliques internos</h2>
+<div class="atelier" data-modo="exercicio" data-edita="js" data-id="a15-ex2-delegacao" data-titulo="Botões atuais e futuros" data-vp="390">
+<p data-papel="enunciado">Mantenha o botão Novo e repare a seleção de projetos.
+Um único listener na lista deve atualizar o status tanto para o primeiro span quanto
+para botões criados depois. Espaços da lista não selecionam nada; teclado e mouse
+devem produzir o mesmo resultado.</p>
+<p data-papel="dica">Crie um item antes de julgar a implementação. Compare o nó clicado
+com o controle pretendido e identifique onde o listener foi instalado.</p>
+<template data-papel="css">body { padding: 1rem; } button { font: inherit; padding: .7rem; } ul { padding-block: 1rem; border: 1px solid; }</template>
+<template data-papel="html"><button id="novo" type="button">Novo</button><ul id="lista"><li><button type="button" data-escolher><span>Projeto 1</span></button></li></ul><p id="status" role="status">Nenhuma escolha.</p></template>
+<template data-papel="js">
+const lista = document.querySelector('#lista');
+let numero = 1;
+document.querySelector('#novo').addEventListener('click', () => {
+  const li = document.createElement('li');
+  const b = document.createElement('button');
+  b.type = 'button'; b.dataset.escolher = ''; b.textContent = 'Projeto ' + (++numero);
+  li.append(b); lista.append(li);
+});
+document.querySelectorAll('[data-escolher]').forEach((b) => {
+  b.addEventListener('click', (evento) => {
+    if (!evento.target.matches('[data-escolher]')) return;
+    document.querySelector('#status').textContent = evento.target.textContent;
+  });
+});
+</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Use Elements → Event Listeners nos botões antigo/novo e no ancestral. Em Sources,
+pause na condição e examine o retorno de matches/closest. Após corrigir, repita
+com foco no botão e Enter; não conclua o teste usando apenas <code>.click()</code> no Console.</p></div>
+
+<h2>6. Pointer: contato, captura e cancelamento</h2>
+<p>Pointer Events unificam mouse, caneta e toque; <code>pointerType</code> informa a
+entrada daquele evento. Use <code>pointerId</code> para acompanhar um contato e
+<code>setPointerCapture()</code> quando o gesto precisa continuar fora do elemento.
+Finalize tanto em pointerup quanto em <code>pointercancel</code> e perda de captura.
+O navegador pode assumir a rolagem e cancelar o gesto da aplicação.</p>
+<p>O exemplo usa <code>touch-action: pan-y pinch-zoom</code> na área horizontal:
+permite rolagem vertical e zoom por pinça. A decisão de touch-action considera também
+ancestrais; alterá-la depois do início do gesto não redefine o gesto atual.
+A mesma tarefa está disponível num input range, operável por teclado.</p>
+<div class="atelier" data-modo="demo" data-id="a15-pointer" data-titulo="Arraste ou use o controle nativo" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } #area { border: 2px solid #245b78; padding: 1.5rem; touch-action: pan-y pinch-zoom; user-select: none; } input { width: 100%; } #ponto { width: 1rem; height: 1rem; background: #245b78; border-radius: 50%; }</template>
+<template data-papel="html"><p id="instrucao">Arraste horizontalmente na área ou use o controle abaixo.</p><div id="area" aria-describedby="instrucao"><div id="ponto"></div></div><label for="posicao">Posição horizontal</label><input id="posicao" type="range" min="0" max="100" value="50"><output id="valor" for="posicao">50%</output><p id="status" role="status">Pronto.</p></template>
+<template data-papel="js">
+const area = document.querySelector('#area');
+const controle = document.querySelector('#posicao');
+let ativo = null;
+function desenhar() {
+  document.querySelector('#ponto').style.marginLeft = 'calc(' + controle.value + '% - ' + (Number(controle.value) / 100) + 'rem)';
+  document.querySelector('#valor').textContent = controle.value + '%';
+}
+function mover(e) {
+  const caixa = area.getBoundingClientRect();
+  controle.value = Math.round(Math.max(0, Math.min(100, (e.clientX - caixa.left) / caixa.width * 100)));
+  desenhar();
+}
+area.addEventListener('pointerdown', (e) => {
+  if (ativo !== null || !e.isPrimary || e.button !== 0) return;
+  ativo = e.pointerId;
+  area.setPointerCapture(ativo);
+  mover(e);
+  document.querySelector('#status').textContent = 'Contato: ' + e.pointerType;
+});
+area.addEventListener('pointermove', (e) => { if (e.pointerId === ativo) mover(e); });
+function terminar(e) {
+  if (e.pointerId !== ativo) return;
+  ativo = null;
+  if (area.hasPointerCapture(e.pointerId)) area.releasePointerCapture(e.pointerId);
+  document.querySelector('#status').textContent = 'Encerrado: ' + e.type;
+}
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach((tipo) => area.addEventListener(tipo, terminar));
+controle.addEventListener('input', desenhar);
+desenhar();
+</template></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Em Sources → Event Listener Breakpoints, procure os eventos Pointer; pause em
+pointerdown e examine pointerId/pointerType. Em Elements → Computed, filtre
+touch-action na área e nos ancestrais. Arraste para fora e solte. Na Device Toolbar,
+selecione um perfil com toque; a largura sozinha não ativa emulação de touch.</p></div>
+
+<h2>7. Touch, listeners passivos e limpeza</h2>
+<p>Ao manter código com Touch Events, diferencie <code>touches</code> (contatos ativos)
+de <code>changedTouches</code> (contatos envolvidos na mudança). Em touchend, o contato
+encerrado já saiu de touches. Não some touchstart e click para executar a mesma ação:
+uma sequência de toque pode produzir ambos.</p>
+<p>Um listener <code>passive: true</code> promete não cancelar a ação padrão;
+preventDefault nele é ignorado. Se houver necessidade real de cancelar, confira
+cancelable e configure passive conscientemente. Para gestos, prefira planejar
+touch-action na região, preservando rolagem e zoom. Ao desmontar um componente,
+remova seus listeners; <code>AbortController</code> permite agrupar listeners nativos.</p>
+<div class="atelier" data-modo="demo" data-id="a15-touch" data-titulo="Observe sem cancelar a rolagem" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } #area { border: 2px solid; min-height: 7rem; touch-action: auto; } button { padding: .7rem; font: inherit; }</template>
+<template data-papel="html"><div id="area">Toque aqui num dispositivo ou emulação de toque.</div><p id="status" role="status">Aguardando touch; mouse não gera esta demonstração.</p><button id="parar" type="button">Parar observação</button></template>
+<template data-papel="js">
+const controle = new AbortController();
+const area = document.querySelector('#area');
+['touchstart', 'touchend', 'touchcancel'].forEach((tipo) => {
+  area.addEventListener(tipo, (e) => {
+    document.querySelector('#status').textContent = e.type + ': ativos=' + e.touches.length +
+      '; alterados=' + e.changedTouches.length;
+  }, { passive: true, signal: controle.signal });
+});
+document.querySelector('#parar').addEventListener('click', () => {
+  controle.abort();
+  document.querySelector('#status').textContent = 'Observação encerrada. Reabra a prévia para repetir.';
+});
+</template></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Em Sources, pause no handler de touchend e expanda touches e changedTouches em
+Scope. Em Elements → Event Listeners confira os listeners de <code>#area</code>
+antes/depois de Parar observação. Console mostra o aviso se você experimentar cancelar
+um listener passivo. Não interprete ausência de touch no mouse como defeito.</p></div>
+<div class="quiz" data-dica="Separe a ação padrão do percurso de propagação. Compare as APIs antes de registrar."
+>
+<p class="quiz-q">Qual afirmação descreve preventDefault?</p><ul class="quiz-opts"><li>Remove automaticamente todos os listeners</li><li>Interrompe sempre o bubbling</li><li>Solicita cancelar a ação padrão, conforme cancelabilidade e opções do listener</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>8. Auditoria de CSS: aparência, foco e gestos</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css" data-id="a15-auditoria" data-titulo="Uma interface bonita também precisa operar" data-vp="390">
+<p data-papel="enunciado">Requisitos: o botão deve ter foco visível, aceitar mouse e
+teclado, manter título e texto legíveis com quebra de linha e não impedir gestos
+nativos de rolagem/zoom na página. Audite o CSS, marque falhas reais e faça os reparos.</p>
+<p data-papel="dica">Conecte cada afirmação a um requisito. Teste Tab, clique, título
+comprido e gesto; procure declarações calculadas e não infira um defeito só pelo nome da propriedade.</p>
+
+<template data-papel="css">
+body { padding: 1rem; touch-action: none; }
+button { font: inherit; padding: .75rem; pointer-events: none; }
+button:focus { outline: none; }
+.titulo { white-space: nowrap; overflow: hidden; }
+.cartao { display: grid; gap: 1rem; border: 1px solid #245b78; padding: 1rem; }
+.icone { transform: translateY(1px); }
+</template>
+<template data-papel="html"><section class="cartao"><h2 class="titulo">Projeto com um título bem longo que precisa continuar legível</h2><button type="button" id="acao"><span class="icone" aria-hidden="true">+</span> Registrar visita</button><p id="status" role="status">0 visitas</p></section></template>
+<template data-papel="js">
+let total = 0;
+document.querySelector('#acao').addEventListener('click', () => {
+  document.querySelector('#status').textContent = (++total) + ' visita(s)';
+});
+</template>
+<ol data-papel="achados">
+<li>O body restringe gestos nativos com touch-action:none.</li>
+<li>O cartão usa Grid, logo click não funciona.</li>
+<li>A transformação do ícone exige recalcular todo o fluxo do documento.</li>
+<li>pointer-events:none impede atingir o botão com o ponteiro.</li>
+<li>O CSS remove o indicador de foco sem oferecer substituição.</li>
+<li>Falta touchstart para o botão responder ao toque.</li>
+<li>A combinação de nowrap e overflow:hidden pode cortar o título.</li>
+<li>role=status obriga mover o foco para o resultado a cada clique.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Elements → Styles permite desligar uma declaração por vez. Em Computed filtre
+pointer-events, outline, white-space e touch-action. Teste foco com Tab, não apenas
+com a simulação :focus. Use Accessibility para conferir o nome do botão e a região de status.</p></div>
+
+<h2>9. Aplique à home — início da F3</h2>
+<ol><li>Escolha uma interação da home: formulário local demonstrável ou seleção de projetos.</li>
+<li>Implemente HTML semântico e listener nativo; preserve a informação principal sem JS.</li>
+<li>Adicione um item após a inicialização e comprove sua operação.</li>
+<li>Se usar arraste, ofereça controle equivalente por teclado e trate cancelamento.</li>
+<li>Registre em COMPATIBILIDADE.md: entrada, ação, resultado, largura, foco e evidência do DevTools.</li></ol>
+<p>Não registre dados pessoais reais no exercício. Se o formulário ainda não envia
+para servidor, diga isso na interface: atualizar uma lista no navegador não é salvar um cadastro remoto.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Network: verifique se ocorreu requisição ou somente atualização local. Sources:
+pause na função da sua home. Elements: compare a árvore antes/depois. Faça uma gravação
+curta em Performance durante a interação, procurando trabalho longo; não deduza rapidez pelo tamanho do código.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Contrato</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>Texto e DOM</td><td>Entrada vira texto; seleção antiga não acompanha nós novos</td></tr>
+<tr><td>Evento</td><td>Alvo, listener, ação padrão e propagação explicados</td></tr>
+<tr><td>Delegação</td><td>Span interno e novo item operam sem duplicação</td></tr>
+<tr><td>Gesto</td><td>Ponteiro identificado, término/cancelamento e alternativa nativa</td></tr>
+<tr><td>Entrega F3 parcial</td><td>Home operável e registro dos testes</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Refaça Elements → Event Listeners → Sources → Console → Network e mostre uma
+evidência por contrato. Ao terminar, desative os breakpoints para a próxima atividade.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll">Seleção do DOM</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent">textContent</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener">addEventListener</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events">Pointer Events</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Touch_events">Touch Events</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action">touch-action</a> ·
+<a href="https://developer.chrome.com/docs/devtools/javascript/breakpoints">Breakpoints no DevTools</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga entrada,
+alvo, listener, estado e o teste que diferencia sua hipótese de outra.</p>
+<nav class="aula-nav"><a href="0014-bootstrap-5-3-ii-componentes-mobile-e-customizacao.html">← A14 — Bootstrap II</a><a href="0016-jquery-e-bibliotecas-para-mobile.html">A16 — jQuery e bibliotecas →</a></nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

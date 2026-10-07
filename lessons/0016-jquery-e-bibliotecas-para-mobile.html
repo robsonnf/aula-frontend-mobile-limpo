@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A16 — jQuery e bibliotecas para mobile</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 16 de 22 · 3h · JavaScript</p>
+<h1>jQuery e bibliotecas<br>para mobile</h1>
+<p class="deck">Uma biblioteca precisa justificar o que acrescenta ao projeto.
+Vamos reconstruir uma interação em jQuery, medir o custo da dependência e decidir
+quando a plataforma já resolve a tarefa. A F3 termina com comportamento verificável.</p>
+<p>Ao final, você deverá ler e escrever seleções jQuery, delegar eventos, desmontar
+listeners com precisão e justificar uma escolha de biblioteca com evidências de
+versão, manutenção, peso, acessibilidade e compatibilidade.</p>
+<div class="callout"><span class="callout-title">Prévia, versão e DevTools</span>
+<p>Os exemplos usam <strong>jQuery Core 4.0.0 completo</strong>, fixado e incluído em
+assets com licença MIT. Funcionam offline; não usam jQuery Mobile. Edite JS e
+aguarde a prévia reiniciar. No Chrome/Edge, F12 abre DevTools. Inspecione dentro do
+iframe e selecione esse frame no Console. Em Sources, busque
+<code>atelier-a16-…js</code>. O <code>$</code> oferecido pelo Console pode ser um
+atalho do DevTools: confirme a biblioteca por <code>window.jQuery?.fn.jquery</code>.</p></div>
+
+<div class="quiz" data-dica="Relembre onde o listener está instalado e o que acontece ao inserir novos descendentes."
+>
+<p class="quiz-q">Retomada A15: como atender botões inseridos depois da carga?</p>
+<ul class="quiz-opts"><li>Delegar o evento num ancestral estável que contenha esses botões</li><li>Recarregar obrigatoriamente toda a página</li><li>Trocar click por touchstart em todos os botões</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Carregamento: biblioteca antes de quem a utiliza</h2>
+<p>jQuery é uma biblioteca de JavaScript para operar o DOM e eventos, entre outras
+APIs; não é uma linguagem nem um requisito de Bootstrap 5.3. Em um projeto comum,
+carregue scripts clássicos externos com defer, na ordem biblioteca → aplicação.
+Scripts async não garantem essa ordem. <code>$(function () { … })</code> aguarda o
+DOM estar pronto, mas não baixa uma biblioteca que está faltando.</p>
+<pre><code>&lt;script defer src="../assets/jquery-4.0.0.min.js"&gt;&lt;/script&gt;
+&lt;script defer src="../assets/app.js"&gt;&lt;/script&gt;</code></pre>
+<p>O atelier insere a biblioteca local antes do JS do exercício. O build completo e
+o slim não oferecem exatamente as mesmas APIs; o slim exclui Ajax e efeitos, entre
+outros módulos conforme a versão. Consulte a distribuição que realmente foi carregada.</p>
+<div class="atelier" data-jquery data-modo="demo" data-id="a16-carga" data-titulo="Confira a dependência em execução" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } button { font: inherit; padding: .75rem; }</template>
+<template data-papel="html"><p id="versao">Carregando demonstração.</p><button type="button" id="acao">Testar biblioteca</button><p id="status" role="status">Aguardando.</p></template>
+<template data-papel="js">
+jQuery(function ($) {
+  $('#versao').text('jQuery Core ' + $.fn.jquery + ' — arquivo local');
+  $('#acao').on('click', function () { $('#status').text('Evento recebido.'); });
+});
+</template></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Em Network, filtre jquery e recarregue a página: confira URL, status e tamanho.
+Em Sources, abra o arquivo para conferir o cabeçalho da versão. No Console do frame,
+avalie <code>window.jQuery.fn.jquery</code>. Bloqueie a URL local usando Request
+blocking, recarregue e observe o erro; depois desfaça o bloqueio.</p></div>
+
+<h2>2. Coleção jQuery, nó DOM e estado</h2>
+<p><code>$('#alvo')</code> retorna uma coleção jQuery; <code>$('#alvo')[0]</code>
+acessa um nó DOM. Uma coleção vazia tem length zero. <code>.text()</code> escreve
+texto, <code>.val()</code> lê/escreve o valor de um campo e <code>.prop()</code> acessa
+propriedades como checked. <code>.attr()</code> trata atributos; para estados ARIA,
+escreva strings explícitas, como <code>'true'</code> e <code>'false'</code>.</p>
+<div class="atelier" data-jquery data-modo="demo" data-id="a16-estado" data-titulo="Propriedade atual versus marcação inicial" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } label { display: block; padding: 1rem; } input { width: 1.3rem; height: 1.3rem; }</template>
+<template data-papel="html"><label><input type="checkbox" id="aceite"> Quero receber o resumo</label><p id="status" role="status">Desmarcado.</p></template>
+<template data-papel="js">
+jQuery(function ($) {
+  $('#aceite').on('change', function () {
+    $('#status').text($(this).prop('checked') ? 'Marcado.' : 'Desmarcado.');
+  });
+});
+</template></div>
+<p>Não use <code>.html()</code> com texto de formulário não confiável. Criar uma
+coleção jQuery não sanitiza dados por si só. A responsabilidade de preservar texto,
+foco e semântica continua sendo do autor.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Em Elements, selecione o checkbox; no Console do frame compare
+<code>window.jQuery('#aceite').prop('checked')</code> com
+<code>window.jQuery('#aceite').attr('checked')</code> antes/depois da mudança.
+Em Accessibility observe checked. A propriedade atual e o atributo inicial não são a mesma coisa.</p></div>
+
+<h2>3. A mesma interação: nativo e jQuery</h2>
+<p>As duas implementações abaixo cumprem o mesmo contrato: um botão alterna a
+seleção e anuncia o estado. Compare requisitos, não apenas quantidade de caracteres.
+A versão nativa não precisa baixar jQuery; a versão jQuery pode fazer sentido num
+projeto que já utiliza a biblioteca e possui equipe preparada para mantê-la.</p>
+<div class="atelier" data-jquery data-modo="demo" data-id="a16-comparacao" data-titulo="Duas APIs, um contrato" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } button { padding: .8rem; margin: .3rem; font: inherit; } [aria-pressed="true"] { background: #245b78; color: white; }</template>
+<template data-papel="html"><button type="button" id="nativo" aria-pressed="false">Favorito nativo</button><button type="button" id="jquery" aria-pressed="false">Favorito jQuery</button><p id="status" role="status">Nenhuma ação.</p></template>
+<template data-papel="js">
+const nativo = document.querySelector('#nativo');
+nativo.addEventListener('click', () => {
+  const ativo = nativo.getAttribute('aria-pressed') !== 'true';
+  nativo.setAttribute('aria-pressed', String(ativo));
+  document.querySelector('#status').textContent = 'Nativo: ' + (ativo ? 'selecionado' : 'removido');
+});
+jQuery(function ($) {
+  $('#jquery').on('click', function () {
+    const ativo = $(this).attr('aria-pressed') !== 'true';
+    $(this).attr('aria-pressed', String(ativo));
+    $('#status').text('jQuery: ' + (ativo ? 'selecionado' : 'removido'));
+  });
+});
+</template></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Elements → Accessibility: compare nome, papel e pressed. Sources → breakpoint no
+handler: percorra cada implementação. Network mostra a dependência da página inteira,
+não atribui automaticamente bytes a cada botão. Para comparar sem jQuery, use páginas
+separadas com os mesmos requisitos.</p></div>
+
+<h2>4. Exercício: delegação e estado com jQuery</h2>
+<p><code>$lista.on('click.favoritos', 'button[data-favorito]', handler)</code> delega
+o evento aos descendentes correspondentes. No handler com função tradicional,
+<code>this</code> é o elemento correspondente ao seletor; <code>event.target</code>
+pode ser seu span interno. Em jQuery, <code>event.delegateTarget</code> identifica
+o ancestral onde a delegação foi instalada. Não transporte automaticamente a
+semântica de currentTarget de um listener nativo para o wrapper jQuery.</p>
+<div class="atelier" data-jquery data-modo="exercicio" data-edita="js" data-id="a16-ex1-favoritos" data-titulo="Favoritos que continuam funcionando" data-vp="390">
+<p data-papel="enunciado">Mantenha a criação de projetos. Corrija a seleção para os
+botões atuais e futuros, incluindo clique no span. Use uma delegação na lista,
+altere aria-pressed e informe o total de favoritos. A segunda ativação deve desmarcar.</p>
+<p data-papel="dica">Inspecione o ponto de instalação, o seletor delegado e o elemento
+que realmente recebeu a ação. Compare o estado lido com o estado escrito, incluindo
+o formato dos valores ARIA. Adicione um projeto antes de concluir.</p>
+<template data-papel="css">body { padding: 1rem; } button { font: inherit; padding: .7rem; } li { margin-block: .5rem; } [aria-pressed="true"] { background: #245b78; color: white; }</template>
+<template data-papel="html"><button type="button" id="novo">Novo projeto</button><ul id="lista"><li><button type="button" data-favorito aria-pressed="false"><span>Projeto 1</span></button></li></ul><p id="status" role="status">0 favorito(s).</p></template>
+<template data-papel="js">
+jQuery(function ($) {
+  let numero = 1;
+  $('#novo').on('click', function () {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.favorito = ''; b.setAttribute('aria-pressed', 'false');
+    b.textContent = 'Projeto ' + (++numero);
+    const li = document.createElement('li'); li.append(b); $('#lista').append(li);
+  });
+  $('[data-favorito]').on('click', function (e) {
+    $(e.target).attr('aria-pressed', 'true');
+    $('#status').text('Uma escolha.');
+  });
+});
+</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Em Sources pause no handler delegado; examine <code>this</code>,
+<code>e.target</code> e <code>e.delegateTarget</code> se declarar o parâmetro e.
+Elements → Accessibility deve mostrar o estado no botão, inclusive após clicar no span.
+Não basta alterar um atributo no filho visual.</p></div>
+
+<h2>5. Exercício: montar duas vezes sem duplicar a ação</h2>
+<p>Namespaces ajudam a remover somente os listeners de um componente.
+<code>.off('click.contador')</code> preserva click de outros namespaces;
+<code>.off('click')</code> é mais amplo. No jQuery, retornar false do handler chama
+preventDefault e stopPropagation; em addEventListener nativo, retornar false não
+tem esse efeito. Prefira intenções explícitas e verifique qual API está usando.</p>
+<div class="atelier" data-jquery data-modo="exercicio" data-edita="js" data-id="a16-ex2-ciclo" data-titulo="Reinicializar sem multiplicar listeners" data-vp="390">
+<p data-papel="enunciado">Repare montar(): depois de acioná-la várias vezes, cada
+clique em Contar deve acrescentar exatamente um ao contador principal. Preserve
+o listener click.telemetria, que atualiza seu contador independentemente. Use um
+namespace próprio para a funcionalidade.</p>
+<p data-papel="dica">Monte três vezes e conte uma. Observe quantas execuções ocorrem.
+Investigue como remover um conjunto de listeners sem apagar o trabalho de outro componente.</p>
+<template data-papel="css">body { padding: 1rem; } button { font: inherit; padding: .8rem; margin: .3rem; }</template>
+<template data-papel="html"><button id="montar" type="button">Montar novamente</button><button id="contar" type="button">Contar</button><p id="status" role="status">0 ação(ões)</p><p id="telemetria">0 observação(ões) local(is)</p></template>
+<template data-papel="js">
+jQuery(function ($) {
+  let total = 0; let observacoes = 0;
+  $('#contar').on('click.telemetria', function () {
+    $('#telemetria').text((++observacoes) + ' observação(ões) local(is)');
+  });
+  function montar() {
+    $('#contar').on('click', function () { $('#status').text((++total) + ' ação(ões)'); });
+  }
+  $('#montar').on('click', montar);
+  montar();
+});
+</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Em Sources, coloque um breakpoint na atualização de total e conte as pausas para
+um clique. O painel Event Listeners pode mostrar um dispatcher jQuery para vários
+handlers: esse número sozinho não demonstra ausência de duplicação. Confira também
+a observação local, que deve continuar aumentando uma vez.</p></div>
+
+<h2>6. jQuery Mobile: reconhecer legado e planejar migração</h2>
+<p>jQuery Core e jQuery Mobile são projetos distintos. O anúncio oficial de
+07/10/2021 descontinuou jQuery Mobile; não o adote como base de um projeto novo.
+Uma página antiga pode continuar abrindo, mas isso não demonstra manutenção,
+compatibilidade futura nem adequação de acessibilidade.</p>
+<p>Ao encontrar uma aplicação antiga: inventarie versões e plug-ins; registre os
+fluxos de navegação e formulários; substitua um componente por vez; teste teclado,
+toque, foco e histórico. Não remova a dependência antes de mapear quem a usa.
+Um upgrade de jQuery Core também exige testar as APIs e os plug-ins da aplicação.</p>
+<div class="atelier" data-modo="demo" data-id="a16-legado" data-titulo="Disclosure da plataforma para um requisito simples" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } details { border: 1px solid #245b78; padding: 1rem; } summary { cursor: pointer; } summary:focus-visible { outline: 3px solid #245b78; }</template>
+<template data-papel="html"><details><summary>Como apresentar o projeto?</summary><p>Abra a home, execute uma tarefa e mostre a evidência do teste.</p></details></template>
+</div>
+<p>Para revelar conteúdo simples, details/summary pode cumprir o requisito sem
+biblioteca. Essa demonstração não é um substituto universal para todos os componentes
+do jQuery Mobile; uma migração depende dos contratos da aplicação real.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Elements: observe o atributo open mudar no details. Accessibility: confira o
+controle e o estado expandido. Network: esta prévia não carrega jQuery; outros
+iframes da mesma aula carregam. Filtre por frame/Initiator para não misturar medições.</p></div>
+
+<h2>7. Bibliotecas para mobile: decidir por requisitos</h2>
+<div class="table-wrap"><table><thead><tr><th>Pergunta</th><th>Evidência a recolher</th></tr></thead><tbody>
+<tr><td>A plataforma já atende?</td><td>Protótipo com details, controles nativos ou scroll snap</td></tr>
+<tr><td>Qual dependência?</td><td>Versão fixa, distribuição, licença e plug-ins necessários</td></tr>
+<tr><td>Quem mantém?</td><td>Repositório oficial, releases, avisos e documentação de migração</td></tr>
+<tr><td>Qual custo real?</td><td>Transferência, tamanho do recurso e trabalho observado em Performance</td></tr>
+<tr><td>Como se opera?</td><td>Teclado, toque, leitor de tela, foco, movimento reduzido e zoom</td></tr>
+<tr><td>Como sai do projeto?</td><td>Desmontagem documentada e impacto da remoção</td></tr>
+</tbody></table></div>
+<p>Exemplo de decisão: Bootstrap 5.3 já está no projeto F2 e oferece componentes;
+jQuery acrescenta uma API de DOM/eventos; CSS scroll snap pode atender uma galeria
+simples. Essas opções não são equivalentes para todos os requisitos. Não instale
+uma biblioteca só porque contém “mobile” no nome.</p>
+<div class="atelier" data-modo="demo" data-id="a16-galeria" data-titulo="Galeria manual sem dependência extra" data-vp="390">
+<template data-papel="css">
+body { padding: 1rem; } .trilho { display: flex; overflow-x: auto; scroll-snap-type: x proximity; gap: 1rem; }
+.trilho article { flex: 0 0 100%; scroll-snap-align: start; padding: 1rem; border: 2px solid #245b78; }
+button { font: inherit; padding: .7rem; } :focus-visible { outline: 3px solid #245b78; outline-offset: 2px; }
+</template>
+<template data-papel="html"><div class="trilho" id="trilho" tabindex="0" role="region" aria-label="Etapas do projeto"><article><h2>Pesquisa</h2><p>Defina um problema.</p></article><article><h2>Protótipo</h2><p>Teste a proposta.</p></article><article><h2>Entrega</h2><p>Registre evidências.</p></article></div><button type="button" id="anterior" hidden>Anterior</button><button type="button" id="proximo" hidden>Próximo</button><p id="status" role="status">Role horizontalmente; controles serão ativados com JavaScript.</p></template>
+<template data-papel="js">
+const trilho = document.querySelector('#trilho');
+const paineis = Array.from(trilho.children);
+const anterior = document.querySelector('#anterior');
+const proximo = document.querySelector('#proximo');
+function indiceAtual() {
+  const esquerda = trilho.getBoundingClientRect().left;
+  return paineis.reduce((melhor, painel, i) =>
+    Math.abs(painel.getBoundingClientRect().left - esquerda) &lt;
+    Math.abs(paineis[melhor].getBoundingClientRect().left - esquerda) ? i : melhor, 0);
+}
+function ir(delta) {
+  const i = Math.max(0, Math.min(paineis.length - 1, indiceAtual() + delta));
+  const destino = trilho.scrollLeft + paineis[i].getBoundingClientRect().left - trilho.getBoundingClientRect().left;
+  trilho.scrollTo({ left: destino, behavior: 'instant' });
+}
+function informar() { document.querySelector('#status').textContent = 'Etapa ' + (indiceAtual() + 1) + ' de 3'; }
+anterior.addEventListener('click', () => ir(-1));
+proximo.addEventListener('click', () => ir(1));
+trilho.addEventListener('scroll', informar, { passive: true });
+anterior.hidden = proximo.hidden = false;
+informar();
+</template></div>
+<p>A galeria não tem autoplay e usa deslocamento instantâneo, sem exigir tratamento
+especial para reduzir animação. A rolagem manual permanece disponível sem JS. Se
+adicionar transição suave, consulte prefers-reduced-motion e teste os dois modos.
+Uma biblioteca de galeria mais complexa só se justifica por requisitos adicionais.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Elements → Styles: localize overflow e scroll-snap-type. Em Rendering, emule
+prefers-reduced-motion e confirme operação. Network → Disable cache + recarregar
+permite medir carga fria; registre separadamente transferred e resource size.
+Em Performance grave a interação; bytes menores não garantem execução mais rápida.</p></div>
+
+<h2>8. Auditoria: eventos e CSS de um componente mobile</h2>
+<div class="atelier" data-jquery data-modo="auditoria" data-edita="js" data-id="a16-auditoria" data-titulo="Diagnostique antes de trocar a biblioteca" data-vp="390">
+<p data-papel="enunciado">Requisitos: cada ativação do botão Ação conta exatamente uma
+vez, inclusive por teclado; repetir Montar não multiplica handlers e não remove o
+observador local. CSS deve manter foco e permitir gestos nativos. Audite JS e CSS;
+repare o JS onde houver descumprimento.</p>
+<p data-papel="dica">Teste montagem repetida, toque e teclado separadamente. Inspecione
+se a remoção atinge somente o componente. Para cada objeção de CSS, compare o estilo
+calculado com o requisito antes de classificá-la.</p>
+
+<template data-papel="css">body { padding: 1rem; touch-action: auto; } .acoes { display: flex; flex-wrap: wrap; gap: .75rem; } button { font: inherit; min-height: 44px; padding: .5rem; } button:focus-visible { outline: 3px solid #245b78; outline-offset: 2px; }</template>
+<template data-papel="html"><div class="acoes"><button id="montar" type="button">Montar</button><button id="acao" type="button">Ação</button></div><p id="status" role="status">0 ação(ões)</p><p id="observador">0 observação(ões)</p></template>
+<template data-papel="js">
+jQuery(function ($) {
+  let total = 0; let observacoes = 0;
+  $('#acao').on('click.observador', function () {
+    $('#observador').text((++observacoes) + ' observação(ões)');
+  });
+  function montar() {
+    $('#acao').on('touchstart click', function () {
+      $('#status').text((++total) + ' ação(ões)');
+    });
+  }
+  $('#montar').on('click', function () { $('#acao').off('click'); montar(); });
+  montar();
+  montar();
+});
+</template>
+<ol data-papel="achados">
+<li>touch-action:auto impede qualquer botão de responder ao toque.</li>
+<li>Registrar a mesma ação em touchstart e click pode duplicar a contagem.</li>
+<li>As duas montagens iniciais acumulam handlers.</li>
+<li>flex-wrap e gap são incompatíveis em interfaces mobile.</li>
+<li>O status deveria usar .html() para atualizar seu texto.</li>
+<li>Montar apaga o listener click.observador.</li>
+<li>O outline de foco muda obrigatoriamente o tamanho de layout do botão.</li>
+<li>Falta jQuery Mobile para Core conseguir tratar click nos botões.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Sources → breakpoint na contagem: compare execuções antes/depois de Montar.
+Em Elements → Computed examine touch-action, flex-wrap, gap e outline ao focar.
+Emule toque e repita por teclado. Os contadores são observáveis; não dependa de
+inspecionar estruturas internas privadas de jQuery.</p></div>
+<div class="quiz" data-dica="Considere o ciclo de vida do componente e a existência de listeners de outras funcionalidades."
+>
+<p class="quiz-q">Por que usar namespace ao desmontar uma funcionalidade?</p><ul class="quiz-opts"><li>Para garantir que qualquer plug-in antigo funcione</li><li>Para remover seus handlers sem atingir os demais</li><li>Para transformar todo click em touchstart</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega da F3: a mesma tarefa, duas implementações</h2>
+<ol><li>Finalize na home a interação nativa da A15 e preserve sua versão.</li>
+<li>Implemente uma peça equivalente em jQuery numa página separada; não execute as duas no mesmo botão.</li>
+<li>Teste mesmos dados, item dinâmico, teclado, toque, zoom e remontagem.</li>
+<li>Compare carga fria e comportamento no mesmo navegador, dispositivo e condições de rede.</li>
+<li>Em COMPATIBILIDADE.md, registre versões, licença, medidas e a decisão de manter ou remover a dependência.</li></ol>
+<p>Use os critérios da seção 7 para avaliar uma biblioteca candidata do seu projeto.
+Se a plataforma já cumprir tudo, essa também é uma decisão justificável. A entrega
+inclui home operável, comparação e limites conhecidos, preparando a auditoria da A17.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Network compara as duas páginas com cache desativado. Performance registra a mesma
+tarefa. Accessibility confirma nomes/estados; Sources confirma uma execução por ação.
+Anote o contexto dos resultados: medidas do laboratório não são dados de todos os usuários.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Dependência</td><td>Core identificado, versão e licença locais</td></tr>
+<tr><td>Estado</td><td>Texto literal, propriedades e ARIA coerentes</td></tr>
+<tr><td>Eventos</td><td>Delegação funciona e remontagem não duplica a ação</td></tr>
+<tr><td>Escolha mobile</td><td>Requisitos, manutenção, custo e alternativa avaliados</td></tr>
+<tr><td>F3 concluída</td><td>Home, peça jQuery comparável e registro de testes</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Mostre, nessa ordem, uma carga em Network, um estado em Elements, um handler em
+Sources e uma tarefa na página. Retire breakpoints e bloqueios de rede ao encerrar.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://jquery.com/download/">Distribuições oficiais</a> ·
+<a href="https://api.jquery.com/ready/">ready</a> ·
+<a href="https://api.jquery.com/on/">on e delegação</a> ·
+<a href="https://api.jquery.com/off/">off e namespaces</a> ·
+<a href="https://api.jquery.com/text/">text</a> ·
+<a href="https://api.jquery.com/prop/">prop</a> ·
+<a href="https://blog.jquery.com/2021/10/07/jquery-maintainers-continue-modernization-initiative-with-deprecation-of-jquery-mobile/">Descontinuação de jQuery Mobile</a> ·
+<a href="https://developer.chrome.com/docs/devtools/javascript/breakpoints">DevTools: breakpoints</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a versão,
+o requisito, a função chamada e a evidência que sustenta sua decisão.</p>
+<nav class="aula-nav"><a href="0015-dom-eventos-delegacao-pointer-e-touch.html">← A15 — DOM e eventos</a>A17 — Acessibilidade →</nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

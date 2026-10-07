@@ -120,16 +120,16 @@ window.AULAS = [
     "bloco": "JavaScript",
     "titulo": "DOM, eventos, delegação, <code>pointer</code> e <code>touch</code>",
     "ementa": "JavaScript – funcionalidades",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0015-dom-eventos-delegacao-pointer-e-touch.html",
+    "disponivel": true
   },
   {
     "n": 16,
     "bloco": "JavaScript",
     "titulo": "jQuery e bibliotecas para mobile",
     "ementa": "JavaScript – bibliotecas; jQuery – mobile",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0016-jquery-e-bibliotecas-para-mobile.html",
+    "disponivel": true
   },
   {
     "n": 17,

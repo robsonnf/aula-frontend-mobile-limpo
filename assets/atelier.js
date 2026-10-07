@@ -32,6 +32,7 @@
   'use strict';
   var bootstrapCSS = new URL('bootstrap-5.3.8.min.css', document.currentScript.src).href;
   var bootstrapJS = new URL('bootstrap-5.3.8.bundle.min.js', document.currentScript.src).href;
+  var jqueryJS = new URL('jquery-4.0.0.min.js', document.currentScript.src).href;
 
   // esm.sh com ?deps= — a razão é específica, não é gosto:
   //
@@ -104,10 +105,11 @@
       import(CM_BASE + '@codemirror/lang-html@6' + CM_DEPS),
       import(CM_BASE + '@codemirror/language@6' + CM_DEPS),
       import(CM_BASE + '@lezer/highlight@1' + CM_DEPS),
-      import(CM_BASE + '@codemirror/state@6.5.2')
+      import(CM_BASE + '@codemirror/state@6.5.2'),
+      import(CM_BASE + '@codemirror/lang-javascript@6' + CM_DEPS)
     ]).then(function (m) {
       return { core: m[0], css: m[1].css, html: m[2].html,
-               lang: m[3], lezer: m[4], state: m[5] };
+               lang: m[3], lezer: m[4], state: m[5], js: m[6].javascript };
     });
 
     var prazo = new Promise(function (_, rejeita) {
@@ -278,7 +280,8 @@
 
   function promoverParaCM(api, mods, aoMudar) {
     var EditorView = mods.core.EditorView;
-    var linguagem = api.linguagem === 'html' ? mods.html() : mods.css();
+    var linguagem = api.linguagem === 'html' ? mods.html()
+      : api.linguagem === 'js' ? mods.js() : mods.css();
 
     // basicSetup NÃO vincula Tab a indentar — indentWithTab é opt-in no CM6 e
     // fica de fora de propósito: Tab tem que continuar movendo o foco, senão o
@@ -315,7 +318,10 @@
 
     var partes = {};
     host.querySelectorAll('template[data-papel]').forEach(function (t) {
-      partes[t.dataset.papel] = dedent(t.innerHTML);
+      // JS é texto, não HTML serializado (que transformaria && em &amp;&amp;).
+      var textoJS = t.dataset.papel === 'js' ||
+        (t.dataset.papel === 'solucao' && (host.dataset.edita || '').split(',')[0].trim() === 'js');
+      partes[t.dataset.papel] = dedent(textoJS ? t.content.textContent : t.innerHTML);
     });
     var enunciadoNo = host.querySelector('[data-papel="enunciado"]');
     var enunciadoHTML = enunciadoNo ? enunciadoNo.innerHTML : '';
@@ -344,6 +350,7 @@
 
     var htmlBase = partes.html || '';
     var cssBase = partes.css || '';
+    var jsBase = partes.js || '';
     var editaveis = (host.dataset.edita || 'css').split(',').map(function (s) { return s.trim(); });
     var solucao = partes.solucao || null;
     // A solução pertence ao primeiro editor declarado. Antes ela era sempre
@@ -405,7 +412,7 @@
     previewCol.appendChild(barra);
     previewCol.appendChild(palco);
 
-    var estado = { html: htmlBase, css: cssBase };
+    var estado = { html: htmlBase, css: cssBase, js: jsBase };
 
     function pintar() {
       if (host.hasAttribute('data-documento')) {
@@ -426,6 +433,14 @@
         '<style>' + estado.css + '</style></head><body>' + estado.html +
         (host.hasAttribute('data-bootstrap-js')
           ? '<script src="' + bootstrapJS + '"><\/script>' : '') +
+        (host.hasAttribute('data-jquery')
+          ? '<script src="' + jqueryJS + '"><\/script>' : '') +
+        (partes.js != null ? '<script>window.addEventListener("error",function(e){' +
+          'var p=document.createElement("pre");p.setAttribute("role","alert");' +
+          'p.style.cssText="white-space:pre-wrap;color:#9b1c1c;padding:1rem";' +
+          'p.textContent="Erro na prévia: "+e.message;document.body.appendChild(p);});<\/script>' +
+          '<script>\n' + estado.js.replace(/<\/script/gi, '<\\/script') +
+          '\n//# sourceURL=atelier-' + (id || 'exemplo') + '.js\n<\/script>' : '') +
         '</body></html>';
     }
 
@@ -507,6 +522,7 @@
       bReiniciar.addEventListener('click', function () {
         estado.html = htmlBase;
         estado.css = cssBase;
+        estado.js = jsBase;
         editaveis.forEach(function (k) { editores[k].define(estado[k]); });
         try { localStorage.removeItem(chave); } catch (e) {}
         if (bSolucao) {
@@ -582,6 +598,13 @@
           /* promoção falhou: o textarea já está de pé, nada a fazer */
         }
       });
+    }
+
+    if (!editavel && partes.js != null) {
+      var codigoDemo = el('details', 'at-dica');
+      codigoDemo.appendChild(el('summary', '', 'Ver código JavaScript da demonstração'));
+      codigoDemo.appendChild(el('pre', '', jsBase));
+      host.appendChild(codigoDemo);
     }
 
     /* O iframe renderiza SEMPRE na largura pedida — é isso que faz a media
