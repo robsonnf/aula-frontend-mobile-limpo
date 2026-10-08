@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A17 — Acessibilidade: WCAG 2.2 na prática</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 17 de 22 · 3h · Qualidade</p>
+<h1>Acessibilidade:<br>WCAG 2.2 na prática</h1>
+<p class="deck">Acessibilidade é requisito verificável, não acabamento. Nesta aula,
+vamos transformar critérios da WCAG 2.2 em inspeções de semântica, teclado, foco,
+reflow, formulários e interação móvel — combinando automação e avaliação humana.</p>
+<p>Ao final, você deverá localizar o critério aplicável, produzir evidência no
+navegador e corrigir barreiras sem substituir HTML nativo por ARIA desnecessária.</p>
+<div class="callout"><span class="callout-title">Escopo, conformidade e DevTools</span>
+<p>Trabalharemos com WCAG 2.2 nível AA como referência pedagógica. Uma ferramenta
+automática encontra parte dos problemas, mas não comprova conformidade. Em cada
+seção, teste também por teclado, zoom, leitura do conteúdo e tarefa real. No
+Chrome/Edge, F12 abre DevTools; a árvore Accessibility fica em Elements.</p></div>
+
+<div class="quiz" data-dica="Pense no que uma auditoria de código consegue inferir e no que depende de uso, contexto e conteúdo."
+>
+<p class="quiz-q">Uma auditoria automática sem erros comprova conformidade WCAG?</p>
+<ul class="quiz-opts"><li>Sim, desde que seja executada duas vezes</li><li>Não; ela precisa ser combinada com avaliação humana</li><li>Sim, se o site usar HTML semântico</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Da diretriz à evidência</h2>
+<p>A WCAG organiza requisitos sob quatro princípios: perceptível, operável,
+compreensível e robusto. Os critérios de sucesso têm níveis A, AA e AAA; a ordem
+numérica não determina o nível. Para uma auditoria útil, registre: tarefa, critério,
+estado testado, resultado observado, impacto e correção verificável.</p>
+<div class="table-wrap"><table><thead><tr><th>Pergunta</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>É perceptível?</td><td>Texto alternativo, contraste, reflow e zoom</td></tr>
+<tr><td>É operável?</td><td>Teclado, foco, alvo e alternativa a arrastar</td></tr>
+<tr><td>É compreensível?</td><td>Rótulos, instruções, erros e ajuda consistente</td></tr>
+<tr><td>É robusto?</td><td>Nome, papel e estado expostos por controles válidos</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Abra Lighthouse → Accessibility e execute uma auditoria como triagem. Em seguida,
+abra Elements → Accessibility e navegue pela página usando somente Tab, Shift+Tab,
+Enter e Espaço. Registre separadamente achados automáticos e manuais.</p></div>
+
+<h2>2. HTML nativo antes de ARIA</h2>
+<p>Elementos nativos carregam comportamento e semântica: <code>button</code> recebe
+foco e responde a teclado; <code>a href</code> representa navegação; <code>label</code>
+nomeia um controle. Um <code>div role="button"</code> ainda exige foco, teclado e
+estado implementados pelo autor. ARIA modifica a árvore de acessibilidade, não cria
+o comportamento esperado nem corrige contraste ou ordem visual.</p>
+<div class="atelier" data-modo="demo" data-id="a17-nativo" data-titulo="Mesmo visual, contratos diferentes" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } .parece-botao, button { display: inline-block; border: 2px solid #245b78; border-radius: .4rem; padding: .75rem; font: inherit; background: white; color: #15384c; } :focus-visible { outline: 3px solid #f2a900; outline-offset: 3px; }</template>
+<template data-papel="html"><div class="parece-botao">Salvar visual</div> <button type="button" id="salvar">Salvar nativo</button><p id="status" role="status">Aguardando.</p></template>
+<template data-papel="js">document.querySelector('#salvar').addEventListener('click', () => { document.querySelector('#status').textContent = 'Salvo.'; });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Em Elements → Accessibility, compare role, name e focusable das duas caixas.
+Pressione Tab e Espaço. Em Event Listeners, confirme que aparência não instalou
+comportamento no div. Use a árvore exposta como evidência, não como substituta do teste.</p></div>
+
+<h2>3. Nome, papel, estado e ordem</h2>
+<p>O nome acessível deve comunicar a ação sem depender só de um ícone. O papel deve
+corresponder à operação e o estado precisa permanecer sincronizado. A ordem do DOM
+orienta leitura e foco; propriedades visuais como <code>order</code> não reorganizam
+automaticamente tecnologias assistivas. Use <code>aria-label</code> apenas quando não
+houver rótulo visível adequado e evite nomes divergentes.</p>
+<div class="atelier" data-modo="demo" data-id="a17-nome" data-titulo="Nome e estado observáveis" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } button { min-height: 2.75rem; padding: .6rem 1rem; font: inherit; } [aria-pressed="true"] { background: #174f6b; color: white; }</template>
+<template data-papel="html"><button type="button" id="favorito" aria-pressed="false"><span aria-hidden="true">★</span> Favoritar curso</button><p id="estado" role="status">Não favorito.</p></template>
+<template data-papel="js">const botao = document.querySelector('#favorito'); botao.addEventListener('click', () => { const ativo = botao.getAttribute('aria-pressed') !== 'true'; botao.setAttribute('aria-pressed', String(ativo)); document.querySelector('#estado').textContent = ativo ? 'Curso favoritado.' : 'Curso removido dos favoritos.'; });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Elements → Accessibility mostra nome, role button e pressed. Acione o controle e
+observe o estado mudar. Na árvore DOM, confirme que o texto visível participa do nome;
+depois use a ordem do foco para comparar DOM e composição visual.</p></div>
+
+<h2>4. Exercício: reparar nome, rótulo e foco</h2>
+<p>Formulários precisam de rótulos persistentes, instruções antes do envio e erros
+identificados em texto. Placeholder não substitui label. Ao atualizar um status sem
+mover o foco, uma região de status pode anunciar a mudança; não transforme toda
+mensagem em alerta agressivo.</p>
+<div class="atelier" data-modo="exercicio" data-edita="html" data-id="a17-ex1-form" data-titulo="Inscrição compreensível" data-vp="390">
+<p data-papel="enunciado">Repare a marcação: associe um rótulo visível ao e-mail,
+explique o formato, ofereça nome acessível ao botão de fechar e preserve um status
+para o resultado. Tudo deve funcionar por teclado sem tabindex positivo.</p>
+<p data-papel="dica">Inspecione name e description de cada controle. Verifique se o
+texto visível está associado por for/id ou por uma referência válida e se o botão
+continua sendo um botão real.</p>
+<template data-papel="css">body { padding: 1rem; } label, small { display: block; margin-block: .4rem; } input, button { font: inherit; min-height: 2.75rem; } :focus-visible { outline: 3px solid #b54b00; outline-offset: 3px; }</template>
+<template data-papel="html"><section aria-labelledby="titulo"><button class="fechar" type="button">×</button><h3 id="titulo">Receba novidades</h3><span>E-mail</span><input type="email" placeholder="voce@exemplo.com"><small>Use um endereço que você consulta.</small><button type="button">Cadastrar</button><p>Preencha o formulário.</p></section></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Elements → Accessibility: selecione input e botões e leia Name e Description.
+Use Tab para confirmar ordem e foco visível. No Console, rode
+<code>document.activeElement</code> a cada etapa; tabindex positivo não deve ser necessário.</p></div>
+
+<h2>5. Exercício: foco visível e conteúdo não encoberto</h2>
+<p>WCAG 2.2 acrescenta Focus Not Obscured (Minimum) em AA. Um cabeçalho fixo não pode
+encobrir completamente o item que recebeu foco. <code>scroll-margin-block-start</code>
+ajuda a reservar espaço ao rolar para âncoras e controles. O indicador de foco não
+deve ser removido sem substituto perceptível.</p>
+<div class="atelier" data-modo="exercicio" data-edita="css" data-id="a17-ex2-foco" data-titulo="Foco visível abaixo do cabeçalho" data-vp="390">
+<p data-papel="enunciado">Corrija o foco invisível e faça a seção focada parar abaixo
+do cabeçalho fixo. Preserve o cabeçalho e a navegação por âncoras.</p>
+<p data-papel="dica">Meça a altura computada do cabeçalho. Depois observe outline,
+outline-offset e a posição final da caixa focada; não resolva mudando a ordem do DOM.</p>
+<template data-papel="css">body { margin: 0; } header { position: sticky; top: 0; min-height: 4rem; background: #15384c; color: white; padding: .5rem; } main { padding: 1rem; } section { min-height: 16rem; } :focus { outline: none; }</template>
+<template data-papel="html"><header><a href="#contato">Ir para contato</a></header><main><section><h3>Conteúdo</h3><p>Role ou use o link.</p></section><section id="contato" tabindex="-1"><h3>Contato</h3><button type="button">Abrir atendimento</button></section></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Ative :focus-visible no painel Styles, siga a âncora e examine o retângulo em
+Elements. Em Computed, localize scroll-margin-block-start. Teste também com zoom de
+200%, pois a altura real do cabeçalho pode mudar.</p></div>
+
+<h2>6. Reflow, zoom, contraste e uso da cor</h2>
+<p>Em conteúdo bidimensional comum, o reflow deve evitar perda e rolagem nas duas
+direções a 320 CSS px de largura equivalente, com exceções justificadas como mapas
+e tabelas complexas. Texto comum em AA pede contraste de pelo menos 4,5:1; texto
+grande, 3:1. Componentes e estados visuais relevantes também têm requisito de
+contraste não textual. Cor não pode ser a única pista.</p>
+<div class="atelier" data-modo="demo" data-id="a17-reflow" data-titulo="Estado que sobrevive sem cor" data-vp="320">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } .erro { border-inline-start: .4rem solid #b42318; padding: .75rem; background: #fff4f2; color: #6f1710; overflow-wrap: anywhere; } .erro::before { content: "Atenção: "; font-weight: 700; }</template>
+<template data-papel="html"><p class="erro">O endereço informado não contém domínio. Revise antes de continuar.</p></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Emule 320px em Device Toolbar e aumente o zoom do navegador. Elements → Styles
+permite desmarcar color e background. Use o seletor de cor para medir o par real;
+confirme que prefixo e borda ainda identificam a mensagem sem depender só do vermelho.</p></div>
+
+<h2>7. Critérios novos com impacto mobile</h2>
+<p>Em AA, Target Size (Minimum) usa 24 × 24 CSS px ou espaçamento suficiente, com
+exceções definidas; 44 × 44 é o critério AAA Target Size (Enhanced), não o mínimo
+AA. Dragging Movements pede uma alternativa de ponteiro simples quando arrastar é
+necessário, salvo exceções. Ajuda consistente, entrada redundante e autenticação
+acessível completam situações frequentes em jornadas móveis.</p>
+<div class="atelier" data-modo="demo" data-id="a17-alvos" data-titulo="Escolher sem depender de arrastar" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } .acoes { display: flex; flex-wrap: wrap; gap: .75rem; } button { min-width: 2.75rem; min-height: 2.75rem; font: inherit; } output { display: block; margin-top: 1rem; }</template>
+<template data-papel="html"><p>Mova a etapa sem arrastar:</p><div class="acoes"><button type="button" id="menos" aria-label="Mover etapa para a esquerda">←</button><button type="button" id="mais" aria-label="Mover etapa para a direita">→</button></div><output id="posicao">Posição 2 de 3</output></template>
+<template data-papel="js">let posicao = 2; const saida = document.querySelector('#posicao'); function mover(delta) { posicao = Math.max(1, Math.min(3, posicao + delta)); saida.textContent = 'Posição ' + posicao + ' de 3'; } document.querySelector('#menos').addEventListener('click', () => mover(-1)); document.querySelector('#mais').addEventListener('click', () => mover(1));</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Em Elements → Computed, meça width/height e espaçamento dos alvos em CSS px.
+Emule toque e opere também por teclado. A régua não decide sozinha: confira as
+exceções do critério e se uma alternativa simples realmente completa a mesma tarefa.</p></div>
+
+<h2>8. Auditoria: uma ficha de atendimento</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css" data-id="a17-auditoria" data-titulo="Separe barreiras de preferências" data-vp="320">
+<p data-papel="enunciado">Requisitos: ler e operar a ficha a 320px, por teclado e
+toque; identificar o campo, perceber o erro sem cor e alcançar o botão sem conteúdo
+encoberto. Audite HTML e CSS e repare o CSS onde houver descumprimento.</p>
+<p data-papel="dica">Teste tarefa e estado, não palavras isoladas. Inspecione nome,
+foco, contraste, tamanho real e overflow. Antes de condenar uma propriedade, mostre
+qual requisito ela quebra neste componente.</p>
+
+<template data-papel="css">body { margin: 0; font: 1rem/1.5 system-ui; } header { position: sticky; top: 0; background: #15384c; color: white; padding: 1rem; } main { width: 620px; padding: 1rem; } .campo { margin-block: 1rem; } label { display: block; } input { min-height: 2.75rem; font: inherit; } .erro { color: #c7655d; } button { width: 20px; height: 20px; padding: 0; overflow: hidden; } :focus { outline: 0; } #enviar { scroll-margin-block-start: 5rem; }</template>
+<template data-papel="html"><header>Atendimento</header><main><div class="campo"><label for="protocolo">Protocolo</label><input id="protocolo" aria-describedby="erro"><p class="erro" id="erro"><strong>Erro:</strong> informe 8 dígitos.</p></div><button id="enviar" type="button">Enviar</button></main></template>
+<ol data-papel="achados">
+<li>O campo não tem nome porque label e input são elementos separados.</li>
+<li>A largura fixa de main impede o reflow exigido.</li>
+<li>aria-describedby invalida o nome fornecido pelo label.</li>
+<li>O foco do teclado foi removido sem substituto visível.</li>
+<li>O alvo de 20 × 20 não atende ao mínimo demonstrado.</li>
+<li>scroll-margin-block-start cria uma ordem de teclado incorreta.</li>
+<li>O texto de erro não alcança o contraste mínimo para texto normal sobre branco.</li>
+<li>Todo cabeçalho sticky é proibido pela WCAG 2.2.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Device Toolbar em 320px revela overflow; Tab revela o foco; Computed mede o botão;
+Accessibility mostra Name e Description; o seletor de cores ajuda no contraste.
+Documente cada achado com estado e critério, inclusive os itens que não são problema.</p></div>
+<div class="quiz" data-dica="Compare o número do critério, seu nível e as exceções; uma recomendação maior pode continuar sendo uma ótima meta de projeto."
+>
+<p class="quiz-q">Qual afirmação descreve corretamente o tamanho de alvo na WCAG 2.2?</p><ul class="quiz-opts"><li>Todo alvo AA precisa ter 44 × 44 sem exceção</li><li>Qualquer alvo de 16 × 16 atende se tiver ícone</li><li>O mínimo AA é 24 × 24 ou uma condição equivalente prevista; 44 × 44 é AAA</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega da F4: relatório de acessibilidade da home</h2>
+<ol><li>Escolha três tarefas críticas da home e descreva como iniciam e terminam.</li>
+<li>Teste a 320px, zoom, teclado, toque e sem depender da cor.</li>
+<li>Inspecione nomes, papéis, estados, descrições e ordem.</li>
+<li>Execute automação, mas mantenha achados automáticos separados dos manuais.</li>
+<li>Registre ao menos uma barreira corrigida com critério, antes/depois e evidência.</li></ol>
+<p>Crie <code>QUALIDADE.md</code> com ambiente, passos, impacto, critério e limite do
+teste. Não escreva “100% acessível”: declare o escopo verificado e o que permanece pendente.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Salve capturas de Accessibility, Computed e estado focado. Exporte o relatório do
+Lighthouse somente como complemento. Inclua versão do navegador, viewport, zoom e
+entrada usada para que outra pessoa consiga repetir o teste.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Escopo</td><td>Tarefas, ambiente, WCAG 2.2 e nível declarados</td></tr>
+<tr><td>Semântica</td><td>Nome, papel, estado, descrição e ordem coerentes</td></tr>
+<tr><td>Operação</td><td>Teclado, foco, toque e alternativa a arrastar</td></tr>
+<tr><td>Percepção</td><td>Zoom, reflow, contraste e pista além da cor</td></tr>
+<tr><td>Evidência</td><td>Automação e avaliação humana identificadas separadamente</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Faça a demonstração final nesta ordem: tarefa por teclado, árvore Accessibility,
+layout a 320px, contraste e relatório automático. Feche em QUALIDADE.md com o limite
+do que foi testado e um próximo risco priorizado.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://www.w3.org/TR/WCAG22/">WCAG 2.2</a> ·
+<a href="https://www.w3.org/WAI/standards-guidelines/wcag/new-in-22/">O que mudou na WCAG 2.2</a> ·
+<a href="https://www.w3.org/WAI/WCAG22/quickref/">Quick Reference</a> ·
+<a href="https://www.w3.org/WAI/ARIA/apg/practices/read-me-first/">ARIA APG: leia primeiro</a> ·
+<a href="https://developer.chrome.com/docs/devtools/accessibility/reference">DevTools: acessibilidade</a> ·
+<a href="https://developer.chrome.com/docs/lighthouse/accessibility/scoring">Lighthouse: pontuação de acessibilidade</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a tarefa,
+o critério, o estado testado e a evidência observada.</p>
+<nav class="aula-nav"><a href="0016-jquery-e-bibliotecas-para-mobile.html">← A16 — jQuery</a><a href="0018-seo-para-mobile.html">A18 — SEO para mobile →</a></nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

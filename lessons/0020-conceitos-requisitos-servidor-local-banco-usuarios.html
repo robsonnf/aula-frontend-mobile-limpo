@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A20 — CMS: conceitos, requisitos, servidor local, banco e usuários</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 20 de 22 · 3h · CMS</p>
+<h1>CMS: servidor local,<br>banco e usuários</h1>
+<p class="deck">A home estática vira um sistema: navegador, servidor, PHP, banco,
+arquivos e pessoas com permissões diferentes. Nesta aula, cada camada recebe uma
+responsabilidade, uma evidência e um limite.</p>
+<p>Ao final, você deverá montar um ambiente WordPress local, distinguir banco de
+arquivos, aplicar menor privilégio e registrar uma base restaurável para a F5.</p>
+<div class="callout"><span class="callout-title">Versão, laboratório e limite</span>
+<p>Referência conferida em 07/10/2026: <strong>WordPress 7.1.3</strong>, versão de
+manutenção e segurança publicada em 06/10/2026. A rota principal do laboratório é
+WordPress Studio. Ele usa SQLite por padrão; produção deve ser validada contra os
+requisitos reais do host. As prévias desta aula simulam contratos e funcionam offline:
+elas não executam PHP nem substituem uma instalação WordPress.</p></div>
+
+<div class="quiz" data-dica="Separe texto/configuração persistente dos arquivos executáveis e dos uploads enviados pelo usuário."
+>
+<p class="quiz-q">Copiar apenas a pasta do WordPress produz um backup completo?</p>
+<ul class="quiz-opts"><li>Sim, porque o banco fica dentro de wp-content</li><li>Não; banco e arquivos formam o conjunto restaurável</li><li>Sim, se o tema filho estiver ativo</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. CMS não é apenas um editor</h2>
+<p>Um CMS administra conteúdo, apresentação, extensões e acesso. No WordPress, o
+navegador solicita uma URL; o servidor encaminha a execução; PHP e o core consultam
+configuração, conteúdo, tema e plug-ins; o banco devolve dados; a resposta HTML volta
+ao navegador. Cache pode atender parte do percurso, mas não elimina as camadas.</p>
+<div class="atelier" data-modo="demo" data-id="a20-fluxo" data-titulo="Siga uma requisição sem confundir as camadas" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } ol { display: grid; gap: .6rem; padding-left: 1.5rem; } li { border: 1px solid #9aabb5; border-radius: .4rem; padding: .65rem; } li[data-ativo="true"] { border-color: #1769aa; background: #e8f3fb; } button { min-height: 2.75rem; font: inherit; padding: .5rem 1rem; }</template>
+<template data-papel="html"><button type="button" id="proximo">Próxima camada</button><ol id="fluxo"><li>Navegador solicita /noticias</li><li>Servidor recebe HTTP</li><li>WordPress/PHP resolve a rota</li><li>Banco fornece conteúdo e opções</li><li>Tema gera a resposta HTML</li></ol><p id="status" role="status">Etapa 1 de 5.</p></template>
+<template data-papel="js">const etapas = [...document.querySelectorAll('#fluxo li')]; let atual = 0; function mostrar() { etapas.forEach((item, i) => item.dataset.ativo = String(i === atual)); document.querySelector('#status').textContent = 'Etapa ' + (atual + 1) + ' de ' + etapas.length + '.'; } document.querySelector('#proximo').addEventListener('click', () => { atual = (atual + 1) % etapas.length; mostrar(); }); mostrar();</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Network mostra a requisição do documento e seus recursos, não a consulta SQL interna.
+Abra Headers, Response e Timing. A prévia é uma simulação estática: para observar PHP
+e banco, combine Network com logs do servidor e Site Health na instalação local.</p></div>
+
+<h2>2. Requisitos: recomendado não é o mesmo que legado tolerado</h2>
+<p>Na data desta revisão, o WordPress recomenda PHP 8.3+, MariaDB 10.11+ ou MySQL
+8.0+ e HTTPS. A página oficial ainda descreve versões antigas que podem executar o
+sistema, mas já chegaram ao fim de vida; “funcionou” não as torna base segura. Apache
+ou Nginx são recomendados, embora qualquer servidor compatível possa atender.</p>
+<div class="table-wrap"><table><thead><tr><th>Camada</th><th>Referência recomendada</th><th>Onde comprovar</th></tr></thead><tbody>
+<tr><td>WordPress</td><td>7.1.3 nesta revisão</td><td>Painel → Atualizações / versão oficial</td></tr>
+<tr><td>PHP</td><td>8.3 ou superior</td><td>Ferramentas → Saúde do site → Informações</td></tr>
+<tr><td>Banco</td><td>MariaDB 10.11+ ou MySQL 8.0+</td><td>Saúde do site / host</td></tr>
+<tr><td>Transporte</td><td>HTTPS</td><td>URL e segurança da resposta</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Network → documento confirma protocolo, status e cabeçalhos públicos. Security
+confirma a conexão HTTPS quando publicada. A versão do banco não deve ser deduzida
+do HTML; confira Site Health ou o painel autorizado do host.</p></div>
+
+<h2>3. Servidor local adotado: WordPress Studio</h2>
+<p>Studio cria e inicia sites locais em Windows, macOS e Linux compatível. Em Add site,
+escolha um site vazio, versão estável e credenciais próprias; depois use Open Site e
+WP Admin. O local serve para desenvolver e testar sem alterar produção. Por padrão,
+Studio guarda o banco em SQLite e oferece uma interface phpMyAdmin adaptada.</p>
+<div class="atelier" data-modo="demo" data-id="a20-local" data-titulo="Estado do ambiente local" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } dl { display: grid; grid-template-columns: max-content 1fr; gap: .5rem 1rem; } dt { font-weight: 700; } code { overflow-wrap: anywhere; }</template>
+<template data-papel="html"><h3>Site local: F5</h3><dl><dt>Estado</dt><dd>Running</dd><dt>URL</dt><dd><code>http://f5.local</code></dd><dt>Admin</dt><dd><code>/wp-admin/</code></dd><dt>Banco local</dt><dd>SQLite administrado pelo Studio</dd><dt>Produção</dt><dd>Ainda não conectada</dd></dl></template>
+</div>
+<p><strong>Alternativa para equipe com Docker:</strong> <code>wp-env</code> é mantido
+pela comunidade de desenvolvimento do WordPress, mas exige Node e Docker. XAMPP,
+Local, MAMP e outros continuam opções; a aula padroniza Studio para reduzir diferenças
+operacionais. Nenhuma credencial real deve entrar em screenshot ou repositório.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>No site iniciado, Network → documento confirma a URL local e o servidor em execução.
+Application → Cookies mostra a sessão após login; não copie valores. Studio → Overview
+abre phpMyAdmin; Studio → Settings mostra versões e permite ativar debug log.</p></div>
+
+<h2>4. Exercício: relatório de prontidão sem segredos</h2>
+<div class="atelier" data-modo="exercicio" data-edita="html" data-id="a20-ex1-requisitos" data-titulo="Documente o ambiente que realmente existe" data-vp="390">
+<p data-papel="enunciado">Repare o relatório: use estrutura de dados adequada,
+registre versões e finalidade do ambiente, identifique a divergência SQLite × produção
+e remova credenciais. Não declare HTTPS ou compatibilidade que ainda não foi verificada.</p>
+<p data-papel="dica">Separe evidência, pendência e segredo. Pergunte de qual painel
+cada valor veio e se ele descreve o local ou o servidor de publicação.</p>
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } dl { display: grid; grid-template-columns: minmax(7rem, max-content) 1fr; gap: .5rem 1rem; } dt { font-weight: 700; } .pendente { border-inline-start: .35rem solid #b54b00; padding-inline-start: .6rem; }</template>
+<template data-papel="html"><h3>Servidor pronto</h3><p>WordPress novo</p><p>Banco: senha123</p><p>HTTPS: garantido</p><p>Produção igual ao local</p></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Elements verifica heading, dl/dt/dd e ausência de segredo. Accessibility confirma
+a estrutura textual. Network não comprova valores escritos manualmente: anote junto
+a cada versão a origem no Studio, Site Health ou painel do host.</p></div>
+
+<h2>5. Banco e arquivos: duas metades do mesmo site</h2>
+<p>Posts, páginas, opções, usuários e relações ficam no banco. Core, temas, plug-ins e
+uploads ficam em arquivos, embora extensões possam criar dados próprios. Um backup
+restaurável normalmente inclui os dois, produzidos como um conjunto consistente.
+Exportar conteúdo pelo painel não equivale necessariamente a copiar o site inteiro.</p>
+<div class="atelier" data-modo="demo" data-id="a20-persistencia" data-titulo="Classifique antes de planejar o backup" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } .itens { display: flex; flex-wrap: wrap; gap: .5rem; } button { min-height: 2.75rem; font: inherit; } output { display: block; margin-top: 1rem; border: 1px solid #9aabb5; padding: .75rem; }</template>
+<template data-papel="html"><div class="itens"><button type="button" data-tipo="banco">Página Sobre</button><button type="button" data-tipo="arquivo">Imagem enviada</button><button type="button" data-tipo="banco">Papel do usuário</button><button type="button" data-tipo="arquivo">Tema filho</button></div><output id="origem">Escolha um item.</output></template>
+<template data-papel="js">document.querySelector('.itens').addEventListener('click', event => { const botao = event.target.closest('button[data-tipo]'); if (!botao) return; document.querySelector('#origem').textContent = botao.textContent + ': ' + (botao.dataset.tipo === 'banco' ? 'dado persistido no banco.' : 'arquivo no wp-content.'); });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Network → Img revela o arquivo transferido, não o registro que o referencia.
+Application não é o banco do WordPress. No Studio, abra phpMyAdmin para consultar
+tabelas sem editar diretamente o arquivo SQLite; em Files, localize wp-content.</p></div>
+
+<h2>6. Usuários: papel reúne capacidades</h2>
+<p>WordPress possui Administrator, Editor, Author, Contributor e Subscriber em um site
+simples; Super Admin pertence ao contexto Multisite. Papéis agrupam capacidades.
+Conceda a menor permissão que conclui a tarefa: quem revisa e publica conteúdo de
+outras pessoas pode ser Editor, sem instalar plug-ins nem alterar usuários.</p>
+<div class="atelier" data-modo="demo" data-id="a20-papeis" data-titulo="Tarefa antes do papel" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } label { display: block; font-weight: 700; } select { min-height: 2.75rem; font: inherit; max-width: 100%; } output { display: block; margin-top: 1rem; }</template>
+<template data-papel="html"><label for="tarefa">Responsabilidade</label><select id="tarefa"><option value="editar">Editar e publicar conteúdo da equipe</option><option value="autor">Publicar apenas conteúdo próprio</option><option value="configurar">Gerenciar configurações, temas e plug-ins</option><option value="ler">Manter perfil e ler</option></select><output id="papel">Papel indicado: Editor.</output></template>
+<template data-papel="js">const mapa = { editar: 'Editor', autor: 'Author', configurar: 'Administrator', ler: 'Subscriber' }; const campo = document.querySelector('#tarefa'); campo.addEventListener('change', () => { document.querySelector('#papel').textContent = 'Papel indicado: ' + mapa[campo.value] + '.'; });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Elements mostra controles e status desta simulação. No WordPress, compare menus com
+duas contas de teste e use Network para observar 403 em ação não autorizada. Esconder
+um botão com CSS não remove a capacidade no servidor.</p></div>
+
+<h2>7. Exercício: aplique menor privilégio</h2>
+<div class="atelier" data-modo="exercicio" data-edita="js" data-id="a20-ex2-capacidades" data-titulo="Autorize a tarefa, não o título do cargo" data-vp="390">
+<p data-papel="enunciado">Corrija pode(): Editor publica conteúdo da equipe; Author
+publica apenas o próprio; Administrator instala plug-ins; Subscriber apenas lê.
+Trocar o papel deve atualizar a resposta. Não use uma regra “qualquer usuário logado”.</p>
+<p data-papel="dica">Modele as capacidades necessárias para cada tarefa e compare
+conjuntos. Teste todas as combinações, inclusive uma ação negada.</p>
+<template data-papel="css">body { padding: 1rem; } label { display: block; margin-block: .5rem; } select { min-height: 2.75rem; font: inherit; } button { min-height: 2.75rem; font: inherit; margin-top: .75rem; }</template>
+<template data-papel="html"><label>Papel <select id="papel"><option>Subscriber</option><option>Author</option><option>Editor</option><option>Administrator</option></select></label><label>Tarefa <select id="tarefa"><option value="read">Ler</option><option value="publish_own">Publicar próprio</option><option value="edit_others">Publicar da equipe</option><option value="install_plugins">Instalar plug-in</option></select></label><button type="button" id="verificar">Verificar</button><p id="resultado" role="status">Aguardando.</p></template>
+<template data-papel="js">function pode(papel, tarefa) { return papel !== ''; } document.querySelector('#verificar').addEventListener('click', () => { const papel = document.querySelector('#papel').value; const tarefa = document.querySelector('#tarefa').value; document.querySelector('#resultado').textContent = pode(papel, tarefa) ? 'Permitido.' : 'Negado.'; });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Sources pausa em pode() e inspeciona papel/tarefa. Teste Subscriber × instalar e
+Editor × equipe. Na aplicação real, a resposta do servidor é decisiva: interface
+oculta sem verificação de capacidade continua insegura.</p></div>
+
+<h2>8. Auditoria: painel local responsivo e operação segura</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css" data-id="a20-auditoria" data-titulo="Separe barreira, risco operacional e decoy" data-vp="320">
+<p data-papel="enunciado">Requisitos: operar o painel em 320px por teclado, manter
+avisos visíveis, aplicar menor privilégio e preparar backup restaurável. Audite CSS
+e decisões da equipe; repare no editor os problemas de apresentação.</p>
+<p data-papel="dica">Meça a caixa, navegue com Tab e liste o que pertence ao servidor.
+Uma propriedade CSS não revela banco por magia; uma interface bonita não corrige
+papel excessivo nem backup incompleto.</p>
+
+<template data-papel="css">body { margin: 0; font: 1rem/1.5 system-ui; } main { width: 1100px; padding: 1rem; } .aviso { display: none; } .tabela { overflow-x: auto; } table { min-width: 42rem; border-collapse: collapse; } th, td { padding: .6rem; border: 1px solid #9aabb5; text-align: left; } button { min-height: 2.75rem; font: inherit; } button:focus { outline: none; }</template>
+<template data-papel="html"><main><h3>Ambiente F5</h3><p class="aviso"><strong>Atenção:</strong> banco de produção ainda não validado.</p><div class="tabela" tabindex="0" aria-label="Tabela de usuários com rolagem horizontal"><table><thead><tr><th>Usuário</th><th>Responsabilidade</th><th>Papel</th></tr></thead><tbody><tr><td>Ana</td><td>Publicar equipe</td><td>Administrator</td></tr><tr><td>Caio</td><td>Textos próprios</td><td>Administrator</td></tr></tbody></table></div><button type="button">Criar backup</button></main></template>
+<ol data-papel="achados">
+<li>overflow-x:auto na tabela é sempre falha de responsividade.</li>
+<li>main impede o reflow da página.</li>
+<li>Usar CSS customizado revela automaticamente as credenciais do banco.</li>
+<li>O CSS remove o aviso de banco não validado.</li>
+<li>O indicador de foco foi eliminado.</li>
+<li>Todo ambiente WordPress local é obrigado a executar MySQL.</li>
+<li>Os dois usuários receberam privilégio excessivo.</li>
+<li>Falta criar um Super Admin para o site simples funcionar.</li>
+<li>A decisão de guardar somente o banco produz backup incompleto.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Device Toolbar em 320px mostra o overflow da página; Elements/Computed confirma
+display e width; Tab revela foco. Network e CSS não comprovam backup ou papel: valide
+esses itens no painel, nos arquivos e em um teste de restauração.</p></div>
+<div class="quiz" data-dica="Escolha o papel pelas capacidades necessárias para a tarefa, não por confiança pessoal ou posição na empresa."
+>
+<p class="quiz-q">Qual papel padrão atende quem publica conteúdo de toda a equipe?</p><ul class="quiz-opts"><li>Subscriber</li><li>Editor</li><li>Administrator obrigatoriamente</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega F5 — parte 1: base local reproduzível</h2>
+<ol><li>Crie um site vazio no Studio e registre WordPress/PHP/local URL.</li>
+<li>Crie páginas equivalentes às regiões da home e uma navegação funcional.</li>
+<li>Crie contas de teste com Editor e Author; mantenha um Administrator separado.</li>
+<li>Registre banco local, banco previsto no host e diferenças conhecidas.</li>
+<li>Exporte um backup completo e anote como restaurá-lo; não entregue credenciais.</li></ol>
+<p>Adicione <code>CMS.md</code> ao projeto com ambiente, versões, mapa de conteúdo,
+papéis, conjunto de backup e pendências. A A21 usará essa base para tema filho,
+plug-ins e publicação.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Network registra home, wp-admin e respostas de ações permitidas/negadas. Application
+confirma que cada conta usa sessão distinta sem copiar cookies. Site Health e Studio
+fornecem versões. Anexe evidências sem nomes, e-mails ou tokens reais.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Arquitetura</td><td>Navegador, servidor, PHP, banco e tema distinguidos</td></tr>
+<tr><td>Ambiente</td><td>Versões e finalidade local registradas sem segredo</td></tr>
+<tr><td>Persistência</td><td>Banco e arquivos incluídos no conjunto de backup</td></tr>
+<tr><td>Acesso</td><td>Papéis escolhidos por capacidade e testados</td></tr>
+<tr><td>F5 local</td><td>Conteúdo, usuários, backup e pendências documentados</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Demonstre uma requisição, um dado no banco, um arquivo em wp-content e uma ação
+negada por capacidade. Feche Studio/phpMyAdmin e encerre sessões de teste ao terminar.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://wordpress.org/news/category/releases/">WordPress: releases</a> ·
+<a href="https://wordpress.org/about/requirements/">Requisitos oficiais</a> ·
+<a href="https://developer.wordpress.com/docs/developer-tools/studio/">WordPress Studio</a> ·
+<a href="https://developer.wordpress.com/docs/developer-tools/studio/frequently-asked-questions/">Studio: banco e FAQ</a> ·
+<a href="https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/">wp-env</a> ·
+<a href="https://wordpress.org/documentation/article/roles-and-capabilities/">Papéis e capacidades</a> ·
+<a href="https://developer.wordpress.org/advanced-administration/security/backup/">Backup de arquivos e banco</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a camada,
+a versão, o ambiente e a evidência que sustenta sua conclusão.</p>
+<nav class="aula-nav"><a href="0019-otimizacao-de-front-end.html">← A19 — Otimização</a><a href="0021-tema-filho-css-plug-ins-implantacao-e-publicacao.html">A21 — Tema filho e publicação →</a></nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

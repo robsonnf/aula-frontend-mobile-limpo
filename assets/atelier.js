@@ -321,7 +321,12 @@
       // JS é texto, não HTML serializado (que transformaria && em &amp;&amp;).
       var textoJS = t.dataset.papel === 'js' ||
         (t.dataset.papel === 'solucao' && (host.dataset.edita || '').split(',')[0].trim() === 'js');
-      partes[t.dataset.papel] = dedent(textoJS ? t.content.textContent : t.innerHTML);
+      // Um documento completo codificado como texto preserva <!doctype>, html,
+      // head e body: o parser de fragmentos de <template> descartaria esses
+      // contêineres se fossem escritos como nós crus.
+      var textoDocumento = host.hasAttribute('data-documento-texto') &&
+        (t.dataset.papel === 'html' || t.dataset.papel === 'solucao');
+      partes[t.dataset.papel] = dedent(textoJS || textoDocumento ? t.content.textContent : t.innerHTML);
     });
     var enunciadoNo = host.querySelector('[data-papel="enunciado"]');
     var enunciadoHTML = enunciadoNo ? enunciadoNo.innerHTML : '';

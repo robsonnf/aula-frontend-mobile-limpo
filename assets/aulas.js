@@ -136,40 +136,40 @@ window.AULAS = [
     "bloco": "Qualidade",
     "titulo": "Acessibilidade: WCAG 2.2 na prática",
     "ementa": "Acessibilidade",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0017-acessibilidade-wcag-2-2-na-pratica.html",
+    "disponivel": true
   },
   {
     "n": 18,
     "bloco": "Qualidade",
     "titulo": "SEO para mobile",
     "ementa": "SEO",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0018-seo-para-mobile.html",
+    "disponivel": true
   },
   {
     "n": 19,
     "bloco": "Qualidade",
     "titulo": "Otimização de front-end",
     "ementa": "Otimização de front end",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0019-otimizacao-de-front-end.html",
+    "disponivel": true
   },
   {
     "n": 20,
     "bloco": "CMS",
     "titulo": "Conceitos, requisitos, servidor local, banco, usuários",
     "ementa": "CMS – requisitos, servidor local, usuários",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0020-conceitos-requisitos-servidor-local-banco-usuarios.html",
+    "disponivel": true
   },
   {
     "n": 21,
     "bloco": "CMS",
     "titulo": "Tema filho, CSS, plug-ins, implantação e publicação",
     "ementa": "CMS – temas, plug-ins, publicação",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0021-tema-filho-css-plug-ins-implantacao-e-publicacao.html",
+    "disponivel": true
   },
   {
     "n": 22,

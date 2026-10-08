@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A18 — SEO para mobile</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 18 de 22 · 3h · Qualidade</p>
+<h1>SEO para mobile</h1>
+<p class="deck">SEO técnico torna conteúdo rastreável, indexável e compreensível,
+mas não promete posição. Vamos auditar a versão que o Google usa no mobile-first
+indexing: conteúdo, metadados, links, recursos e experiência precisam permanecer equivalentes.</p>
+<p>Ao final, você deverá distinguir rastreamento de indexação, corrigir sinais por
+URL e produzir evidências no DOM, na resposta de rede e nas ferramentas oficiais.</p>
+<div class="callout"><span class="callout-title">Limites e DevTools</span>
+<p>DevTools e Lighthouse observam a página carregada; não mostram sozinhos se uma URL
+está no índice nem garantem ranking. Para estado no Google, use Search Console e
+Inspeção de URL em propriedade autorizada. Nesta aula, cada conclusão deve indicar
+se veio do HTML entregue, DOM renderizado, cabeçalho HTTP ou ferramenta externa.</p></div>
+
+<div class="quiz" data-dica="Pergunte qual versão fornece ao mecanismo o conteúdo usado para entender e classificar a página."
+>
+<p class="quiz-q">No mobile-first indexing, qual versão orienta a indexação?</p>
+<ul class="quiz-opts"><li>A versão desktop, mesmo quando o mobile remove conteúdo</li><li>A versão mobile acessível ao agente smartphone</li><li>Uma página AMP obrigatória e separada</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Rastrear, renderizar, indexar e exibir</h2>
+<p>Descoberta por links ou sitemap não significa indexação. O robô solicita recursos,
+o sistema pode renderizar JavaScript, escolher uma URL canônica e decidir se o
+conteúdo entra no índice. Uma página indexada ainda não tem posição garantida. SEO
+começa por permitir acesso técnico e oferecer conteúdo útil, identificável e consistente.</p>
+<div class="table-wrap"><table><thead><tr><th>Etapa</th><th>Pergunta verificável</th></tr></thead><tbody>
+<tr><td>Descoberta</td><td>Há link rastreável ou sitemap conhecido?</td></tr>
+<tr><td>Rastreamento</td><td>URL e recursos respondem e não estão bloqueados?</td></tr>
+<tr><td>Renderização</td><td>Conteúdo essencial existe sem gesto obrigatório?</td></tr>
+<tr><td>Indexação</td><td>Robots, canonical e conteúdo permitem inclusão?</td></tr>
+<tr><td>Exibição</td><td>Título e descrição representam a página?</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Em Network, recarregue e abra o documento: veja status, Response e Headers.
+Elements mostra o DOM renderizado; Ctrl+U, quando servido por HTTP, mostra a fonte
+recebida. Essa comparação não substitui a Inspeção de URL do Search Console.</p></div>
+
+<h2>2. Mobile-first pede equivalência, não cópia visual</h2>
+<p>Design responsivo com a mesma URL e HTML é recomendado por ser simples de manter,
+mas não é o único formato possível. O essencial é que a versão mobile ofereça conteúdo
+primário, headings, metadados, alt e dados estruturados equivalentes. A composição
+pode mudar e conteúdo pode ficar em accordion; ele não deve depender de clique,
+swipe ou digitação para ser carregado e então descoberto.</p>
+<div class="atelier" data-modo="demo" data-id="a18-equivalencia" data-titulo="Mesmo conteúdo, outra composição" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } article { display: grid; gap: 1rem; } img { width: 100%; height: auto; } @media (min-width: 48rem) { article { grid-template-columns: 1fr 1fr; } }</template>
+<template data-papel="html"><article><div><h3>Guia de pneus para chuva</h3><p>Compare sulcos, pressão e desgaste antes da viagem.</p><a href="/guias/pneus-chuva">Ler o guia de pneus para chuva</a></div><img src="../assets/a12-paisagem-960.svg" alt="Ilustração de montanhas diante de um lago" width="960" height="640"></article></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Device Toolbar: compare 390px e 900px. Elements confirma que heading, texto, link
+e alt continuam no DOM nas duas composições. Desmarque a media query em Styles: mudar
+layout não remove conteúdo nem cria uma segunda URL.</p></div>
+
+<h2>3. Head: identidade e diretivas por URL</h2>
+<p><code>title</code> deve ser descritivo e específico. A meta description pode ser
+usada como trecho, mas o mecanismo pode escolher outro texto. <code>canonical</code>
+é um sinal para consolidar duplicatas, não um redirecionamento. <code>noindex</code>
+é diretiva de indexação; bloquear a URL em robots.txt pode impedir que o robô veja
+essa diretiva. A meta keywords não é usada pelo Google Search.</p>
+<div class="atelier" data-modo="demo" data-documento data-documento-texto data-edita="html" data-id="a18-head" data-titulo="Documento com sinais coerentes" data-vp="390">
+<template data-papel="html">&lt;!doctype html&gt;
+&lt;html lang="pt-BR"&gt;&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;title&gt;Calendário da temporada 2026 | Box Box&lt;/title&gt;
+&lt;meta name="description" content="Consulte datas e circuitos da temporada 2026."&gt;
+&lt;link rel="canonical" href="https://example.com/calendario-2026"&gt;
+&lt;/head&gt;&lt;body&gt;&lt;main&gt;&lt;h1&gt;Calendário da temporada 2026&lt;/h1&gt;&lt;p&gt;Datas e circuitos confirmados.&lt;/p&gt;&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Na prévia, Elements → head localiza title, description e canonical; Console usa
+<code>document.title</code> e seletores explícitos. Em Network → documento → Headers,
+procure também <code>X-Robots-Tag</code>. Não conclua prioridade entre sinais sem
+verificar a resposta e a URL efetivamente publicada.</p></div>
+
+<h2>4. Exercício: reparar a página que será publicada</h2>
+<div class="atelier" data-modo="exercicio" data-documento data-documento-texto data-edita="html" data-id="a18-ex1-pagina" data-titulo="Uma URL identificável e rastreável" data-vp="390">
+<p data-papel="enunciado">Corrija o documento de uma página de notícia: defina idioma,
+viewport, título e descrição específicos, canonical absoluta, um h1 coerente, link
+rastreável e alt descritivo. A página deve continuar indexável.</p>
+<p data-papel="dica">Separe o que fica no head do que descreve o conteúdo visível.
+Confira se o link possui href real, se canonical identifica esta URL e se alguma
+diretiva impede a indexação pretendida.</p>
+<template data-papel="html">&lt;html&gt;&lt;head&gt;
+&lt;title&gt;Página inicial&lt;/title&gt;
+&lt;meta name="robots" content="noindex"&gt;
+&lt;link rel="canonical" href="/"&gt;
+&lt;/head&gt;&lt;body&gt;&lt;main&gt;
+&lt;h2&gt;Equipe apresenta carro de 2026&lt;/h2&gt;
+&lt;img src="../assets/a12-paisagem-960.svg"&gt;
+&lt;div onclick="location.href='/temporada-2026'"&gt;Veja a temporada&lt;/div&gt;
+&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Elements confirma head e conteúdo; Accessibility confirma nome do link e da imagem;
+Lighthouse → SEO aponta verificações básicas. Copie a URL canonical e compare com a
+URL planejada. O iframe local não prova que essa URL exista no servidor.</p></div>
+
+<h2>5. Exercício: link e conteúdo que não dependem do gesto</h2>
+<p>Links rastreáveis usam <code>a href</code>. Um clique em div com location não oferece
+o mesmo contrato. Conteúdo primário carregado somente após interação pode ficar fora
+do que o agente vê. Progressive enhancement mantém a informação essencial no HTML e
+usa JavaScript para melhorar sua apresentação.</p>
+<div class="atelier" data-modo="exercicio" data-edita="html" data-id="a18-ex2-conteudo" data-titulo="Descoberta sem gesto obrigatório" data-vp="390">
+<p data-papel="enunciado">Reestruture o bloco para que título, resumo e destino sejam
+compreensíveis e rastreáveis sem executar JavaScript. Preserve details como melhoria
+nativa e escreva texto de link específico.</p>
+<p data-papel="dica">Desative JavaScript mentalmente: qual informação e qual destino
+continuam no HTML? Use elementos segundo sua função, sem acrescentar role a um controle nativo.</p>
+<template data-papel="css">body { padding: 1rem; } .card { border: 1px solid #999; padding: 1rem; } a { display: inline-block; padding: .6rem 0; }</template>
+<template data-papel="html"><div class="card"><div class="titulo">Guia do circuito</div><button type="button" onclick="document.querySelector('#texto').hidden=false">Ler</button><p id="texto" hidden>Curvas, zonas de frenagem e acessos.</p><div onclick="location.href='/guias/circuito'">Saiba mais</div></div></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Elements verifica se o destino está em href e se o texto primário existe no DOM.
+No Command Menu, escolha Disable JavaScript e recarregue a página servida; confirme
+que o caminho e o resumo permanecem disponíveis. Reative JavaScript ao terminar.</p></div>
+
+<h2>6. Conteúdo, headings, imagens e dados estruturados</h2>
+<p>Headings claros organizam o conteúdo para pessoas e mecanismos; não existe uma
+regra de ranking que obrigue exatamente um h1 em toda página, embora uma hierarquia
+coerente ajude a comunicar estrutura. Alt descreve a finalidade da imagem no contexto.
+Dados estruturados devem representar conteúdo visível e seguir a documentação do tipo;
+marcação válida não garante um rich result.</p>
+<div class="atelier" data-modo="demo" data-id="a18-conteudo" data-titulo="Estrutura que comunica assunto" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } nav ul { display: flex; flex-wrap: wrap; gap: 1rem; padding: 0; list-style: none; }</template>
+<template data-papel="html"><header><nav aria-label="Seções"><ul><li><a href="/noticias">Notícias</a></li><li><a href="/guias">Guias</a></li></ul></nav></header><main><article><h3>Como preparar a visita ao autódromo</h3><p>Consulte transporte, horários e itens permitidos.</p><a href="/guias/visita-autodromo">Planejar a visita ao autódromo</a></article></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Elements mostra a hierarquia real; Accessibility ajuda a percorrer headings e links.
+Para JSON-LD publicado, valide no Rich Results Test e compare os campos com o conteúdo
+visível. O painel Elements pode mostrar sintaxe, mas não confirma elegibilidade.</p></div>
+
+<h2>7. Experiência de página sem fórmula mágica</h2>
+<p>Desempenho e Core Web Vitals participam da experiência, mas uma pontuação isolada
+não substitui relevância nem garante posição. Mobile-friendly significa conteúdo
+legível, controles operáveis e ausência de obstáculos intrusivos. Compare dados de
+campo e laboratório no contexto; a A19 tratará as métricas e suas correções.</p>
+<div class="atelier" data-modo="demo" data-id="a18-mobile" data-titulo="Conteúdo legível sem versão paralela" data-vp="390">
+<template data-papel="css">body { margin: auto; max-width: 65ch; padding: 1rem; font: clamp(1rem, .95rem + .25vw, 1.2rem)/1.6 system-ui; } img { display: block; max-width: 100%; height: auto; } a { overflow-wrap: anywhere; }</template>
+<template data-papel="html"><main><h3>Resumo da etapa</h3><p>O conteúdo permanece legível e completo no viewport estreito.</p><img src="../assets/a12-paisagem-960.svg" alt="Ilustração de montanhas diante de um lago" width="960" height="640"><p><a href="/resultados/etapa-final-com-classificacao-completa">Classificação completa da etapa</a></p></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Device Toolbar testa largura e zoom; Lighthouse separa SEO, Accessibility e
+Performance. Em Network, use condições iguais antes de comparar. Não some as três
+pontuações nem apresente um único laboratório como posição provável na busca.</p></div>
+
+<h2>8. Auditoria: notícia mobile</h2>
+<div class="atelier" data-modo="auditoria" data-documento data-documento-texto data-edita="html" data-id="a18-auditoria" data-titulo="Diretiva, sinal ou decoy?" data-vp="390">
+<p data-papel="enunciado">A notícia deve ser indexável, ter identidade própria,
+conteúdo principal equivalente no mobile e destino rastreável. Audite o documento e
+repare a marcação onde houver descumprimento.</p>
+<p data-papel="dica">Inspecione head, conteúdo entregue e destino dos links. Diferencie
+preferência editorial, mito de ranking e impedimento técnico. Uma palavra como hidden
+ou h1 não basta para classificar sem contexto.</p>
+
+<template data-papel="html">&lt;!doctype html&gt;&lt;html lang="pt-BR"&gt;&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;title&gt;Notícia&lt;/title&gt;
+&lt;meta name="description" content="Últimas notícias, notícia, notícias e mais notícias."&gt;
+&lt;meta name="keywords" content="corrida, carro, pista"&gt;
+&lt;meta name="robots" content="noindex"&gt;
+&lt;link rel="canonical" href="https://example.com/"&gt;
+&lt;/head&gt;&lt;body&gt;&lt;main&gt;
+&lt;h1&gt;Equipe confirma dupla para 2026&lt;/h1&gt;
+&lt;div id="conteudo-principal"&gt;&lt;/div&gt;
+&lt;div onclick="location.href='/temporada-2026'"&gt;Temporada&lt;/div&gt;
+&lt;script&gt;if (innerWidth &gt; 640) document.querySelector('#conteudo-principal').textContent = 'A equipe confirmou seus dois pilotos e explicou o plano da temporada.';&lt;/script&gt;
+&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;</template>
+<ol data-papel="achados">
+<li>A diretiva noindex impede a indexação pretendida.</li>
+<li>Meta keywords causa punição automática no ranking.</li>
+<li>O title não distingue esta notícia.</li>
+<li>A canonical contradiz a identidade da notícia.</li>
+<li>Usar apenas um h1 reduz obrigatoriamente a capacidade de ranking.</li>
+<li>O script entrega o conteúdo principal somente ao viewport largo.</li>
+<li>Qualquer uso de display:none é uma violação de SEO.</li>
+<li>O destino da temporada não está exposto como link rastreável.</li>
+<li>A meta description é genérica e repetitiva.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Elements → head confirma diretivas; Device Toolbar revela a perda do parágrafo;
+Accessibility e o DOM distinguem link de div; Lighthouse oferece triagem. Liste
+separadamente seis problemas reais e três decoys, sempre com evidência.</p></div>
+<div class="quiz" data-dica="Pense na diferença entre impedir a requisição do robô e permitir que ele leia uma diretiva de indexação."
+>
+<p class="quiz-q">Qual é a relação correta entre robots.txt e noindex?</p><ul class="quiz-opts"><li>Bloquear o rastreamento pode impedir que o robô veja a diretiva noindex</li><li>robots.txt remove sempre a URL já indexada</li><li>noindex deve ser escrito somente no robots.txt</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega da F4: ficha de SEO da home</h2>
+<ol><li>Defina a URL canônica e a intenção principal da home.</li>
+<li>Registre title, description, h1, links internos e imagens essenciais.</li>
+<li>Compare conteúdo e metadados em viewport estreito e largo.</li>
+<li>Verifique status, robots, canonical e recursos no ambiente publicado.</li>
+<li>Adicione ao QUALIDADE.md evidências, limites e ações priorizadas.</li></ol>
+<p>Não prometa ranking. A entrega prova que a página pode ser rastreada, interpretada
+e usada no mobile dentro do escopo testado. Dados de índice exigem acesso ao Search Console.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Salve o documento de Network, o head em Elements e a composição mobile. Execute
+Lighthouse → SEO como checklist parcial. Para produção, acrescente Inspeção de URL e
+teste de resultados avançados quando houver dados estruturados aplicáveis.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Acesso</td><td>Status, recursos e diretivas observados</td></tr>
+<tr><td>Identidade</td><td>Title, description e canonical coerentes por URL</td></tr>
+<tr><td>Mobile-first</td><td>Conteúdo, headings, alt e metadados equivalentes</td></tr>
+<tr><td>Descoberta</td><td>Links reais e conteúdo essencial sem gesto obrigatório</td></tr>
+<tr><td>Limite</td><td>Nenhuma promessa de indexação ou ranking sem dado externo</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Demonstre documento em Network, head em Elements, link em Accessibility e mobile
+em Device Toolbar. Termine apontando o que depende do Search Console e o que será
+medido na A19 com Network, Performance e dados de campo.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing">Mobile-first indexing</a> ·
+<a href="https://developers.google.com/search/docs/fundamentals/seo-starter-guide">SEO Starter Guide</a> ·
+<a href="https://developers.google.com/search/docs/essentials">Search Essentials</a> ·
+<a href="https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag">Robots meta e X-Robots-Tag</a> ·
+<a href="https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls">Canonicalização</a> ·
+<a href="https://search.google.com/test/rich-results">Rich Results Test</a> ·
+<a href="https://developer.chrome.com/docs/lighthouse/seo/">Lighthouse: SEO</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a URL,
+o agente, a diretiva e a camada em que a evidência foi observada.</p>
+<nav class="aula-nav"><a href="0017-acessibilidade-wcag-2-2-na-pratica.html">← A17 — Acessibilidade</a><a href="0019-otimizacao-de-front-end.html">A19 — Otimização →</a></nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A19 — Otimização de front-end</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 19 de 22 · 3h · Qualidade</p>
+<h1>Otimização<br>de front-end</h1>
+<p class="deck">Otimizar é medir uma tarefa, localizar seu gargalo e comparar uma
+mudança sob condições controladas. Vamos trabalhar carregamento, renderização,
+responsividade e estabilidade sem trocar experiência real por uma pontuação isolada.</p>
+<p>Ao final, você deverá interpretar Core Web Vitals, ler waterfall e main thread,
+reparar imagens e JavaScript e documentar ganhos com contexto e limites.</p>
+<div class="callout"><span class="callout-title">Laboratório, campo e DevTools</span>
+<p>Dados de laboratório são reproduzíveis e úteis para diagnóstico; dados de campo
+representam usuários reais agregados. Eles podem divergir por dispositivo, rede,
+cache e interação. Use Network, Performance e Lighthouse no mesmo perfil de teste,
+mas não apresente uma execução local como experiência de todos os usuários.</p></div>
+
+<div class="quiz" data-dica="Pense em onde a observação foi coletada e de quantas pessoas ela representa a experiência."
+>
+<p class="quiz-q">Por que laboratório e campo podem mostrar resultados diferentes?</p>
+<ul class="quiz-opts"><li>Porque apenas o laboratório mede JavaScript</li><li>Porque usam populações e condições de coleta diferentes</li><li>Porque dados de campo não incluem dispositivos móveis</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Métricas centradas na experiência</h2>
+<p>Os Core Web Vitals atuais avaliam carregamento com LCP, responsividade com INP e
+estabilidade visual com CLS. Para classificar como “bom”, as referências são LCP até
+2,5 s, INP até 200 ms e CLS até 0,1, avaliadas no percentil 75 das visitas. Métrica
+indica sintoma; a investigação encontra elemento, tarefa e causa.</p>
+<div class="table-wrap"><table><thead><tr><th>Métrica</th><th>Pergunta</th><th>Bom</th></tr></thead><tbody>
+<tr><td>LCP</td><td>Quando o maior conteúdo visível aparece?</td><td>≤ 2,5 s</td></tr>
+<tr><td>INP</td><td>Como a página responde às interações?</td><td>≤ 200 ms</td></tr>
+<tr><td>CLS</td><td>Quanto o conteúdo muda inesperadamente?</td><td>≤ 0,1</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Performance → Record and reload mostra marcadores e trilhas de Web Vitals. Lighthouse
+fornece laboratório; PageSpeed Insights pode combinar laboratório e campo quando há
+dados suficientes. Registre origem, data, dispositivo e condição junto a cada número.</p></div>
+
+<h2>2. Waterfall: solicitação, transferência e cache</h2>
+<p>O waterfall revela dependências, bloqueios e ordem. <em>Transferred</em> pode incluir
+compressão e cache; <em>resource size</em> representa tamanho decodificado. Headers
+como cache-control e content-encoding pertencem à resposta HTTP. Um arquivo pequeno
+pode chegar tarde por cadeia de dependências, latência ou prioridade inadequada.</p>
+<div class="atelier" data-modo="demo" data-id="a19-waterfall" data-titulo="Recursos com responsabilidades explícitas" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } img { display: block; max-width: 100%; height: auto; }</template>
+<template data-papel="html"><main><h3>Resumo da etapa</h3><img src="../assets/a12-paisagem-960.svg" alt="Ilustração de montanhas diante de um lago" width="960" height="640"><p>O HTML define a tarefa; CSS apresenta e a imagem complementa.</p></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Network: marque Disable cache somente para a carga fria, escolha Fast 4G e recarregue.
+Mostre Waterfall, Initiator, Size e Timing. Depois desmarque Disable cache e compare a
+carga repetida. Anote as condições; não misture os dois cenários.</p></div>
+
+<h2>3. Caminho crítico, CSS e JavaScript</h2>
+<p>CSS pode bloquear a primeira renderização; scripts clássicos sem defer podem
+bloquear o parser. <code>defer</code> preserva ordem entre scripts defer e executa após
+o parse; módulos são adiados por padrão. Dividir código só ajuda quando reduz trabalho
+necessário na rota e não cria excesso de solicitações. Minificar reduz texto, mas não
+elimina execução, dependências ou lógica desnecessária.</p>
+<div class="atelier" data-modo="demo" data-id="a19-main-thread" data-titulo="Trabalho adiado até a ação" data-vp="390">
+<template data-papel="css">body { padding: 1rem; } button { min-height: 2.75rem; font: inherit; padding: .6rem 1rem; }</template>
+<template data-papel="html"><button type="button" id="calcular">Calcular classificação</button><p id="status" role="status">Aguardando.</p></template>
+<template data-papel="js">document.querySelector('#calcular').addEventListener('click', () => { const pontos = [25, 18, 15, 12].reduce((soma, valor) => soma + valor, 0); document.querySelector('#status').textContent = 'Total demonstrativo: ' + pontos + ' pontos.'; });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Sources localiza o script; Performance grava a carga e depois o clique. Na Main,
+expanda tarefas e use Bottom-up para atribuir tempo. Coverage aponta bytes não usados
+nesta navegação, mas não prova que sejam desnecessários em todas as rotas.</p></div>
+
+<h2>4. Exercício: impedir deslocamento e priorizar a hero</h2>
+<p>Dimensões intrínsecas ou <code>aspect-ratio</code> reservam espaço antes da imagem e
+ajudam a evitar CLS. Imagens abaixo da dobra podem usar lazy loading nativo; a imagem
+LCP visível inicialmente não deve ser atrasada com <code>loading="lazy"</code>. Use
+<code>fetchpriority="high"</code> com parcimônia, apenas para um recurso realmente prioritário.</p>
+<div class="atelier" data-modo="exercicio" data-edita="html" data-id="a19-ex1-imagem" data-titulo="Hero estável e descoberta cedo" data-vp="390">
+<p data-papel="enunciado">Repare a imagem principal: reserve sua proporção antes do
+download, não a carregue de forma preguiçosa e forneça candidatos responsivos com sizes
+coerente para um slot de até 720px.</p>
+<p data-papel="dica">Identifique se a imagem está no viewport inicial. Depois separe
+três decisões: quando descobrir, qual candidato baixar e quanto espaço reservar.</p>
+<template data-papel="css">body { margin: auto; max-width: 45rem; padding: 1rem; } img { display: block; max-width: 100%; height: auto; }</template>
+<template data-papel="html"><main><h3>Grande Prêmio</h3><img src="../assets/a12-paisagem-960.svg" loading="lazy" alt="Ilustração de montanhas diante de um lago"><p>Resumo da etapa.</p></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Network → Img mostra prioridade, iniciador e recurso escolhido; Console consulta
+<code>document.querySelector('img').currentSrc</code>. Performance → Experience localiza
+layout shifts. Teste sem cache e não atribua bytes reais aos candidatos SVG repetidos da demonstração.</p></div>
+
+<h2>5. Exercício: reduzir trabalho por interação</h2>
+<p>INP inclui atraso de entrada, processamento e apresentação do próximo frame. Um
+handler deve fazer o trabalho necessário sem forçar leituras e escritas de layout em
+ciclo. Delegação reduz listeners em listas dinâmicas, mas não torna processamento pesado
+automaticamente rápido. Meça a tarefa específica antes e depois.</p>
+<div class="atelier" data-modo="exercicio" data-edita="js" data-id="a19-ex2-lista" data-titulo="Uma atualização por ação" data-vp="390">
+<p data-papel="enunciado">Repare a seleção: use um listener delegado na lista, altere
+somente o botão acionado e atualize a contagem uma vez. Deve funcionar também para um
+item inserido depois e para clique no span interno.</p>
+<p data-papel="dica">Observe quantos listeners foram instalados, qual elemento é target
+e onde procurar o botão correspondente. Evite percorrer e reescrever todos os itens
+quando apenas um mudou.</p>
+<template data-papel="css">body { padding: 1rem; } button { min-height: 2.75rem; font: inherit; } [aria-pressed="true"] { background: #174f6b; color: white; }</template>
+<template data-papel="html"><button id="novo" type="button">Novo</button><ul id="lista"><li><button type="button" aria-pressed="false"><span>Item 1</span></button></li><li><button type="button" aria-pressed="false"><span>Item 2</span></button></li></ul><p id="status" role="status">0 selecionado(s).</p></template>
+<template data-papel="js">const lista = document.querySelector('#lista'); const status = document.querySelector('#status'); function montar() { lista.querySelectorAll('button').forEach(botao => { botao.addEventListener('click', () => { lista.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', 'true')); status.textContent = lista.querySelectorAll('[aria-pressed="true"]').length + ' selecionado(s).'; }); }); } montar(); document.querySelector('#novo').addEventListener('click', () => { lista.insertAdjacentHTML('beforeend', '&lt;li&gt;&lt;button type="button" aria-pressed="false"&gt;&lt;span&gt;Novo item&lt;/span&gt;&lt;/button&gt;&lt;/li&gt;'); montar(); });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Elements → Event Listeners compara listeners antes/depois de criar itens. Performance
+grava clique e inserção; Sources usa breakpoint no handler e observa target/closest.
+Não use uma diferença minúscula desta amostra como promessa de ganho em produção.</p></div>
+
+<h2>6. Fontes, renderização e estabilidade</h2>
+<p>Fontes web acrescentam requisições e podem trocar métricas do texto. Subconjuntos,
+formatos adequados, preload criterioso e <code>font-display</code> fazem parte da decisão,
+mas cada estratégia tem trade-offs. Fallbacks com métricas muito diferentes podem
+deslocar conteúdo. Não esconda texto indefinidamente à espera de uma fonte.</p>
+<div class="atelier" data-modo="demo" data-id="a19-fontes" data-titulo="Fallback explícito e caixa flexível" data-vp="390">
+<template data-papel="css">body { margin: auto; max-width: 65ch; padding: 1rem; font-family: system-ui, sans-serif; line-height: 1.55; } h3 { font-size: clamp(1.6rem, 1.2rem + 2vw, 2.6rem); } .card { min-height: 8rem; border: 1px solid #888; padding: 1rem; }</template>
+<template data-papel="html"><article class="card"><h3>Classificação atualizada</h3><p>A caixa cresce com texto ampliado e não depende de altura fixa.</p></article></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Elements → Computed → Rendered Fonts mostra a fonte usada em cada trecho. Network
+filtra Font; Rendering pode destacar layout shift regions. A demonstração usa fonte
+do sistema de propósito: ausência de download também é uma decisão de desempenho.</p></div>
+
+<h2>7. Orçamento, hipótese e comparação justa</h2>
+<p>Um orçamento define limites por tipo e rota: bytes transferidos, quantidade de
+recursos, trabalho de JavaScript ou métricas de experiência. Ele deve nascer de público
+e produto, não de número universal. Compare o mesmo fluxo, em perfil equivalente,
+com várias execuções e mediana; documente variação, regressões e custo de manutenção.</p>
+<div class="atelier" data-modo="demo" data-id="a19-orcamento" data-titulo="Registro de hipótese" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } dl { display: grid; grid-template-columns: max-content 1fr; gap: .5rem 1rem; } dt { font-weight: 700; }</template>
+<template data-papel="html"><h3>Experimento</h3><dl><dt>Tarefa</dt><dd>Abrir a home em Fast 4G</dd><dt>Hipótese</dt><dd>Descobrir a hero cedo reduz LCP</dd><dt>Controle</dt><dd>Mesmo navegador, viewport e cache frio</dd><dt>Decisão</dt><dd>Comparar mediana e verificar regressões</dd></dl></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Crie um Performance trace antes e outro depois com a mesma configuração. Em Network,
+exporte HAR sem dados sensíveis se precisar comparar waterfall. Lighthouse permite
+configurar modo e dispositivo; guarde configurações junto aos resultados.</p></div>
+
+<h2>8. Auditoria: home rápida no papel, lenta na tarefa</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css" data-id="a19-auditoria" data-titulo="Localize causa antes de otimizar" data-vp="390">
+<p data-papel="enunciado">Requisitos: hero estável e prioritária, conteúdo abaixo da
+dobra adiado, foco preservado e animação econômica. Audite HTML e CSS; repare no CSS
+o que puder e registre quais correções pertencem ao HTML ou servidor.</p>
+<p data-papel="dica">Separe rede, layout, pintura e interação. Desligue propriedades
+uma a uma e procure a métrica afetada. Nem toda prática com nome de performance é
+adequada em todos os elementos.</p>
+
+<template data-papel="css">body { margin: 0; font: 1rem/1.5 system-ui; } img { display: block; max-width: 100%; height: auto; } .hero { height: auto; } .card { min-height: 8rem; padding: 1rem; content-visibility: auto; contain-intrinsic-size: auto 220px; } * { will-change: transform; } button:focus { outline: none; } .selo { transition: transform .2s; } .selo:hover { transform: translateY(-2px); }</template>
+<template data-papel="html"><main><h3>Temporada</h3><img class="hero" src="../assets/a12-paisagem-960.svg" loading="lazy" alt="Ilustração de montanhas diante de um lago"><article class="card"><h4>Notícias</h4><p>Conteúdo abaixo da dobra.</p></article><button class="selo" type="button">Acompanhar</button></main></template>
+<ol data-papel="achados">
+<li>A imagem principal não deveria usar lazy loading neste cenário.</li>
+<li>max-width:100% faz o navegador baixar duas imagens.</li>
+<li>A hero não reserva espaço antes do carregamento.</li>
+<li>content-visibility:auto é sempre pior para desempenho.</li>
+<li>will-change global é uma otimização contraproducente.</li>
+<li>O foco visível foi eliminado.</li>
+<li>Qualquer transform aciona obrigatoriamente layout completo.</li>
+<li>A animação não cobre teclado nem movimento reduzido.</li>
+<li>A ausência da palavra gzip no CSS prova que o servidor não comprime arquivos.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Network confirma loading/prioridade e headers; Performance → Experience mostra
+shifts; Layers/Rendering ajuda a investigar pintura; Computed verifica foco e
+will-change. Classifique cinco problemas reais e quatro decoys sem atribuir ao CSS
+o que só a resposta HTTP pode provar.</p></div>
+<div class="quiz" data-dica="Considere descoberta do recurso, posição no viewport e papel da imagem na métrica de carregamento."
+>
+<p class="quiz-q">Qual imagem é a pior candidata a loading="lazy"?</p><ul class="quiz-opts"><li>Uma miniatura muito abaixo da dobra</li><li>A hero visível inicialmente e provável LCP</li><li>Uma imagem aberta somente numa rota futura</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega da F4: relatório de qualidade e plano</h2>
+<ol><li>Escolha três tarefas: carregar, interagir e navegar na home.</li>
+<li>Fixe viewport, CPU/rede, cache e versão do navegador.</li>
+<li>Registre LCP/INP ou proxy de laboratório/CLS e waterfall antes.</li>
+<li>Implemente uma correção por causa demonstrada e repita as medições.</li>
+<li>Atualize QUALIDADE.md com mediana, variação, regressões e próximo passo.</li></ol>
+<p>Combine o relatório com A17 e A18: uma otimização não pode remover nome, foco,
+conteúdo mobile ou link rastreável. Entregue evidência, não apenas a nota do Lighthouse.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Guarde screenshots ou traces de Network/Performance e a configuração. Compare três
+ou mais execuções quando possível. Em Lighthouse, leia cada oportunidade e valide a
+causa no painel correspondente antes de transformar a sugestão em tarefa.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Métrica</td><td>LCP, INP e CLS interpretados no contexto correto</td></tr>
+<tr><td>Rede</td><td>Waterfall, prioridade, cache e headers inspecionados</td></tr>
+<tr><td>Renderização</td><td>Espaço reservado, fonte e caminho crítico avaliados</td></tr>
+<tr><td>Interação</td><td>Main thread medida e atualização limitada ao necessário</td></tr>
+<tr><td>Experimento</td><td>Antes/depois comparável, limites e regressões registrados</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Demonstre um waterfall, o elemento LCP, um layout shift e uma interação no trace.
+Feche com o diff do QUALIDADE.md e restaure throttling, cache e emulações para não
+contaminar a próxima sessão.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://web.dev/articles/vitals">Web Vitals</a> ·
+<a href="https://web.dev/learn/performance/">Learn Performance</a> ·
+<a href="https://web.dev/articles/optimize-lcp">Otimizar LCP</a> ·
+<a href="https://web.dev/articles/optimize-inp">Otimizar INP</a> ·
+<a href="https://web.dev/articles/optimize-cls">Otimizar CLS</a> ·
+<a href="https://developer.chrome.com/docs/devtools/network/overview">DevTools: Network</a> ·
+<a href="https://developer.chrome.com/docs/devtools/performance/overview">DevTools: Performance</a> ·
+<a href="https://developer.chrome.com/docs/lighthouse/overview">Lighthouse</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a tarefa,
+a métrica, as condições e a causa que você pretende testar.</p>
+<nav class="aula-nav"><a href="0018-seo-para-mobile.html">← A18 — SEO</a><a href="0020-conceitos-requisitos-servidor-local-banco-usuarios.html">A20 — CMS e servidor →</a></nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

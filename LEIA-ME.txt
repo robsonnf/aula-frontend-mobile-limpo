@@ -78,6 +78,18 @@ Cada seção indica o painel do DevTools e o teste a executar. Ao usar o Console
 selecione o iframe da prévia, e não o contexto top. Para gestos de toque,
 combine emulação com teste em dispositivo real e preserve operação por teclado.
 
+A17, A18 e A19 formam o bloco de Qualidade. As atividades combinam inspeção
+automática e teste humano, separam DOM, resposta HTTP e ferramentas externas e
+registram condições de medição. Lighthouse é triagem: não comprova conformidade
+WCAG, indexação, ranking ou experiência de todos os usuários. As três aulas usam
+apenas recursos locais nas prévias; links de leitura exigem internet.
+
+A20 e A21 usam WordPress 7.1.3 como referência conferida em 07/10/2026.
+As prévias simulam arquitetura, papéis, tema, plug-ins e publicação; não executam
+PHP nem instalam WordPress. O laboratório adota WordPress Studio, com SQLite local
+por padrão, e exige validar PHP, MariaDB/MySQL e HTTPS do destino real. Nunca coloque
+senha, cookie, token, wp-config.php ou dump de banco no exercício ou no Git.
+
 Quizzes e marcações de auditoria começam limpos a cada abertura ou
 recarregamento. Ao escolher, a seleção azul e o ícone indicam apenas
 "Resposta registrada", não acerto ou erro. A auditoria mostra o contador
@@ -114,3 +126,8 @@ CONTEÚDO
   - A14 — Bootstrap 5.3 II: componentes mobile e customização
   - A15 — DOM, eventos, delegação, pointer e touch
   - A16 — jQuery e bibliotecas para mobile
+  - A17 — Acessibilidade: WCAG 2.2 na prática
+  - A18 — SEO para mobile
+  - A19 — Otimização de front-end
+  - A20 — CMS: conceitos, requisitos, servidor local, banco e usuários
+  - A21 — Tema filho, CSS, plug-ins, implantação e publicação

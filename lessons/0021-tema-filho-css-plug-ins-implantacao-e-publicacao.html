@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A21 — Tema filho, CSS, plug-ins, implantação e publicação</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 21 de 22 · 3h · CMS</p>
+<h1>Tema filho, plug-ins<br>e publicação</h1>
+<p class="deck">Publicar não é copiar uma aparência: é tornar customizações
+atualizáveis, escolher extensões por requisito e mover arquivos e banco com retorno
+planejado. A F5 termina no ar sem abandonar acessibilidade, SEO ou desempenho.</p>
+<p>Ao final, você deverá criar um tema filho reconhecível, aplicar CSS com escopo,
+justificar plug-ins, implantar em staging/produção e executar um smoke test com rollback.</p>
+<div class="callout"><span class="callout-title">Escopo e segurança operacional</span>
+<p>A aula usa WordPress 7.1.3 como referência conferida em 07/10/2026. Não faça a
+primeira tentativa em produção. Antes de tema, plug-in, atualização ou migração,
+mantenha backup restaurável de arquivos e banco. As prévias locais demonstram HTML,
+CSS e JS; PHP, hooks e publicação devem ser testados no site WordPress da A20.</p></div>
+
+<div class="quiz" data-dica="Pergunte se a mudança define apresentação do site ou uma funcionalidade que deve sobreviver à troca de tema."
+>
+<p class="quiz-q">Onde deve ficar uma funcionalidade que precisa sobreviver à troca de tema?</p>
+<ul class="quiz-opts"><li>No CSS do tema pai</li><li>Em um plug-in adequado ou no core</li><li>Em um comentário dentro de theme.json</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Linha de base antes da customização</h2>
+<p>Confirme versão, tema pai, conteúdo, URLs, papéis e backup da A20. Faça uma captura
+da home em 320px e desktop, teste teclado e registre Network/Lighthouse como referência.
+Uma mudança só é melhoria se a tarefa continua funcionando e o efeito pode ser revertido.</p>
+<div class="atelier" data-modo="demo" data-id="a21-baseline" data-titulo="Mudança com origem e retorno" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } ol { counter-reset: etapa; list-style: none; padding: 0; display: grid; gap: .6rem; } li { border-inline-start: .35rem solid #1769aa; padding: .6rem; } li::before { counter-increment: etapa; content: counter(etapa) ". "; font-weight: 700; }</template>
+<template data-papel="html"><h3>Rota de mudança</h3><ol><li>Medir e salvar a linha de base</li><li>Alterar no ambiente local</li><li>Testar em staging</li><li>Fazer backup da produção</li><li>Implantar, verificar e monitorar</li><li>Reverter se o critério falhar</li></ol></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Preserve um trace ou HAR sem dados sensíveis e capturas de Elements/Accessibility.
+Use o mesmo viewport, navegador e cache nas comparações. DevTools produz evidência da
+interface; backup e rollback são comprovados fora dele.</p></div>
+
+<h2>2. Tema filho: herdar sem editar o pai</h2>
+<p>O tema filho herda o pai e mantém customizações separadas para que o pai possa ser
+atualizado. O arquivo mínimo para o WordPress reconhecer o filho é <code>style.css</code>
+com cabeçalho; <code>Template</code> deve corresponder exatamente à pasta do tema pai.
+O pai precisa estar instalado. <code>functions.php</code> do filho é carregado além do
+arquivo do pai — ele não o substitui.</p>
+<pre><code>/*
+Theme Name: F5 Child
+Template: twentytwentysix
+Version: 1.0.0
+Text Domain: f5-child
+*/</code></pre>
+<p>Temas de blocos usam principalmente HTML e <code>theme.json</code>; temas clássicos
+usam PHP, hooks e templates tradicionais. Um tema filho pode sobrescrever templates,
+parts e patterns conforme o tipo do pai. Não copie o tema inteiro sem necessidade.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Elements → body mostra classes de tema/contexto. Network → CSS revela a URL em
+<code>wp-content/themes/f5-child/</code>, status e ordem de carga. Sources confirma qual
+arquivo entregou a regra; o nome visual no painel não prova sozinho o Template correto.</p></div>
+
+<h2>3. CSS, theme.json e fila de assets</h2>
+<p>Em tema de blocos, prefira <code>theme.json</code> para propriedades suportadas: o
+Site Editor entende tokens e estilos sem guerra de especificidade. CSS continua válido
+para o que não cabe ali. Em temas clássicos e folhas adicionais, use
+<code>wp_enqueue_style()</code> no hook <code>wp_enqueue_scripts</code>; não cole links
+fixos no head. Versão do asset ajuda a invalidar cache.</p>
+<pre><code>&lt;?php
+add_action( 'wp_enqueue_scripts', 'f5_child_styles' );
+function f5_child_styles() {
+    wp_enqueue_style(
+        'f5-child',
+        get_stylesheet_uri(),
+        array(),
+        wp_get_theme()-&gt;get( 'Version' )
+    );
+}</code></pre>
+<div class="atelier" data-modo="demo" data-id="a21-cascade" data-titulo="Escopo antes de força" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } .site-f5 { --cor-acao: #174f6b; } .site-f5 .wp-block-button__link { display: inline-block; border-radius: .35rem; padding: .7rem 1rem; background: var(--cor-acao); color: white; } .site-f5 .wp-block-button__link:focus-visible { outline: 3px solid #f2a900; outline-offset: 3px; }</template>
+<template data-papel="html"><main class="site-f5"><h3>Notícias da equipe</h3><div class="wp-block-button"><a class="wp-block-button__link" href="#agenda">Ver agenda</a></div><section id="agenda"><h4>Agenda</h4><p>Conteúdo preservado.</p></section></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Elements → Styles identifica seletor, origem e regra sobrescrita. Computed mostra o
+valor final e a variável usada. Network → CSS confirma handle/URL/versão; Disable cache
+serve ao diagnóstico local, não substitui versionar corretamente o asset.</p></div>
+
+<h2>4. Exercício: CSS do filho sem efeito colateral</h2>
+<div class="atelier" data-modo="exercicio" data-edita="css" data-id="a21-ex1-css" data-titulo="Escopo, estados e reflow" data-vp="390">
+<p data-papel="enunciado">Repare o CSS: limite a customização ao bloco da F5, remova
+força desnecessária, mantenha foco visível, permita quebra do grupo e não esconda a
+descrição no mobile. O link principal deve continuar identificável sem depender de hover.</p>
+<p data-papel="dica">Localize quem ganha na cascata e qual ancestral oferece escopo.
+Teste 320px, teclado e texto ampliado. Não aumente especificidade antes de entender a origem.</p>
+<template data-papel="css">a { color: red !important; } .acoes { display: flex; width: 700px; } .descricao { display: none; } .wp-block-button__link:focus { outline: none; } .wp-block-button__link:hover { transform: scale(1.2); }</template>
+<template data-papel="html"><main class="site-f5"><h3>Próxima etapa</h3><p class="descricao">Consulte horários e canais oficiais.</p><div class="acoes"><div class="wp-block-button"><a class="wp-block-button__link" href="#detalhes">Ver detalhes</a></div><a href="#arquivo">Baixar regulamento</a></div><section id="detalhes"><h4>Detalhes</h4><p>Conteúdo da etapa.</p></section><p id="arquivo">Arquivo demonstrativo.</p></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Styles mostra o fim de !important e o escopo .site-f5. Computed confirma max-width,
+flex-wrap, cor e outline. Device Toolbar em 320px e Tab verificam reflow/estados; use
+Coverage apenas para a rota observada, sem declarar o restante do CSS inútil.</p></div>
+
+<h2>5. Plug-in: requisito, procedência e ciclo de vida</h2>
+<p>Plug-in estende funcionalidade. Antes de instalar, escreva o requisito e verifique
+procedência, versão compatível, manutenção, suporte, licença, acessibilidade, dados
+criados, impacto, desinstalação e alternativa do core. Quantidade de instalações ou
+avaliação alta não substitui esse conjunto. Teste no local/staging e faça backup antes
+de atualizar. Extensão inativa e sem uso deve ser removida, não colecionada.</p>
+<div class="atelier" data-modo="demo" data-id="a21-plugin" data-titulo="Ficha de decisão de plug-in" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } dl { display: grid; grid-template-columns: max-content 1fr; gap: .5rem 1rem; } dt { font-weight: 700; } .pendente { color: #8a1c13; }</template>
+<template data-papel="html"><h3>Requisito: formulário com consentimento</h3><dl><dt>Core atende?</dt><dd>Não por completo</dd><dt>Fonte</dt><dd>Diretório oficial / fornecedor identificado</dd><dt>Compatibilidade</dt><dd>Testar com WordPress, PHP e tema atuais</dd><dt>Dados</dt><dd class="pendente">Pendente: retenção e remoção</dd><dt>Rollback</dt><dd>Backup + versão anterior + teste</dd></dl></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Network compara recursos antes/depois; Coverage e Performance ajudam a localizar
+custo na rota. Application revela cookies/storage adicionados. Console mostra erros,
+mas ausência de erro não comprova segurança, privacidade ou compatibilidade.</p></div>
+
+<h2>6. Exercício: decisão baseada em evidência</h2>
+<div class="atelier" data-modo="exercicio" data-edita="js" data-id="a21-ex2-plugin" data-titulo="Aprovação exige todos os bloqueadores" data-vp="390">
+<p data-papel="enunciado">Corrija avaliar(): o candidato só pode ser aprovado quando
+requisito, fonte, compatibilidade, dados e rollback estiverem verificados. Atualize o
+status a cada mudança e liste quantos bloqueadores faltam.</p>
+<p data-papel="dica">Leia os checkboxes como condições necessárias, não como pontos.
+Teste zero, um e todos marcados. Uma popularidade alta não aparece porque não substitui os critérios.</p>
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } label { display: block; padding: .45rem; } input { width: 1.25rem; height: 1.25rem; } output { display: block; margin-top: 1rem; font-weight: 700; }</template>
+<template data-papel="html"><fieldset id="criterios"><legend>Critérios verificados</legend><label><input type="checkbox" value="requisito"> Requisito não atendido pelo core</label><label><input type="checkbox" value="fonte"> Fonte e licença conhecidas</label><label><input type="checkbox" value="compatibilidade"> Compatibilidade testada</label><label><input type="checkbox" value="dados"> Dados e desinstalação conhecidos</label><label><input type="checkbox" value="rollback"> Backup e rollback testados</label></fieldset><output id="status">5 bloqueador(es). Não aprovado.</output></template>
+<template data-papel="js">function avaliar() { document.querySelector('#status').textContent = 'Aprovado.'; } document.querySelector('#criterios').addEventListener('change', avaliar);</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>Sources pausa em avaliar() e inspeciona faltam. Elements → Accessibility confirma
+fieldset/legend e estados checked. No site real, Network/Performance fornece parte
+da ficha; changelog, licença, dados e rollback exigem documentação e teste externo.</p></div>
+
+<h2>7. Implantar é mover um sistema, não só HTML</h2>
+<p>A sequência segura é: staging compatível; backup conjunto e restauração conhecida;
+arquivos e banco; URLs migradas com ferramenta consciente de dados serializados;
+configuração/segredos do destino; HTTPS e permalinks; smoke tests; monitoramento e
+rollback. Um replace bruto no SQL pode corromper valores serializados.</p>
+<div class="atelier" data-modo="demo" data-id="a21-deploy" data-titulo="Gate de publicação" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } .passos { display: grid; gap: .5rem; } label { border: 1px solid #9aabb5; padding: .6rem; } input { width: 1.25rem; height: 1.25rem; } output { display: block; margin-top: 1rem; font-weight: 700; }</template>
+<template data-papel="html"><div class="passos"><label><input type="checkbox"> Backup restaurável</label><label><input type="checkbox"> Staging aprovado</label><label><input type="checkbox"> URLs/HTTPS verificados</label><label><input type="checkbox"> Smoke test executado</label></div><output id="gate">Publicação bloqueada: 4 etapa(s).</output></template>
+<template data-papel="js">const itens = [...document.querySelectorAll('input')]; function atualizar() { const faltam = itens.filter(item => !item.checked).length; document.querySelector('#gate').textContent = faltam ? 'Publicação bloqueada: ' + faltam + ' etapa(s).' : 'Gate completo: monitorar e manter rollback.'; } document.querySelector('.passos').addEventListener('change', atualizar);</template>
+</div>
+<p>Studio exporta site completo ou banco; formatos e recursos do host determinam a
+restauração. Studio Sync serve apenas a destinos compatíveis e pode substituir banco:
+revise o escopo. Qualquer fluxo automático continua exigindo backup e teste.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Network confirma redirects, HTTPS, status, canonical e recursos sem 404. Application
+verifica cookies e cache do novo domínio; Console procura erros. Preserve o log do host
+e Site Health para falhas PHP. Um 200 na home não conclui o smoke test.</p></div>
+
+<h2>8. Auditoria: front-end do tema e plano de publicação</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css" data-id="a21-auditoria" data-titulo="Corrija sem mascarar o risco operacional" data-vp="320">
+<p data-papel="enunciado">Requisitos: home utilizável em 320px/teclado, aviso de
+atualização visível e customização isolada no filho. O plano deve preservar update,
+dados e rollback. Audite CSS e decisões; repare os problemas visuais no editor.</p>
+<p data-papel="dica">Localize a origem da regra antes de aumentar sua força. Separe
+o que Styles resolve do que exige tema, plug-in, banco ou host. Decoy plausível ainda
+precisa de evidência para ser rejeitado.</p>
+
+<template data-papel="css">body { margin: 0; font: 1rem/1.5 system-ui; } .site-f5 { width: 980px; padding: 1rem; } .atualizacao { display: none; } a { color: #174f6b !important; } .acoes { display: flex; gap: .5rem; } :focus { outline: 0; }</template>
+<template data-papel="html"><main class="site-f5"><h3>Portal F5</h3><p class="atualizacao"><strong>Atenção:</strong> atualização pendente de teste.</p><p>Conteúdo publicado pelo CMS.</p><div class="acoes"><a href="#noticias">Notícias</a><a href="#contato">Contato</a><a href="#arquivo">Arquivo da temporada</a></div><section id="noticias"><h4>Notícias</h4><p>Última publicação.</p></section></main></template>
+<ol data-papel="achados">
+<li>A equipe alterou diretamente o CSS do tema pai.</li>
+<li>O campo Template usar o nome da pasta do pai é um erro.</li>
+<li>A home não reflui no viewport estreito.</li>
+<li>O aviso de atualização foi escondido pelo CSS.</li>
+<li>Todo CSS do filho deve ser inserido com uma tag link escrita manualmente.</li>
+<li>O plano usa localizar/substituir textual direto em todo o SQL para trocar domínio.</li>
+<li>Usar theme.json impede qualquer CSS adicional.</li>
+<li>Foco e ações deixam de funcionar bem por teclado/viewport estreito.</li>
+<li>O rollback guarda somente o banco.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Device Toolbar, Styles e Computed revelam largura, display, !important, flex e
+outline. Network confirma a folha do filho e 404; não valida search-replace ou backup.
+São seis problemas reais e três decoys: discuta o texto, pois a ordem muda.</p></div>
+<div class="quiz" data-dica="Pense no que uma atualização do tema pai substitui e no que fica fora da pasta dele."
+>
+<p class="quiz-q">Qual vantagem central do tema filho?</p><ul class="quiz-opts"><li>Separar customização do código atualizável do pai</li><li>Eliminar a necessidade de tema pai instalado</li><li>Transformar todo plug-in em CSS</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega F5 — parte 2: publicar com retorno</h2>
+<ol><li>Crie/ative o tema filho e versione seus arquivos próprios.</li>
+<li>Transfira a home preservando HTML semântico, responsividade e estados.</li>
+<li>Para cada plug-in, complete requisito, procedência, dados, custo e rollback.</li>
+<li>Implante primeiro em staging compatível; execute A17, A18 e A19 novamente.</li>
+<li>Faça backup de produção, publique, rode smoke test e monitore; reverta se falhar.</li></ol>
+<p>Atualize <code>CMS.md</code> com tema pai/filho, arquivos, plug-ins/versões, migração,
+URLs, teste, backup e retorno. Não inclua senha, chave, cookie, dado pessoal ou dump no Git.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Network: documento, CSS do filho, assets, redirects e status. Elements/Accessibility:
+semântica/foco. Lighthouse e Performance: regressões. Application: cookies/cache do
+domínio certo. Repita anônimo e autenticado com contas de teste separadas.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Tema filho</td><td>Template correto, pai intacto e customização separada</td></tr>
+<tr><td>CSS</td><td>Escopo, estados, reflow e origem inspecionados</td></tr>
+<tr><td>Plug-ins</td><td>Requisito, procedência, dados, custo e rollback</td></tr>
+<tr><td>Implantação</td><td>Staging, arquivos+banco, URLs, HTTPS e smoke test</td></tr>
+<tr><td>Publicação</td><td>Backup restaurável, monitoramento e retorno documentado</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Demonstre a folha do filho, uma regra aplicada, uma requisição do plug-in e o smoke
+test da URL publicada. Termine mostrando onde está o plano de rollback — sem abri-lo
+se contiver dados sensíveis.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://developer.wordpress.org/themes/advanced-topics/child-themes/">Tema filho</a> ·
+<a href="https://developer.wordpress.org/themes/">Theme Handbook</a> ·
+<a href="https://developer.wordpress.org/themes/global-settings-and-styles/styles/">theme.json: estilos</a> ·
+<a href="https://developer.wordpress.org/themes/core-concepts/including-assets/">Enfileirar assets</a> ·
+<a href="https://wordpress.org/documentation/article/manage-plugins/">Gerenciar plug-ins</a> ·
+<a href="https://developer.wordpress.org/advanced-administration/security/">Segurança e atualizações</a> ·
+<a href="https://developer.wordpress.org/advanced-administration/upgrade/migrating/">Migração</a> ·
+<a href="https://developer.wordpress.com/docs/developer-tools/studio/import-export/">Studio: importar e exportar</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga a origem
+da mudança, o ambiente, a evidência e a rota de retorno.</p>
+<nav class="aula-nav"><a href="0020-conceitos-requisitos-servidor-local-banco-usuarios.html">← A20 — CMS e servidor</a>A22 — Testes →</nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>
