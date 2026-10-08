@@ -1,4 +1,4 @@
-# Projeto Integrador — Portal Mobile da Temporada
+# Projeto UC15 - HTML Mobile first
 
 ## Missão
 

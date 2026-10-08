@@ -96,7 +96,7 @@ Playwright. No projeto real, diferencie Chromium, Firefox, WebKit, navegadores d
 perfis emulados e aparelhos físicos. Não publique trace, screenshot, cookie ou relatório
 que contenha credencial, dado pessoal ou endereço privado.
 
-O trabalho único da disciplina está em PROJETO-INTEGRADOR.md. Use a lista T00–T12
+O trabalho único da disciplina está em PROJETO-UC15-HTML-MOBILE-FIRST.md. Use a lista T00–T12
 para evoluir o mesmo produto, anexar evidências e preparar a entrega final.
 
 Quizzes e marcações de auditoria começam limpos a cada abertura ou

@@ -15,7 +15,7 @@ ferramenta, não com opinião.
 
 ## Success looks like
 
-- Cada aluno tem **uma URL pública** do projeto integrador, funcionando no celular dele.
+- Cada aluno tem **uma URL pública** do Projeto UC15 - HTML Mobile first, funcionando no celular dele.
 - O aluno escreve um layout responsivo do zero com Grid/Flexbox e media queries, sem framework, sem copiar.
 - O aluno explica *por que* mobile-first e progressive enhancement são a ordem correta — não só *o que* são.
 - O aluno audita o próprio site com Lighthouse, axe e DevTools e corrige o que a ferramenta apontou.

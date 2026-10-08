@@ -15,14 +15,14 @@ gastar memória de trabalho no conteúdo e não no formato:
 | Prática 1 | 30 min | Aluno faz. Feedback imediato. |
 | Intervalo | 15 min | — |
 | Exposição 2 | 35 min | Segunda metade do conteúdo. |
-| Prática 2 / Projeto | 40 min | Aplicação no projeto integrador. |
+| Prática 2 / Projeto | 40 min | Aplicação no Projeto UC15 - HTML Mobile first. |
 | Fechamento | 5 min | O que ficou de pé + o que vem. |
 
 **Regra de retomada:** os 15 min iniciais nunca cobrem só a aula anterior. Intercalam
 (interleaving) com uma aula de 3–4 encontros atrás. É o que converte fluência em
 retenção de longo prazo.
 
-## Projeto integrador — um site, cinco encarnações
+## Projeto UC15 - HTML Mobile first — um site, cinco encarnações
 
 Um único site real (institucional ou portfólio, tema escolhido pelo aluno na A1),
 que atravessa o semestre e é reconstruído sob cada lente da ementa. Isso evita o

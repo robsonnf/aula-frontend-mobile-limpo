@@ -4,9 +4,10 @@ Este projeto contém somente o material destinado aos alunos. As aulas ficam em
 `lessons/`, os recursos compartilhados em `assets/` e não há gabaritos, soluções,
 roteiros de fala ou documentos internos de avaliação.
 
-## Projeto integrador
+## Projeto UC15 - HTML Mobile first
 
-O trabalho único da disciplina está em [PROJETO-INTEGRADOR.md](PROJETO-INTEGRADOR.md).
+O trabalho único da disciplina está em
+[PROJETO-UC15-HTML-MOBILE-FIRST.md](PROJETO-UC15-HTML-MOBILE-FIRST.md).
 Use as tarefas T00–T12 para evoluir o mesmo produto até a publicação e os testes finais.
 
 ## Rodar
@@ -37,7 +38,7 @@ gera `dist/aula-frontend-mobile-aluno.zip`.
 - `scripts/`: servidor, verificação e empacotamento;
 - `CURRICULUM.md`: mapa completo da disciplina;
 - `MISSION.md`: objetivos da disciplina;
-- `PROJETO-INTEGRADOR.md`: trabalho único e lista pública de tarefas.
+- `PROJETO-UC15-HTML-MOBILE-FIRST.md`: trabalho único e lista pública de tarefas.
 
 Este projeto é publicado a partir do projeto do professor. As aulas geradas não
 devem ser corrigidas manualmente aqui, pois uma nova publicação poderá substituí-las.
