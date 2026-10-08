@@ -176,7 +176,7 @@ window.AULAS = [
     "bloco": "Entrega",
     "titulo": "Testes: script, cross-browser, responsividade, automação",
     "ementa": "Testes em aplicações web",
-    "arquivo": null,
-    "disponivel": false
+    "arquivo": "0022-testes-script-cross-browser-responsividade-automacao.html",
+    "disponivel": true
   }
 ];

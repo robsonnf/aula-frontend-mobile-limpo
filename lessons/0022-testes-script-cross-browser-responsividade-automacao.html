@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A22 — Testes: script, cross-browser, responsividade e automação</title>
+<link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/atelier.css">
+</head><body class="lesson">
+<p class="aula-tag">Aula 22 de 22 · 3h · Entrega</p>
+<h1>Testar, automatizar<br>e entregar com evidência</h1>
+<p class="deck">Um teste útil liga risco, ação, resultado esperado e ambiente. A
+automação repete contratos importantes; a matriz cross-browser, o dispositivo real e a
+revisão humana cobrem diferenças que um único motor emulado não consegue provar.</p>
+<p>Ao final, você deverá escrever um roteiro reproduzível, testar limites responsivos,
+definir navegadores-alvo, automatizar um fluxo com Playwright e entregar evidências que
+permitam diagnosticar e repetir o resultado.</p>
+<div class="callout"><span class="callout-title">Contrato desta aula</span>
+<p>Playwright executa Chromium, Firefox e WebKit e também configura viewports/dispositivos
+emulados. Isso amplia cobertura, mas WebKit não é o mesmo que declarar Safari real testado,
+e Device Mode não executa o hardware de um celular. A aprovação exige automação mais
+verificações manuais orientadas pelo risco, sem credenciais ou dados pessoais nos artefatos.</p></div>
+
+<div class="quiz" data-dica="Pergunte se o software executado e o hardware são realmente os mesmos, ou apenas parâmetros aproximados."
+>
+<p class="quiz-q">Passar no modo responsivo do Chrome prova funcionamento no Safari de um iPhone real?</p>
+<ul class="quiz-opts"><li>Sim, porque o tamanho da tela define todo o navegador</li><li>Não; é evidência útil, mas parcial</li><li>Sim, desde que o zoom esteja em 100%</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>1. Teste começa no risco e no contrato</h2>
+<p>Não tente combinar todos os navegadores, sistemas e aparelhos existentes. Defina a
+matriz a partir do público, analytics quando disponíveis, requisitos, recursos usados e
+impacto da falha. Priorize tarefas: abrir a navegação, ler conteúdo, preencher formulário,
+publicar no CMS e recuperar uma falha. Aparência idêntica não é o objetivo; acesso à
+função e ao conteúdo é.</p>
+<div class="atelier" data-modo="demo" data-id="a22-risco" data-titulo="Risco define profundidade" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } table { border-collapse: collapse; width: 100%; } th, td { border-bottom: 1px solid #9aabb5; padding: .55rem; text-align: left; } .alta { color: #8a1c13; font-weight: 700; }</template>
+<template data-papel="html"><h3>Mapa mínimo</h3><table><thead><tr><th>Tarefa</th><th>Risco</th><th>Cobertura</th></tr></thead><tbody><tr><td>Enviar formulário</td><td class="alta">Alto</td><td>Automático + teclado + mobile real</td></tr><tr><td>Abrir menu</td><td>Médio</td><td>Motores + limites de largura</td></tr><tr><td>Gradiente decorativo</td><td>Baixo</td><td>Inspeção visual amostral</td></tr></tbody></table></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 1</span>
+<p>Abra Issues e Console para sinais iniciais; Network e Elements ajudam a ligar a falha
+à requisição ou ao DOM. Nenhum painel escolhe sozinho público, impacto ou matriz: registre
+essas decisões no plano de teste.</p></div>
+
+<h2>2. Script manual: outra pessoa consegue repetir?</h2>
+<p>Um caso de teste registra identificador, objetivo, ambiente, pré-condições, dados de
+teste, passos, resultado esperado e resultado observado. “Teste o menu” não oferece
+oráculo. “Em 320 CSS px, com sessão anônima, acione Menu por Enter; o painel fica visível,
+<code>aria-expanded</code> vira <code>true</code> e o foco continua identificável” é verificável.</p>
+<p>Registre navegador e versão, sistema, largura/altura, zoom, entrada usada, URL/commit e
+data. Capture só a evidência necessária. Console limpo não prova que a tarefa terminou;
+um screenshot não prova teclado, ordem de foco nem resposta do servidor.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 2</span>
+<p>Device Toolbar fixa dimensões e orientação; Elements → Accessibility mostra nome,
+papel e estado; Network preserva requisições e status. Use Recorder apenas como ponto de
+partida: revise passos, dados e expectativas antes de chamar o fluxo de teste.</p></div>
+
+<h2>3. Exercício: o teste precisa falhar pelo motivo certo</h2>
+<div class="atelier" data-modo="exercicio" data-edita="js" data-id="a22-ex1-script" data-titulo="Teste o contrato do menu" data-vp="390">
+<p data-papel="enunciado">Corrija o componente e <code>executarTestes()</code>. O relatório
+deve verificar três contratos independentes: começa fechado com <code>aria-expanded=false</code>;
+um clique abre e sincroniza o estado; o segundo clique fecha e sincroniza novamente.
+Mostre PASS/FAIL para cada expectativa — nunca escreva PASS incondicional.</p>
+<p data-papel="dica">Prepare o estado antes de cada sequência, execute a mesma ação que a
+pessoa usa e compare DOM observável. Se o teste passa mesmo quando você quebra o atributo,
+ele não protege o contrato.</p>
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } button { min-height: 44px; padding: .55rem .8rem; } nav { margin-block: .7rem; padding: .6rem; border: 1px solid #71828c; } #resultado { display: grid; gap: .35rem; margin-top: 1rem; } .pass { color: #126329; } .fail { color: #9b1c1c; }</template>
+<template data-papel="html"><main><h3>Portal F5</h3><button id="menu" aria-expanded="false" aria-controls="painel">Menu</button><nav id="painel" hidden><a href="#conteudo">Ir ao conteúdo</a></nav><section id="conteudo"><h4>Conteúdo</h4><p>A temporada começa aqui.</p></section><button id="executar" type="button">Executar testes</button><div id="resultado" aria-live="polite">Ainda não executado.</div></main></template>
+<template data-papel="js">const botao = document.querySelector('#menu');
+const painel = document.querySelector('#painel');
+const resultado = document.querySelector('#resultado');
+botao.addEventListener('click', () => { painel.hidden = !painel.hidden; });
+function executarTestes() { resultado.textContent = 'PASS: tudo funciona'; }
+document.querySelector('#executar').addEventListener('click', executarTestes);</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 3</span>
+<p>Sources permite breakpoint em <code>definirMenu</code>; Elements confirma <code>hidden</code>
+e <code>aria-expanded</code>; Accessibility expõe o estado expandido. Force um defeito e
+confirme que ao menos uma expectativa fica FAIL antes de aceitar o teste.</p></div>
+
+<h2>4. Cross-browser: motores, produtos e melhoria progressiva</h2>
+<p>Chromium, Firefox e WebKit oferecem uma matriz valiosa de motores no Playwright.
+Produtos reais ainda variam por versão, sistema, políticas, codecs e integração. Defina
+suporte por tarefa e versão, consulte tabelas de compatibilidade e prefira detecção de
+recurso a identificar o navegador por user agent. Entregue uma base funcional e melhore
+quando houver suporte.</p>
+<div class="atelier" data-modo="demo" data-id="a22-feature" data-titulo="Base antes do recurso novo" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } .grade { display: block; } .cartao { border: 1px solid #71828c; padding: .7rem; margin-block: .6rem; } @supports (display: grid) { .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: .7rem; } .cartao { margin: 0; } }</template>
+<template data-papel="html"><h3>Resultado preservado</h3><div class="grade"><article class="cartao"><h4>Notícia</h4><p>A base em bloco continua legível.</p></article><article class="cartao"><h4>Agenda</h4><p>Grid melhora a composição quando suportado.</p></article></div></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 4</span>
+<p>Em Styles, localize a regra dentro de <code>@supports</code> e desative-a para verificar
+a base. Console aceita <code>CSS.supports('display', 'grid')</code>. Trocar user agent no
+Network não troca o motor de renderização e não constitui teste cross-browser.</p></div>
+
+<h2>5. Exercício: responsividade se testa nos limites</h2>
+<p>Não teste apenas nomes de aparelhos. Varra a largura até o conteúdo pedir mudança e
+verifique pontos imediatamente antes, no breakpoint e depois dele. Inclua texto longo,
+zoom, orientação, teclado, toque, preferências e conteúdo real. O viewport emulado mede
+layout; o aparelho real revela teclado virtual, área segura, desempenho e gestos.</p>
+<div class="atelier" data-modo="exercicio" data-edita="css" data-id="a22-ex2-responsive" data-titulo="Remova falsos sucessos em 320px" data-vp="320">
+<p data-papel="enunciado">Repare a página para 320px, texto ampliado e teclado: remova
+larguras rígidas, permita quebra das ações, mantenha a ajuda disponível e devolva foco
+visível. Preserve uma largura máxima confortável sem esconder overflow como maquiagem.</p>
+<p data-papel="dica">No Console, compare <code>document.documentElement.scrollWidth</code>
+com <code>clientWidth</code>. Em seguida inspecione o elemento que excede. Teste 319, 320,
+767 e 768px; o nome do aparelho não explica qual regra entrou.</p>
+<template data-papel="css">body { margin: 0; font: 1rem/1.5 system-ui; } .pagina { width: 960px; padding: 1rem; } .cartao { min-width: 420px; border: 1px solid #71828c; padding: 1rem; } .acoes { display: flex; gap: .5rem; } .ajuda { display: none; } :focus { outline: 0; }</template>
+<template data-papel="html"><main class="pagina"><h3>Inscrição da temporada</h3><p class="ajuda">Revise os dados antes de continuar.</p><section class="cartao"><h4>Equipe com um nome muito longo para testar conteúdo real</h4><div class="acoes"><a href="#revisar">Revisar inscrição</a><button type="button">Continuar</button><a href="#cancelar">Cancelar</a></div></section><p id="revisar">Resumo da inscrição.</p><p id="cancelar">A inscrição ainda não foi enviada.</p></main></template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 5</span>
+<p>Device Toolbar ajusta largura/altura; o selo de media query mostra limites. Elements →
+Layout e Computed localizam a caixa excedente. Em Rendering, simule preferências; aplique
+zoom do navegador e Tab. Repita a tarefa em celular real antes da entrega.</p></div>
+
+<h2>6. Automação com Playwright: ação e expectativa</h2>
+<p>Um teste de interface abre a aplicação, executa a ação e verifica o estado observável.
+Locators por papel, nome e rótulo aproximam o uso real e resistem melhor a mudanças de
+estrutura do que <code>nth-child</code>. As assertions web-first esperam o estado dentro do
+timeout; <code>waitForTimeout()</code> fixo costuma criar lentidão e instabilidade.</p>
+<pre><code>import { test, expect } from '@playwright/test';
+
+test('menu abre e expõe estado', async ({ page }) =&gt; {
+  await page.goto('/');
+  const menu = page.getByRole('button', { name: 'Menu' });
+  await menu.click();
+  await expect(menu).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByRole('navigation')).toBeVisible();
+});</code></pre>
+<p>Configure <code>webServer</code>/<code>baseURL</code> e projetos para Chromium, Firefox,
+WebKit e perfis móveis relevantes. Fixe dependências no lockfile e instale os browsers da
+versão usada. Um projeto emulado não deve receber o rótulo de teste em aparelho físico.</p>
+<div class="atelier" data-modo="demo" data-id="a22-matriz" data-titulo="Relatório deixa o ambiente explícito" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } button { min-height: 44px; } ul { padding-left: 1.25rem; } .ok { color: #126329; } code { background: #eef2f4; padding: .1rem .25rem; }</template>
+<template data-papel="html"><h3>Matriz didática simulada</h3><button id="rodar">Gerar relatório</button><ul id="matriz"><li>Aguardando execução.</li></ul><p><small>Esta prévia ensina o formato; não inicia browsers reais.</small></p></template>
+<template data-papel="js">const projetos = ['chromium-desktop', 'firefox-desktop', 'webkit-desktop', 'mobile-chrome-emulado', 'mobile-safari-emulado']; document.querySelector('#rodar').addEventListener('click', () => { const lista = document.querySelector('#matriz'); lista.replaceChildren(); for (const nome of projetos) { const item = document.createElement('li'); item.className = 'ok'; item.textContent = 'PASS — ' + nome; lista.append(item); } });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 6</span>
+<p>O DevTools depura a página aberta pelo teste: Console, Network, DOM e Accessibility.
+Para a execução, use terminal, relatório HTML, UI Mode ou Inspector do Playwright. Selecione
+o contexto/iframe correto; o Console da página externa não é o da prévia.</p></div>
+
+<h2>7. Isolamento, assincronia e diagnóstico</h2>
+<p>Cada teste deve preparar seu próprio estado e não depender da ordem. No Playwright,
+Browser Contexts isolam cookies e storage por teste. Prefira esperar pelo estado esperado;
+um atraso fixo só aposta no tempo. Retry pode revelar instabilidade, mas não transforma
+um teste intermitente em aprovado: investigue a primeira falha e guarde trace, screenshot,
+vídeo ou log conforme o risco.</p>
+<div class="atelier" data-modo="demo" data-id="a22-assincrono" data-titulo="Espere pelo estado, não pelo palpite" data-vp="390">
+<template data-papel="css">body { padding: 1rem; font: 1rem/1.5 system-ui; } button { min-height: 44px; } output { display: block; margin-top: .75rem; font-weight: 700; }</template>
+<template data-papel="html"><h3>Resposta assíncrona</h3><button id="carregar">Carregar classificação</button><output id="status">Pronto para iniciar.</output></template>
+<template data-papel="js">const botao = document.querySelector('#carregar'); const status = document.querySelector('#status'); botao.addEventListener('click', () => { botao.disabled = true; status.textContent = 'Carregando…'; const atraso = 180 + Math.floor(Math.random() * 620); setTimeout(() => { status.textContent = 'Classificação carregada.'; botao.disabled = false; }, atraso); });</template>
+</div>
+<div class="callout"><span class="callout-title">No DevTools — seção 7</span>
+<p>Network Throttling ajuda a reproduzir latência; Sources pausa antes da atualização;
+Performance registra a sequência. No Trace Viewer, correlacione ação, DOM, rede e console.
+Não publique trace contendo token, cookie, resposta pessoal ou URL privada.</p></div>
+
+<h2>8. Auditoria: cobertura real ou confiança falsa?</h2>
+<div class="atelier" data-modo="auditoria" data-edita="css" data-id="a22-auditoria" data-titulo="Marque riscos e repare a interface" data-vp="320">
+<p data-papel="enunciado">Requisito: a home deve permitir ler, navegar e acionar em
+320px, teclado e matriz declarada. Marque decisões que produzem falha ou conclusão sem
+evidência. Depois repare no editor os problemas visuais demonstráveis.</p>
+<p data-papel="dica">Separe defeito da página, limitação do ambiente e afirmação de
+cobertura. Procure largura, conteúdo removido, foco, dependência de hover e diferenças
+entre motor emulado, navegador de marca e aparelho físico.</p>
+
+<template data-papel="css">body { margin: 0; font: 1rem/1.5 system-ui; } .home { width: 960px; padding: 1rem; } .acoes { display: flex; gap: .5rem; } .detalhe { opacity: 0; } .cartao:hover .detalhe { opacity: 1; } :focus { outline: 0; } @media (max-width: 600px) { nav { display: none; } }</template>
+<template data-papel="html"><main class="home"><h3>Entrega F6</h3><nav aria-label="Principal"><a href="#casos">Casos</a> <a href="#matriz">Matriz</a></nav><article class="cartao"><h4>Resultado da bateria</h4><p class="detalhe">Dois ambientes ainda precisam de teste manual.</p><div class="acoes"><button type="button">Abrir relatório</button><a href="#falhas">Ver falhas</a></div></article><section id="casos"><h4>Casos</h4><p>Fluxos críticos documentados.</p></section></main></template>
+<ol data-papel="achados">
+<li>A home tem largura fixa maior que o viewport de teste.</li>
+<li>A matriz inclui 599, 600 e 601px em torno do breakpoint.</li>
+<li>O media query remove toda a navegação no mobile.</li>
+<li>O teste usa getByRole com nome em vez de selecionar o segundo botão.</li>
+<li>O CSS elimina o foco visível.</li>
+<li>O detalhe do relatório depende apenas de hover.</li>
+<li>Usar @supports para uma melhoria progressiva é um erro cross-browser.</li>
+<li>A equipe rodou apenas Chromium emulado e declarou cobertura cross-browser e celular real.</li>
+<li>Guardar trace no primeiro retry é incompatível com CI.</li>
+</ol></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 8</span>
+<p>Device Toolbar e Console revelam overflow; Styles mostra opacity, display e outline;
+Accessibility verifica navegação e foco. São cinco problemas reais e quatro decoys.
+Discuta o texto, pois a ordem é embaralhada em cada abertura.</p></div>
+<div class="quiz" data-dica="Um retry altera a causa da falha ou apenas executa o mesmo cenário novamente?"
+>
+<p class="quiz-q">Se um teste falha e passa no retry, qual conclusão é responsável?</p><ul class="quiz-opts"><li>O primeiro resultado deve ser descartado</li><li>Há sinal de instabilidade que precisa ser investigado</li><li>O recurso está comprovadamente correto em todos os ambientes</li></ul><p class="quiz-feedback"></p></div>
+
+<h2>9. Entrega F6 — suíte verde e limites explícitos</h2>
+<ol><li>Crie <code>TESTES.md</code> com riscos, tarefas, ambientes-alvo e limites.</li>
+<li>Documente ao menos um script manual reproduzível por tarefa crítica.</li>
+<li>Automatize smoke tests com ações e expectativas observáveis, sem segredos.</li>
+<li>Rode projetos Chromium, Firefox, WebKit e perfis responsivos declarados.</li>
+<li>Teste teclado e ao menos um celular real; registre o que não pôde ser coberto.</li>
+<li>Anexe relatório, falhas corrigidas, falhas abertas e comandos de reprodução.</li></ol>
+<p>A entrega não é “100% de testes”. É uma defesa rastreável: requisito → risco → caso →
+ambiente → evidência → decisão. Se o teste exige conta, use conta e dados descartáveis.
+Não versione cookies, tokens, vídeos com dados pessoais ou relatórios internos públicos.</p>
+<div class="callout"><span class="callout-title">No DevTools — seção 9</span>
+<p>Faça o smoke test com Network preservado, Console, Accessibility e Device Toolbar.
+Registre commit, URL e ambiente. O relatório Playwright complementa esses painéis com
+projeto, duração, expectativa e trace; nenhum deles substitui o roteiro da entrega.</p></div>
+
+<h2>10. O que precisa ficar de pé</h2>
+<div class="table-wrap"><table><thead><tr><th>Decisão</th><th>Prova</th></tr></thead><tbody>
+<tr><td>Plano</td><td>Público, riscos, tarefas, ambientes e limites declarados</td></tr>
+<tr><td>Script manual</td><td>Pré-condição, ação, esperado, observado e reprodução</td></tr>
+<tr><td>Cross-browser</td><td>Motores/produtos nomeados sem extrapolar emulação</td></tr>
+<tr><td>Responsividade</td><td>Limites, conteúdo, zoom, teclado e dispositivo real</td></tr>
+<tr><td>Automação</td><td>Isolamento, locators observáveis, assertions e diagnóstico</td></tr>
+</tbody></table></div>
+<div class="callout"><span class="callout-title">No DevTools — seção 10</span>
+<p>Demonstre um caso do começo ao fim: condição, ação, DOM/Accessibility, requisição,
+resultado e evidência. Termine no relatório da matriz e nomeie honestamente o que foi
+emulado, o que foi real e o que continua sem cobertura.</p></div>
+
+<hr><h2>Leitura primária</h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Testing/Introduction">MDN: introdução a testes cross-browser</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Testing/Testing_strategies">MDN: estratégia e laboratório</a> ·
+<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Conditional_rules/Using_feature_queries">MDN: feature queries</a> ·
+<a href="https://playwright.dev/docs/writing-tests">Playwright: escrever testes</a> ·
+<a href="https://playwright.dev/docs/test-projects">Playwright: projetos</a> ·
+<a href="https://playwright.dev/docs/emulation">Playwright: emulação</a> ·
+<a href="https://playwright.dev/docs/trace-viewer">Playwright: trace</a> ·
+<a href="https://developer.chrome.com/docs/devtools/device-mode/">Chrome DevTools: Device Mode</a>.</p>
+<p class="pergunte"><strong>Ficou alguma coisa mal explicada?</strong> Traga o risco,
+o ambiente, o passo que falhou e a evidência — “aqui funciona” ainda não fecha o caso.</p>
+<nav class="aula-nav"><a href="0021-tema-filho-css-plug-ins-implantacao-e-publicacao.html">← A21 — CMS e publicação</a></nav>
+<script src="../assets/aulas.js"></script><script src="../assets/shell.js"></script><script src="../assets/course.js"></script><script src="../assets/atelier.js"></script>
+</body></html>

@@ -90,6 +90,15 @@ PHP nem instalam WordPress. O laboratório adota WordPress Studio, com SQLite lo
 por padrão, e exige validar PHP, MariaDB/MySQL e HTTPS do destino real. Nunca coloque
 senha, cookie, token, wp-config.php ou dump de banco no exercício ou no Git.
 
+A22 fecha a F6 com roteiro manual, matriz cross-browser, limites responsivos e
+automação. As prévias demonstram os contratos, mas não instalam nem executam uma suíte
+Playwright. No projeto real, diferencie Chromium, Firefox, WebKit, navegadores de marca,
+perfis emulados e aparelhos físicos. Não publique trace, screenshot, cookie ou relatório
+que contenha credencial, dado pessoal ou endereço privado.
+
+O trabalho único da disciplina está em PROJETO-INTEGRADOR.md. Use a lista T00–T12
+para evoluir o mesmo produto, anexar evidências e preparar a entrega final.
+
 Quizzes e marcações de auditoria começam limpos a cada abertura ou
 recarregamento. Ao escolher, a seleção azul e o ícone indicam apenas
 "Resposta registrada", não acerto ou erro. A auditoria mostra o contador
@@ -131,3 +140,4 @@ CONTEÚDO
   - A19 — Otimização de front-end
   - A20 — CMS: conceitos, requisitos, servidor local, banco e usuários
   - A21 — Tema filho, CSS, plug-ins, implantação e publicação
+  - A22 — Testes: script, cross-browser, responsividade e automação
