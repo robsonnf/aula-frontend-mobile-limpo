@@ -1,12 +1,12 @@
 # Mission: Desenvolvimento Web Mobile (front-end) — 66h
 
-> **Inversão:** este workspace não é para o Leo aprender. É para o Leo **ensinar**.
+> **Inversão:** este workspace não é para o Rob aprender. É para o Rob **ensinar**.
 > Onde a skill `/teach` diz "o usuário", leia "os alunos". A zona de desenvolvimento
-> proximal a calcular é a da turma, não a do Leo.
+> proximal a calcular é a da turma, não a do Rob.
 
 ## Why
 
-Leo ministra uma disciplina de curso técnico/graduação: 22 encontros de 3h (66h),
+Rob ministra uma disciplina de curso técnico/graduação: 22 encontros de 3h (66h),
 ao vivo, ele apresentando. A ementa é fechada e cobre 11 áreas, de mobile-first a
 CMS a testes automatizados. O objetivo concreto: ao fim da disciplina, cada aluno
 publicou na internet um site mobile-first de verdade — escrito à mão, depois
@@ -22,12 +22,12 @@ ferramenta, não com opinião.
 - O aluno instala, configura e publica um CMS (servidor local + banco), com tema filho customizado e usuários administrativos.
 - O aluno distingue o que é padrão da plataforma (Baseline) do que é folclore (prefixos, hacks, jQuery Mobile).
 - O aluno **audita uma resposta de IA** no domínio: separa o erro real da objeção decorada, e confere na fonte primária.
-- Leo entra em cada uma das 22 aulas com material de projeção pronto e roteiro de fala, sem improvisar.
+- Rob entra em cada uma das 22 aulas com material de projeção pronto e roteiro de fala, sem improvisar.
 
 ## Constraints
 
 - **22 encontros × 3h = 66h.** Grade fechada; nada entra sem algo sair.
-- **Ao vivo, Leo apresentando.** As lessons são material de projeção + roteiro de fala,
+- **Ao vivo, Rob apresentando.** As lessons são material de projeção + roteiro de fala,
   não material auto-instrucional. Demos devem ser manipuláveis na frente da turma.
 - **Ementa é contrato.** As 11 áreas do edital precisam ser cobertas, todas. A grade
   responde ao edital, não ao gosto.
